@@ -46,7 +46,7 @@ public class HomeFragment extends Fragment {
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.animator.expand_in, R.animator.expand_out);
                 transaction.replace(R.id.fragment_container, createFragment);
-                transaction.addToBackStack(MainActivity.CREATE_FRAGMENT);
+                transaction.addToBackStack(Utility.CREATE_FRAGMENT);
                 transaction.commit();
             }
         });

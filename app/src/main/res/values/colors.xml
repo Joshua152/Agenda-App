@@ -8,7 +8,7 @@
     <color name="colorSecondaryVariant">#424242</color>
     <color name="colorOnSecondary">#FFFFFF</color>
     <color name="colorBackground">#FFFFFF</color>
-    <color name="colorOnBackground">#FFFFFF</color>
+    <color name="colorOnBackground">#000000</color>
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnSurface">#000000</color>
     <color name="statusBarColor">#222222</color>

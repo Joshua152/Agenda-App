@@ -7,9 +7,6 @@ import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static String HOME_FRAGMENT = "Home Fragment";
-    public final static String CREATE_FRAGMENT = "Create Fragment";
-
     public static HomeFragment homeFragment;
     public static CreateFragment createFragment;
 
