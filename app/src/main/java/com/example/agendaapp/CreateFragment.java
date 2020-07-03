@@ -1,17 +1,22 @@
 package com.example.agendaapp;
 
+import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Size;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 
+import androidx.annotation.Dimension;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -27,9 +32,12 @@ public class CreateFragment extends Fragment {
 
     AppBarLayout appBarLayout;
     Toolbar toolbar;
+    LinearLayout linearLayout;
     ScrollView scrollView;
     ConstraintLayout constraintLayout;
     LinearLayout llDescription;
+    TextInputLayout tiTitle;
+    TextInputLayout tiDueDate;
     TextInputLayout tiDescription;
     TextInputEditText etTitle;
     TextInputEditText etDueDate;
@@ -65,9 +73,12 @@ public class CreateFragment extends Fragment {
 
     private void init(View view) {
         appBarLayout = (AppBarLayout) view.findViewById(R.id.create_app_bar_layout);
+        linearLayout = (LinearLayout) view.findViewById(R.id.create_linear_layout);
         scrollView = (ScrollView) view.findViewById(R.id.create_scroll_view);
         constraintLayout = (ConstraintLayout) view.findViewById(R.id.create_constraint_layout);
         llDescription = (LinearLayout) view.findViewById(R.id.create_ll_description);
+        tiTitle = (TextInputLayout) view.findViewById(R.id.create_ti_title);
+        tiDueDate = (TextInputLayout) view.findViewById(R.id.create_ti_due_date);
         tiDescription = (TextInputLayout) view.findViewById(R.id.create_ti_description);
         etTitle = (TextInputEditText) view.findViewById(R.id.create_et_title);
         etDueDate = (TextInputEditText) view.findViewById(R.id.create_et_due_date);
@@ -116,11 +127,16 @@ public class CreateFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sSubjects.setAdapter(adapter);
 
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        final Point point = new Point();
+        display.getSize(point);
+
         resize.addListener(new Resize.ResizeListener() {
             @Override
             public void onResize(int fromHeight, int toHeight, ViewGroup contentView) {
                 if(fromHeight > toHeight) {
-                    etDescription.setHeight(etDescription.getHeight() - (fromHeight - toHeight));
+                    etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
+                            tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
                 } else {
                     etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
                             * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
