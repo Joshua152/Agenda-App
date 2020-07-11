@@ -1,9 +1,24 @@
 <resources>
     <string name="app_name">Agenda App</string>
 
+    <!--Fragment Titles-->
+
+    <string name="home_title">Agenda</string>
+    <string name="create_title">Create Assignment</string>
+
+    <!--Home Fragment-->
+    <string name="priority">Priority</string>
+    <string name="upcoming_assignments">Upcoming Assignments</string>
+
+    <!--Create Fragment/Edit Fragment-->
+
+    <string name="save">save</string>
+
     <string name="title_label">Title</string>
     <string name="due_date_label">Due Date</string>
     <string name="description_label">Description</string>
+
+    <string name="choose_date">Choose Date</string>
 
     <string-array name="subject_array">
         <item>Art</item>

@@ -2,11 +2,9 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:ordering="together">
 
-    <objectAnimator
+    <translate
         android:duration="300"
-        android:valueTo="1"
-        android:valueFrom="0.8"
-        android:valueType="floatType"
-        android:propertyName="scaleY"/>
+        android:fromXDelta="0%"
+        android:toXDelta="100%"/>
 
 </set>
