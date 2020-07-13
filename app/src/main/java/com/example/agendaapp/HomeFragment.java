@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.card.MaterialCardView;
@@ -41,6 +42,8 @@ public class HomeFragment extends Fragment {
     RecyclerView.LayoutManager recyclerViewLayoutManager;
     RecyclerView.Adapter recyclerViewAdapter;
 
+    ArrayList<DateInfo> pDateInfo;
+    ArrayList<DateInfo> uDateInfo;
     ArrayList<String> pTitles;
     ArrayList<String> pDueDates;
     ArrayList<String> pDescriptions;
@@ -89,15 +92,19 @@ public class HomeFragment extends Fragment {
         ArrayList[] serialized = (ArrayList[]) Serialize.deserialize(context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
 
         if(serialized != null) {
-            pTitles = serialized[0];
-            pDueDates = serialized[1];
-            pTypes = serialized[2];
-            pDescriptions = serialized[3];
-            uTitles = serialized[4];
-            uDueDates = serialized[5];
-            uTypes = serialized[6];
-            uDescriptions = serialized[7];
+            pTitles = serialized[Utility.SERIALIZATION_P_TITLES];
+            pDueDates = serialized[Utility.SERIALIZATION_P_DUE_DATE];
+            pTypes = serialized[Utility.SERIALIZATION_P_SUBJECT];
+            pDescriptions = serialized[Utility.SERIALIZATION_P_DESCRIPTION];
+            pDateInfo = serialized[Utility.SERIALIZATION_P_DATE_INFO];
+            uTitles = serialized[Utility.SERIALIZATION_U_TITLES];
+            uDueDates = serialized[Utility.SERIALIZATION_U_DUE_DATE];
+            uTypes = serialized[Utility.SERIALIZATION_U_SUBJECT];
+            uDescriptions = serialized[Utility.SERIALIZATION_U_DESCRIPTION];
+            uDateInfo = serialized[Utility.SERIALIZATION_U_DATE_INFO];
         } else {
+            pDateInfo = new ArrayList<DateInfo>();
+            uDateInfo = new ArrayList<DateInfo>();
             pTitles = new ArrayList<String>();
             pDueDates = new ArrayList<String>();
             pDescriptions = new ArrayList<String>();
@@ -144,6 +151,8 @@ public class HomeFragment extends Fragment {
         String subject = bundle.getString(Utility.SAVE_BUNDLE_SUBJECT_KEY, "Other");
         String description = bundle.getString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, "");
         String dueDate = bundle.getString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, "");
+        DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY, 0),
+            bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY, 0), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY, 0));
 
         String[] sArray = getResources().getStringArray(R.array.subject_array);
 
@@ -167,26 +176,100 @@ public class HomeFragment extends Fragment {
             subjectDrawable = R.drawable.ic_miscellaneous_services_black_24dp;
         }
 
-        uTitles.add(title);
-        uDueDates.add(dueDate);
-        uDescriptions.add(description);
-        uTypes.add(subjectDrawable);
+        //format and sort
 
-        ArrayList[] serialize = new ArrayList[8];
+        if(compareDates(Utility.getDay(getActivity(), 2), dateInfo)) {
+            addToPriority(title, dueDate, description, subjectDrawable, dateInfo);
+        } else {
+            addToUpcoming(title, dueDate, description, subjectDrawable, dateInfo);
+        }
+
+        ArrayList[] serialize = new ArrayList[10];
         serialize[Utility.SERIALIZATION_P_TITLES] = pTitles;
         serialize[Utility.SERIALIZATION_P_DUE_DATE] = pDueDates;
         serialize[Utility.SERIALIZATION_P_SUBJECT] = pTypes;
         serialize[Utility.SERIALIZATION_P_DESCRIPTION] = pDescriptions;
+        serialize[Utility.SERIALIZATION_P_DATE_INFO] = pDateInfo;
         serialize[Utility.SERIALIZATION_U_TITLES] = uTitles;
         serialize[Utility.SERIALIZATION_U_DUE_DATE] = uDueDates;
         serialize[Utility.SERIALIZATION_U_SUBJECT] = uTypes;
         serialize[Utility.SERIALIZATION_U_DESCRIPTION] = uDescriptions;
+        serialize[Utility.SERIALIZATION_U_DATE_INFO] = uDateInfo;
 
         Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
 
         setArrayAdapter();
 
         recyclerView.setAdapter(recyclerViewAdapter);
+    }
+
+    private void addToPriority(String title, String dueDate, String description, int subjectDrawable, DateInfo dateInfo) {
+        for(int i = 0; i < pDateInfo.size(); i++) {
+            DateInfo fromArray = pDateInfo.get(i);
+
+            if(compareDates(fromArray, dateInfo)) {
+
+                System.out.println(i);
+                pDateInfo.add(i, dateInfo);
+
+                pTitles.add(i, title);
+                pDueDates.add(i, dueDate);
+                pDescriptions.add(i, description);
+                pTypes.add(i, subjectDrawable);
+
+                return;
+            }
+        }
+        //fix so that it is not the first to find that is larger, but in the right spot
+
+        pDateInfo.add(dateInfo);
+        pTitles.add(title);
+        pDueDates.add(dueDate);
+        pDescriptions.add(description);
+        pTypes.add(subjectDrawable);
+    }
+
+    private void addToUpcoming(String title, String dueDate, String description, int subjectDrawable, DateInfo dateInfo) {
+        for(int i = 0; i < uDateInfo.size(); i++) {
+            DateInfo fromArray = uDateInfo.get(i);
+
+            if(compareDates(fromArray, dateInfo)) {
+                uDateInfo.add(i, dateInfo);
+
+                uTitles.add(i, title);
+                uDueDates.add(i, dueDate);
+                uDescriptions.add(i, description);
+                uTypes.add(i, subjectDrawable);
+
+                return;
+            }
+        }
+
+        uDateInfo.add(dateInfo);
+        uTitles.add(title);
+        uDueDates.add(dueDate);
+        uDescriptions.add(description);
+        uTypes.add(subjectDrawable);
+    }
+
+    // returns true if di1 is further away than di2
+    private boolean compareDates(DateInfo di1, DateInfo di2) {
+        if(di1.getYear() > di2.getYear()) {
+            return true;
+        } else if(di1.getYear() == di2.getYear()) {
+            if(di1.getMonth() > di2.getMonth()) {
+                return true;
+            } else if(di1.getMonth() == di2.getMonth()) {
+                if(di1.getDay() > di2.getDay()) {
+                    return true;
+                }
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     class ResultListener implements FragmentResultListener {

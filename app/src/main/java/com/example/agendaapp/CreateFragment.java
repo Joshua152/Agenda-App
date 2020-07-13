@@ -1,5 +1,6 @@
 package com.example.agendaapp;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -21,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
 import com.example.agendaapp.Utils.Resize;
 import com.example.agendaapp.Utils.Utility;
@@ -46,6 +49,7 @@ public class CreateFragment extends Fragment {
 
     HomeFragment homeFragment;
 
+    DateInfo currentDateInfo;
     Resize resize;
 
     int descriptionMinHeight;
@@ -88,6 +92,7 @@ public class CreateFragment extends Fragment {
 
         homeFragment = new HomeFragment();
 
+        currentDateInfo = new DateInfo();
         resize = new Resize(getActivity());
 
         descriptionMinHeight = 0;
@@ -105,7 +110,7 @@ public class CreateFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sSubjects.setAdapter(adapter);
 
-        etDueDate.setText(Utility.getTomorrow(getActivity()));
+        etDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
 
         llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -156,7 +161,14 @@ public class CreateFragment extends Fragment {
         tiDueDate.setEndIconOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatePickerFragment fragment = new DatePickerFragment(etDueDate);
+                DatePickerFragment fragment = new DatePickerFragment(new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                        currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
+                        etDueDate.setText(currentDateInfo.getDate());
+                    }
+                });
+
                 fragment.show(getParentFragmentManager(), "Date Picker");
             }
         });
@@ -173,6 +185,7 @@ public class CreateFragment extends Fragment {
                 return false;
             }
         });
+
     }
 
     private void save() {
@@ -181,6 +194,10 @@ public class CreateFragment extends Fragment {
         bundle.putString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, etDueDate.getText().toString());
         bundle.putString(Utility.SAVE_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
         bundle.putString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
+        bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
+        bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
+        bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+
         getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
     }
 

@@ -1,5 +1,6 @@
 package com.example.agendaapp.Utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.io.ObjectOutputStream;
 public class Serialize {
 
     public static void serialize(Object object, String fileName) {
+        new File(fileName);
+
         try {
             FileOutputStream file = new FileOutputStream(fileName);
             ObjectOutputStream outputStream = new ObjectOutputStream(file);
@@ -31,7 +34,9 @@ public class Serialize {
             file.close();
 
             return returnObject;
-        } catch(IOException|ClassNotFoundException e){}
+        } catch(IOException|ClassNotFoundException e){
+            e.printStackTrace();
+        }
 
         return null;
     }
