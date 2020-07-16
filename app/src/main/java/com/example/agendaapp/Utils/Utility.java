@@ -7,7 +7,7 @@ import android.view.inputmethod.InputMethodManager;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Utility {
@@ -46,10 +46,10 @@ public class Utility {
     }
 
     public static DateInfo getDay (Context context, int inDaysTime) {
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_MONTH) + inDaysTime;
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int year = calendar.get(Calendar.YEAR);
+        LocalDate localDate = LocalDate.now();
+        int day = localDate.getDayOfMonth() + inDaysTime;
+        int month = localDate.getMonthValue();
+        int year = localDate.getYear();
 
         return getLocalDateFormat(context, day, month, year);
     }

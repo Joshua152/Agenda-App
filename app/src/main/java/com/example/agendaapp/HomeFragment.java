@@ -25,13 +25,14 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
 
     CreateFragment createFragment;
 
-    Context context;
+    static Context context;
 
     Toolbar toolbar;
     FloatingActionButton fab;
@@ -42,16 +43,16 @@ public class HomeFragment extends Fragment {
     RecyclerView.LayoutManager recyclerViewLayoutManager;
     RecyclerView.Adapter recyclerViewAdapter;
 
-    ArrayList<DateInfo> pDateInfo;
-    ArrayList<DateInfo> uDateInfo;
-    ArrayList<String> pTitles;
-    ArrayList<String> pDueDates;
-    ArrayList<String> pDescriptions;
-    ArrayList<String> uTitles;
-    ArrayList<String> uDueDates;
-    ArrayList<String> uDescriptions;
-    ArrayList<Integer> pTypes;
-    ArrayList<Integer> uTypes;
+    static ArrayList<DateInfo> pDateInfo;
+    static ArrayList<DateInfo> uDateInfo;
+    static ArrayList<String> pTitles;
+    static ArrayList<String> pDueDates;
+    static ArrayList<String> pDescriptions;
+    static ArrayList<String> uTitles;
+    static ArrayList<String> uDueDates;
+    static ArrayList<String> uDescriptions;
+    static ArrayList<Integer> pTypes;
+    static ArrayList<Integer> uTypes;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
@@ -117,15 +118,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void initListeners() {
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-                transaction.replace(R.id.fragment_container, createFragment);
-                transaction.addToBackStack(Utility.CREATE_FRAGMENT);
-                transaction.commit();
-            }
+        fab.setOnClickListener(view -> {
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+            transaction.replace(R.id.fragment_container, createFragment);
+            transaction.addToBackStack(Utility.CREATE_FRAGMENT);
+            transaction.commit();
         });
     }
 
@@ -184,19 +182,7 @@ public class HomeFragment extends Fragment {
             addToUpcoming(title, dueDate, description, subjectDrawable, dateInfo);
         }
 
-        ArrayList[] serialize = new ArrayList[10];
-        serialize[Utility.SERIALIZATION_P_TITLES] = pTitles;
-        serialize[Utility.SERIALIZATION_P_DUE_DATE] = pDueDates;
-        serialize[Utility.SERIALIZATION_P_SUBJECT] = pTypes;
-        serialize[Utility.SERIALIZATION_P_DESCRIPTION] = pDescriptions;
-        serialize[Utility.SERIALIZATION_P_DATE_INFO] = pDateInfo;
-        serialize[Utility.SERIALIZATION_U_TITLES] = uTitles;
-        serialize[Utility.SERIALIZATION_U_DUE_DATE] = uDueDates;
-        serialize[Utility.SERIALIZATION_U_SUBJECT] = uTypes;
-        serialize[Utility.SERIALIZATION_U_DESCRIPTION] = uDescriptions;
-        serialize[Utility.SERIALIZATION_U_DATE_INFO] = uDateInfo;
-
-        Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
+        serializeArrays();
 
         setArrayAdapter();
 
@@ -208,8 +194,6 @@ public class HomeFragment extends Fragment {
             DateInfo fromArray = pDateInfo.get(i);
 
             if(compareDates(fromArray, dateInfo)) {
-
-                System.out.println(i);
                 pDateInfo.add(i, dateInfo);
 
                 pTitles.add(i, title);
@@ -220,7 +204,6 @@ public class HomeFragment extends Fragment {
                 return;
             }
         }
-        //fix so that it is not the first to find that is larger, but in the right spot
 
         pDateInfo.add(dateInfo);
         pTitles.add(title);
@@ -272,6 +255,22 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    public static void serializeArrays() {
+        ArrayList[] serialize = new ArrayList[10];
+        serialize[Utility.SERIALIZATION_P_TITLES] = pTitles;
+        serialize[Utility.SERIALIZATION_P_DUE_DATE] = pDueDates;
+        serialize[Utility.SERIALIZATION_P_SUBJECT] = pTypes;
+        serialize[Utility.SERIALIZATION_P_DESCRIPTION] = pDescriptions;
+        serialize[Utility.SERIALIZATION_P_DATE_INFO] = pDateInfo;
+        serialize[Utility.SERIALIZATION_U_TITLES] = uTitles;
+        serialize[Utility.SERIALIZATION_U_DUE_DATE] = uDueDates;
+        serialize[Utility.SERIALIZATION_U_SUBJECT] = uTypes;
+        serialize[Utility.SERIALIZATION_U_DESCRIPTION] = uDescriptions;
+        serialize[Utility.SERIALIZATION_U_DATE_INFO] = uDateInfo;
+
+        Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
+    }
+
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {
@@ -321,6 +320,8 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         MaterialCardView cardView;
 
+        int position;
+
         public AssignmentViewHolder(View itemView) {
             super(itemView);
 
@@ -332,38 +333,92 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             cardView = (MaterialCardView) itemView;
 
+            position = 0;
+
             setListener();
         }
 
         private void setListener() {
-            cardView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("Clicked");
+            cardView.setOnClickListener(view -> System.out.println("Clicked"));
+
+            cardView.setOnLongClickListener(view -> {
+                ((MaterialCardView) view).setChecked(!((MaterialCardView) view).isChecked());
+
+                if(ivDone.getVisibility() == View.INVISIBLE) {
+                    ivDone.setVisibility(View.VISIBLE);
+                } else {
+                    ivDone.setVisibility(View.INVISIBLE);
                 }
+
+                return true;
             });
 
-            cardView.setOnLongClickListener(new CardView.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    ((MaterialCardView) view).setChecked(!((MaterialCardView) view).isChecked());
+            ivDone.setOnClickListener(view -> {
+                removeItem(position);
 
-                    if(ivDone.getVisibility() == View.INVISIBLE) {
-                        ivDone.setVisibility(View.VISIBLE);
-                    } else {
-                        ivDone.setVisibility(View.INVISIBLE);
-                    }
-
-                    return true;
-                }
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, pTitles.length + uTitles.length + 2);
             });
+        }
 
-            ivDone.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    System.out.println("done");
-                }
-            });
+        private void removeItem(int position) {
+            if(position <= pTitles.length) {
+                String[] titles = new String[pTitles.length - 1];
+                String[] dueDates = new String[pDueDates.length - 1];
+                String[] descriptions = new String[pDescriptions.length - 1];
+                int[] types = new int[pTypes.length - 1];
+
+                System.arraycopy(pTitles, 0, titles, 0, position - 1);
+                System.arraycopy(pDueDates, 0, dueDates, 0, position - 1);
+                System.arraycopy(pDescriptions, 0, descriptions, 0, position - 1);
+                System.arraycopy(pTypes, 0, types, 0, position - 1);
+                System.arraycopy(pTitles, position, titles, position - 1, pTitles.length - position);
+                System.arraycopy(pDueDates, position, dueDates, position - 1, pDueDates.length - position);
+                System.arraycopy(pDescriptions, position, descriptions, position - 1, pDescriptions.length - position);
+                System.arraycopy(pTypes, position, types, position - 1, pTypes.length - position);
+
+                pTitles = titles;
+                pDueDates = dueDates;
+                pDescriptions = descriptions;
+                pTypes = types;
+
+                HomeFragment.pDateInfo.remove(position - 1);
+                HomeFragment.pTitles.remove(position - 1);
+                HomeFragment.pDueDates.remove(position - 1);
+                HomeFragment.pDescriptions.remove(position - 1);
+                HomeFragment.pTypes.remove(position - 1);
+            } else {
+                String[] titles = new String[uTitles.length - 1];
+                String[] dueDates = new String[uDueDates.length - 1];
+                String[] descriptions = new String[uDescriptions.length - 1];
+                int[] types = new int[uTypes.length - 1];
+
+                System.arraycopy(uTitles, 0, titles, 0, position - pTitles.length - 2);
+                System.arraycopy(uDueDates, 0, dueDates, 0, position - pTitles.length - 2);
+                System.arraycopy(uDescriptions, 0, descriptions, 0, position - pTitles.length - 2);
+                System.arraycopy(uTypes, 0, types, 0, position - pTitles.length - 2);
+                System.arraycopy(uTitles, position - pTitles.length - 1, titles, position - pTitles.length - 2,
+                        uTitles.length - (position - pTitles.length - 1));
+                System.arraycopy(uDueDates, position - pTitles.length - 1, dueDates, position - pTitles.length - 2,
+                        uDueDates.length - (position - pDueDates.length - 1));
+                System.arraycopy(uDescriptions, position - pTitles.length - 1, descriptions, position - pTitles.length - 2,
+                        uDescriptions.length - (position - pDescriptions.length - 1));
+                System.arraycopy(uTypes, position - pTitles.length - 1, types, position - pTitles.length - 2,
+                        uTypes.length - (position - pTypes.length - 1));
+
+                uTitles = titles;
+                uDueDates = dueDates;
+                uDescriptions = descriptions;
+                uTypes = types;
+
+                HomeFragment.uDateInfo.remove(position - (pTitles.length + 2));
+                HomeFragment.uTitles.remove(position - (pTitles.length + 2));
+                HomeFragment.uDueDates.remove(position - (pTitles.length + 2));
+                HomeFragment.uDescriptions.remove(position - (pTitles.length + 2));
+                HomeFragment.uTypes.remove(position - (pTitles.length + 2));
+            }
+
+            HomeFragment.serializeArrays();
         }
     }
 
@@ -424,6 +479,7 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
         } else if(holder instanceof AssignmentViewHolder) {
             AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
+            assignmentHolder.position = position;
 
             if(position <= pTitles.length) {
                 assignmentHolder.tvTitle.setText(pTitles[position - 1]);

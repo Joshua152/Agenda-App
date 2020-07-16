@@ -5,6 +5,7 @@
 
     <string name="home_title">Agenda</string>
     <string name="create_title">Create Assignment</string>
+    <string name="edit_title">Edit Assignment</string>
 
     <!--Home Fragment-->
     <string name="priority">Priority</string>
