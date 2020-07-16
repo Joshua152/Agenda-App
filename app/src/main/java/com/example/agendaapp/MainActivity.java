@@ -8,7 +8,6 @@ import android.os.Bundle;
 public class MainActivity extends AppCompatActivity {
 
     public static HomeFragment homeFragment;
-    public static CreateFragment createFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         homeFragment = new HomeFragment();
-        createFragment = new CreateFragment();
     }
 
     private void addHomeFragment() {

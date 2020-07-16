@@ -52,8 +52,24 @@ public class EditFragment extends Fragment {
     DateInfo currentDateInfo;
     Resize resize;
 
+    String title;
+    String dueDate;
+    String description;
+
+    int subject;
+
+    int originalPosition;
+
     int descriptionMinHeight;
     int originalContentHeight;
+
+    public EditFragment(String title, String dueDate, String description, int subject, int originalPosition) {
+        this.title = title;
+        this.dueDate = dueDate;
+        this.description = description;
+        this.subject = subject;
+        this.originalPosition = originalPosition;
+    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
@@ -110,7 +126,10 @@ public class EditFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sSubjects.setAdapter(adapter);
 
-        etDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
+        etTitle.setText(title);
+        etDueDate.setText(dueDate);
+        etDescription.setText(description);
+        sSubjects.setSelection(Utility.getSubjectPosition(subject), true);
 
         llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -197,6 +216,8 @@ public class EditFragment extends Fragment {
         bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
         bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
         bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+        bundle.putInt(Utility.SAVE_BUNDLE_POSITION_KEY, originalPosition);
+        bundle.putBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, false);
 
         getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
     }

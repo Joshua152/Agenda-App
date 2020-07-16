@@ -92,7 +92,7 @@ public class CreateFragment extends Fragment {
 
         homeFragment = new HomeFragment();
 
-        currentDateInfo = new DateInfo();
+        currentDateInfo = Utility.getDay(getActivity(), 1);
         resize = new Resize(getActivity());
 
         descriptionMinHeight = 0;
@@ -138,39 +138,30 @@ public class CreateFragment extends Fragment {
     }
 
     private void initListeners() {
-        resize.addListener(new Resize.ResizeListener() {
-            @Override
-            public void onResize(int fromHeight, int toHeight, ViewGroup contentView) {
-                if(toHeight == originalContentHeight) {
-                    etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
-                            * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
-                            + etDescription.getCompoundPaddingBottom());
+        resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
+            if(toHeight == originalContentHeight) {
+                etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
+                        * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
+                        + etDescription.getCompoundPaddingBottom());
 
-                    etDescription.setMinHeight(descriptionMinHeight);
+                etDescription.setMinHeight(descriptionMinHeight);
 
-                    tiTitle.clearFocus();
-                    tiDueDate.clearFocus();
-                    tiDescription.clearFocus();
-                } else {
-                    etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
-                            tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
-                }
+                tiTitle.clearFocus();
+                tiDueDate.clearFocus();
+                tiDescription.clearFocus();
+            } else {
+                etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
+                        tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
             }
         });
 
-        tiDueDate.setEndIconOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerFragment fragment = new DatePickerFragment(new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
-                        etDueDate.setText(currentDateInfo.getDate());
-                    }
-                });
+        tiDueDate.setEndIconOnClickListener(view -> {
+            DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
+                currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
+                etDueDate.setText(currentDateInfo.getDate());
+            });
 
-                fragment.show(getParentFragmentManager(), "Date Picker");
-            }
+            fragment.show(getParentFragmentManager(), "Date Picker");
         });
 
         sSubjects.setOnTouchListener(new View.OnTouchListener() {
@@ -197,6 +188,7 @@ public class CreateFragment extends Fragment {
         bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
         bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
         bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+        bundle.putBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
 
         getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
     }

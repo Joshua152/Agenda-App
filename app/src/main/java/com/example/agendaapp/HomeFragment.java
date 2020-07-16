@@ -127,16 +127,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private int[] toIntArray(List<Integer> list) {
-        int[] array = new int[list.size()];
-
-        for(int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-
-        return array;
-    }
-
     private void setArrayAdapter() {
         recyclerViewAdapter = new AssignmentRecyclerAdapter(context, pTitles.toArray(new String[pTitles.size()]),
                 pDueDates.toArray(new String[pDueDates.size()]), pDescriptions.toArray(new String[pDescriptions.size()]),
@@ -151,6 +141,17 @@ public class HomeFragment extends Fragment {
         String dueDate = bundle.getString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, "");
         DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY, 0),
             bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY, 0), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY, 0));
+
+        int originalPosition = bundle.getInt(Utility.SAVE_BUNDLE_POSITION_KEY, -1);
+        boolean createNew = bundle.getBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
+
+        if(!createNew) {
+            if(originalPosition <= pTitles.size()) {
+                removeFromPriority(originalPosition);
+            } else {
+                removeFromUpcoming(originalPosition);
+            }
+        }
 
         String[] sArray = getResources().getStringArray(R.array.subject_array);
 
@@ -174,8 +175,6 @@ public class HomeFragment extends Fragment {
             subjectDrawable = R.drawable.ic_miscellaneous_services_black_24dp;
         }
 
-        //format and sort
-
         if(compareDates(Utility.getDay(getActivity(), 2), dateInfo)) {
             addToPriority(title, dueDate, description, subjectDrawable, dateInfo);
         } else {
@@ -192,7 +191,7 @@ public class HomeFragment extends Fragment {
     private void addToPriority(String title, String dueDate, String description, int subjectDrawable, DateInfo dateInfo) {
         for(int i = 0; i < pDateInfo.size(); i++) {
             DateInfo fromArray = pDateInfo.get(i);
-
+            
             if(compareDates(fromArray, dateInfo)) {
                 pDateInfo.add(i, dateInfo);
 
@@ -253,6 +252,32 @@ public class HomeFragment extends Fragment {
         } else {
             return false;
         }
+    }
+
+    private void removeFromPriority(int position) {
+        pDateInfo.remove(position - 1);
+        pTitles.remove(position - 1);
+        pDueDates.remove(position - 1);
+        pDescriptions.remove(position - 1);
+        pTypes.remove(position - 1);
+    }
+
+    private void removeFromUpcoming(int position) {
+        uDateInfo.remove(position - pTitles.size() - 2);
+        uTitles.remove(position - pTitles.size() - 2);
+        uDueDates.remove(position - pTitles.size() - 2);
+        uDescriptions.remove(position - pTitles.size() - 2);
+        uTypes.remove(position - pTitles.size() - 2);
+    }
+
+    private int[] toIntArray(List<Integer> list) {
+        int[] array = new int[list.size()];
+
+        for(int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+
+        return array;
     }
 
     public static void serializeArrays() {
@@ -339,7 +364,21 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         private void setListener() {
-            cardView.setOnClickListener(view -> System.out.println("Clicked"));
+            cardView.setOnClickListener(view -> {
+                FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
+
+                if(position <= pTitles.length) {
+                    transaction.replace(R.id.fragment_container, new EditFragment(pTitles[position - 1],
+                            pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1], position));
+                } else {
+                    transaction.replace(R.id.fragment_container, new EditFragment(uTitles[position - pTitles.length - 2],
+                            uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
+                            uTypes[position - pTitles.length - 2], position));
+                }
+
+                transaction.addToBackStack(Utility.EDIT_FRAGMENT);
+                transaction.commit();
+            });
 
             cardView.setOnLongClickListener(view -> {
                 ((MaterialCardView) view).setChecked(!((MaterialCardView) view).isChecked());

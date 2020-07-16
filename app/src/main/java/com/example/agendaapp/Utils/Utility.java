@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 
+import com.example.agendaapp.R;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +16,7 @@ public class Utility {
 
     public final static String HOME_FRAGMENT = "Home Fragment";
     public final static String CREATE_FRAGMENT = "Create Fragment";
+    public final static String EDIT_FRAGMENT = "Edit Fragment";
 
     public final static String SAVE_BUNDLE_TITLE_KEY = "Save Bundle Title Key";
     public final static String SAVE_BUNDLE_DUE_DATE_KEY = "Save Bundle Due Date Key";
@@ -22,6 +25,8 @@ public class Utility {
     public final static String SAVE_BUNDLE_DAY_KEY = "Save Bundle Day Key";
     public final static String SAVE_BUNDLE_MONTH_KEY = "Save Bundle Month Key";
     public final static String SAVE_BUNDLE_YEAR_KEY = "Save Bundle Year Key";
+    public final static String SAVE_BUNDLE_CREATE_NEW_KEY = "Save Bundle Create New Key";
+    public final static String SAVE_BUNDLE_POSITION_KEY = "Save Bundle Position Key";
     public final static String SAVE_RESULT_KEY = "Save Result Key";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
@@ -36,6 +41,15 @@ public class Utility {
     public final static int SERIALIZATION_U_SUBJECT = 7;
     public final static int SERIALIZATION_U_DESCRIPTION = 8;
     public final static int SERIALIZATION_U_DATE_INFO = 9;
+
+    public final static int POSITION_ART = 0;
+    public final static int POSITION_HISTORY = 1;
+    public final static int POSITION_LANGUAGE = 2;
+    public final static int POSITION_LITERATURE = 3;
+    public final static int POSITION_MATH = 4;
+    public final static int POSITION_MUSIC = 5;
+    public final static int POSITION_SCIENCE = 6;
+    public final static int POSITION_OTHER = 7;
 
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager manager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -68,5 +82,28 @@ public class Utility {
         DateInfo info = new DateInfo(date, day, month, year);
 
         return info;
+    }
+
+    public static int getSubjectPosition(int drawableId) {
+        switch(drawableId) {
+            case R.drawable.ic_brush_black_24dp :
+                return POSITION_ART;
+            case R.drawable.ic_history_edu_black_24dp :
+                return POSITION_HISTORY;
+            case R.drawable.ic_language_black_24dp :
+                return POSITION_LANGUAGE;
+            case R.drawable.ic_book_black_24dp :
+                return POSITION_LITERATURE;
+            case R.drawable.ic_calculate_black_24dp :
+                return POSITION_MATH;
+            case R.drawable.ic_music_note_black_24dp :
+                return POSITION_MUSIC;
+            case R.drawable.ic_science_black_24dp :
+                return POSITION_SCIENCE;
+            case R.drawable.ic_miscellaneous_services_black_24dp :
+                return POSITION_OTHER;
+            default :
+                return -1;
+        }
     }
 }
