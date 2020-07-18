@@ -366,12 +366,13 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         private void setListener() {
             cardView.setOnClickListener(view -> {
                 FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
 
                 if(position <= pTitles.length) {
-                    transaction.replace(R.id.fragment_container, new EditFragment(pTitles[position - 1],
+                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(pTitles[position - 1],
                             pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1], position));
                 } else {
-                    transaction.replace(R.id.fragment_container, new EditFragment(uTitles[position - pTitles.length - 2],
+                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(uTitles[position - pTitles.length - 2],
                             uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
                             uTypes[position - pTitles.length - 2], position));
                 }
@@ -397,6 +398,14 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, pTitles.length + uTitles.length + 2);
+
+                if(pTitles.length == 0) {
+                    notifyItemRangeChanged(0, 1);
+                }
+
+                if(uTitles.length == 0) {
+                    notifyItemRangeChanged(pTitles.length + 1, 1);
+                }
             });
         }
 
@@ -511,9 +520,17 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             switch(position) {
                 case 0 :
                     headerHolder.tvHeader.setText(context.getString(R.string.priority));
+
+                    if(pTitles.length == 0) {
+                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
+                    }
                     break;
                 default :
                     headerHolder.tvHeader.setText(context.getString(R.string.upcoming_assignments));
+
+                    if(uTitles.length == 0) {
+                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
+                    }
                     break;
             }
         } else if(holder instanceof AssignmentViewHolder) {

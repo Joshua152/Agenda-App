@@ -18,6 +18,8 @@ public class Utility {
     public final static String CREATE_FRAGMENT = "Create Fragment";
     public final static String EDIT_FRAGMENT = "Edit Fragment";
 
+    public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
+
     public final static String SAVE_BUNDLE_TITLE_KEY = "Save Bundle Title Key";
     public final static String SAVE_BUNDLE_DUE_DATE_KEY = "Save Bundle Due Date Key";
     public final static String SAVE_BUNDLE_SUBJECT_KEY = "Save Bundle Subject Key";
@@ -29,7 +31,11 @@ public class Utility {
     public final static String SAVE_BUNDLE_POSITION_KEY = "Save Bundle Position Key";
     public final static String SAVE_RESULT_KEY = "Save Result Key";
 
-    public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
+    public final static String EDIT_TITLE_KEY = "Edit Bundle Key";
+    public final static String EDIT_DUE_DATE_KEY = "Edit Due Date Key";
+    public final static String EDIT_DESCRIPTION_KEY = "Edit Description Key";
+    public final static String EDIT_SUBJECT_KEY = "Edit Subject Key";
+    public final static String EDIT_ORIGINAL_POSITION_KEY = "Edit Original Position Key";
 
     public final static int SERIALIZATION_P_TITLES = 0;
     public final static int SERIALIZATION_P_DUE_DATE = 1;

@@ -63,14 +63,6 @@ public class EditFragment extends Fragment {
     int descriptionMinHeight;
     int originalContentHeight;
 
-    public EditFragment(String title, String dueDate, String description, int subject, int originalPosition) {
-        this.title = title;
-        this.dueDate = dueDate;
-        this.description = description;
-        this.subject = subject;
-        this.originalPosition = originalPosition;
-    }
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
@@ -110,6 +102,12 @@ public class EditFragment extends Fragment {
 
         currentDateInfo = new DateInfo();
         resize = new Resize(getActivity());
+
+        title = getArguments().getString(Utility.EDIT_TITLE_KEY);
+        dueDate = getArguments().getString(Utility.EDIT_DUE_DATE_KEY);
+        description = getArguments().getString(Utility.EDIT_DESCRIPTION_KEY);
+        subject = getArguments().getInt(Utility.EDIT_SUBJECT_KEY);
+        originalPosition = getArguments().getInt(Utility.EDIT_ORIGINAL_POSITION_KEY);
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
@@ -209,7 +207,8 @@ public class EditFragment extends Fragment {
 
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY, etTitle.getText().toString());
+        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY,
+                !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
         bundle.putString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, etDueDate.getText().toString());
         bundle.putString(Utility.SAVE_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
         bundle.putString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
@@ -249,5 +248,18 @@ public class EditFragment extends Fragment {
             default :
                 return false;
         }
+    }
+
+    public static EditFragment newInstance(String title, String dueDate, String description, int subject, int originalPosition) {
+        Bundle bundle = new Bundle();
+        bundle.putString(Utility.EDIT_TITLE_KEY, title);
+        bundle.putString(Utility.EDIT_DUE_DATE_KEY, dueDate);
+        bundle.putString(Utility.EDIT_DESCRIPTION_KEY, description);
+        bundle.putInt(Utility.EDIT_SUBJECT_KEY, subject);
+        bundle.putInt(Utility.EDIT_ORIGINAL_POSITION_KEY, originalPosition);
+
+        EditFragment fragment = new EditFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
 }

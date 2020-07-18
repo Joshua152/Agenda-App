@@ -181,7 +181,8 @@ public class CreateFragment extends Fragment {
 
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY, etTitle.getText().toString());
+        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY,
+                !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
         bundle.putString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, etDueDate.getText().toString());
         bundle.putString(Utility.SAVE_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
         bundle.putString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());

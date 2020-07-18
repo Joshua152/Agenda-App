@@ -11,6 +11,8 @@
     <string name="priority">Priority</string>
     <string name="upcoming_assignments">Upcoming Assignments</string>
 
+    <string name="none">- None</string>
+
     <!--Create Fragment/Edit Fragment-->
 
     <string name="save">save</string>
@@ -20,6 +22,8 @@
     <string name="description_label">Description</string>
 
     <string name="choose_date">Choose Date</string>
+
+    <string name="untitled">Untitled</string>
 
     <string-array name="subject_array">
         <item>Art</item>
