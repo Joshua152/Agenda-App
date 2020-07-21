@@ -1,16 +1,28 @@
 package com.example.agendaapp;
 
 import android.content.Context;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BlendModeColorFilterCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -337,6 +349,7 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     class AssignmentViewHolder extends RecyclerView.ViewHolder {
 
+        FrameLayout frameIconBackground;
         TextView tvTitle;
         TextView tvDueDate;
         TextView tvDescription;
@@ -350,6 +363,7 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public AssignmentViewHolder(View itemView) {
             super(itemView);
 
+            frameIconBackground = (FrameLayout) itemView.findViewById(R.id.assignment_frame_icon);
             tvTitle = (TextView) itemView.findViewById(R.id.assignment_tv_title);
             tvDueDate = (TextView) itemView.findViewById(R.id.assignment_tv_due_date);
             tvDescription = (TextView) itemView.findViewById(R.id.assignment_tv_description);
@@ -548,6 +562,8 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 assignmentHolder.tvDescription.setText(uDescriptions[position - pTitles.length - 2]);
                 assignmentHolder.ivType.setImageResource(uTypes[position - pTitles.length - 2]);
             }
+
+            setColor(assignmentHolder.frameIconBackground.getBackground(), position);
         }
     }
 
@@ -565,5 +581,19 @@ class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         } else {
             return TYPE_ASSIGNMENT;
         }
+    }
+
+    private void setColor(Drawable drawable, int position) {
+        Drawable unwrappedDrawable = drawable;
+        Drawable wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
+        DrawableCompat.setTint(wrappedDrawable, Utility.getColor(context, getDrawableId(position)));
+    }
+
+    private int getDrawableId(int position) {
+        if(position <= pTitles.length) {
+            return pTypes[position - 1];
+        }
+
+        return uTypes[position - pTitles.length - 2];
     }
 }

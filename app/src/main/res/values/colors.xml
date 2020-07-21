@@ -13,4 +13,13 @@
     <color name="colorOnSurface">#000000</color>
     <color name="statusBarColor">#222222</color>
 
+    <color name="red">#D84D6A</color>
+    <color name="orange">#D8934D</color>
+    <color name="yellow">#D8C14D</color>
+    <color name="green">#84D84D</color>
+    <color name="turquoise">#4DD8B2</color>
+    <color name="blue">#4D9CD8</color>
+    <color name="magenta">#D84DB3</color>
+    <color name="purple">#A64DD8</color>
+
 </resources>

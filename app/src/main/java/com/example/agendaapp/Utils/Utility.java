@@ -2,7 +2,10 @@ package com.example.agendaapp.Utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.inputmethod.InputMethodManager;
+
+import androidx.core.content.ContextCompat;
 
 import com.example.agendaapp.R;
 
@@ -111,5 +114,30 @@ public class Utility {
             default :
                 return -1;
         }
+    }
+
+    public static int getColor(Context context, int drawable) {
+        int position = getSubjectPosition(drawable);
+
+        switch(position) {
+            case POSITION_ART :
+                return ContextCompat.getColor(context, R.color.red);
+            case POSITION_HISTORY :
+                return ContextCompat.getColor(context, R.color.orange);
+            case POSITION_LANGUAGE :
+                return ContextCompat.getColor(context, R.color.yellow);
+            case POSITION_LITERATURE :
+                return ContextCompat.getColor(context, R.color.green);
+            case POSITION_MATH :
+                return ContextCompat.getColor(context, R.color.turquoise);
+            case POSITION_MUSIC :
+                return ContextCompat.getColor(context, R.color.blue);
+            case POSITION_SCIENCE :
+                return ContextCompat.getColor(context, R.color.magenta);
+            case POSITION_OTHER :
+                return ContextCompat.getColor(context, R.color.purple);
+        }
+
+        return 0;
     }
 }
