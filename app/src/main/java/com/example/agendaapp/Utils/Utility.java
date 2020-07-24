@@ -2,7 +2,6 @@ package com.example.agendaapp.Utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.content.ContextCompat;
@@ -14,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 public class Utility {
 
@@ -139,5 +139,15 @@ public class Utility {
         }
 
         return 0;
+    }
+
+    public static int[] toIntArray(List<Integer> list) {
+        int[] array = new int[list.size()];
+
+        for(int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+
+        return array;
     }
 }

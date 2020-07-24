@@ -1,44 +1,28 @@
 package com.example.agendaapp;
 
 import android.content.Context;
-import android.graphics.BlendMode;
-import android.graphics.BlendModeColorFilter;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.BlendModeColorFilterCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Utils.DateInfo;
+import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class HomeFragment extends Fragment {
 
@@ -53,7 +37,10 @@ public class HomeFragment extends Fragment {
     RecyclerView recyclerView;
 
     RecyclerView.LayoutManager recyclerViewLayoutManager;
-    RecyclerView.Adapter recyclerViewAdapter;
+    AssignmentRecyclerAdapter recyclerViewAdapter;
+
+    ItemTouchHelper.Callback callback;
+    ItemTouchHelper itemTouchHelper;
 
     static ArrayList<DateInfo> pDateInfo;
     static ArrayList<DateInfo> uDateInfo;
@@ -95,7 +82,12 @@ public class HomeFragment extends Fragment {
         recyclerViewLayoutManager = new LinearLayoutManager(context);
         setArrayAdapter();
 
+        callback = new ItemMoveCallback((ItemMoveCallback.ItemTouchHelperContract) recyclerViewAdapter);
+        itemTouchHelper = new ItemTouchHelper(callback);
+
         createFragment = new CreateFragment();
+
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         recyclerView.setLayoutManager(recyclerViewLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
@@ -142,17 +134,28 @@ public class HomeFragment extends Fragment {
     private void setArrayAdapter() {
         recyclerViewAdapter = new AssignmentRecyclerAdapter(context, pTitles.toArray(new String[pTitles.size()]),
                 pDueDates.toArray(new String[pDueDates.size()]), pDescriptions.toArray(new String[pDescriptions.size()]),
-                toIntArray(pTypes), uTitles.toArray(new String[uTitles.size()]), uDueDates.toArray(new String[uDueDates.size()]),
-                uDescriptions.toArray(new String[uDescriptions.size()]), toIntArray(uTypes));
+                Utility.toIntArray(pTypes), uTitles.toArray(new String[uTitles.size()]), uDueDates.toArray(new String[uDueDates.size()]),
+                uDescriptions.toArray(new String[uDescriptions.size()]), Utility.toIntArray(uTypes));
+    }
+
+    private void updateArrayAdapter() {
+        recyclerViewAdapter.pTitles = pTitles.toArray(new String[pTitles.size()]);
+        recyclerViewAdapter.pDueDates = pDueDates.toArray(new String[pDueDates.size()]);
+        recyclerViewAdapter.pDescriptions = pDescriptions.toArray(new String[pDescriptions.size()]);
+        recyclerViewAdapter.pTypes = Utility.toIntArray(pTypes);
+        recyclerViewAdapter.uTitles = uTitles.toArray(new String[uTitles.size()]);
+        recyclerViewAdapter.uDueDates = uDueDates.toArray(new String[uDueDates.size()]);
+        recyclerViewAdapter.uDescriptions = uDescriptions.toArray(new String[uDescriptions.size()]);
+        recyclerViewAdapter.uTypes = Utility.toIntArray(uTypes);
     }
 
     private void save(Bundle bundle) {
-        String title = bundle.getString(Utility.SAVE_BUNDLE_TITLE_KEY, "Untitled");
-        String subject = bundle.getString(Utility.SAVE_BUNDLE_SUBJECT_KEY, "Other");
-        String description = bundle.getString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, "");
-        String dueDate = bundle.getString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, "");
-        DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY, 0),
-            bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY, 0), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY, 0));
+        String title = bundle.getString(Utility.SAVE_BUNDLE_TITLE_KEY);
+        String subject = bundle.getString(Utility.SAVE_BUNDLE_SUBJECT_KEY);
+        String description = bundle.getString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY);
+        String dueDate = bundle.getString(Utility.SAVE_BUNDLE_DUE_DATE_KEY);
+        DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY),
+            bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY));
 
         int originalPosition = bundle.getInt(Utility.SAVE_BUNDLE_POSITION_KEY, -1);
         boolean createNew = bundle.getBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
@@ -195,9 +198,7 @@ public class HomeFragment extends Fragment {
 
         serializeArrays();
 
-        setArrayAdapter();
-
-        recyclerView.setAdapter(recyclerViewAdapter);
+        updateArrayAdapter();
     }
 
     private void addToPriority(String title, String dueDate, String description, int subjectDrawable, DateInfo dateInfo) {
@@ -282,16 +283,6 @@ public class HomeFragment extends Fragment {
         uTypes.remove(position - pTitles.size() - 2);
     }
 
-    private int[] toIntArray(List<Integer> list) {
-        int[] array = new int[list.size()];
-
-        for(int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-
-        return array;
-    }
-
     public static void serializeArrays() {
         ArrayList[] serialize = new ArrayList[10];
         serialize[Utility.SERIALIZATION_P_TITLES] = pTitles;
@@ -313,287 +304,5 @@ public class HomeFragment extends Fragment {
         public void onFragmentResult(String key, Bundle bundle) {
             save(bundle);
         }
-    }
-}
-
-class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    final static int TYPE_HEADER = 0;
-    final static int TYPE_ASSIGNMENT = 1;
-    final static int TYPE_SPACER = 2;
-
-    Context context;
-
-    //p : priority | u : upcoming
-
-    String[] pTitles;
-    String[] pDueDates;
-    String[] pDescriptions;
-    String[] uTitles;
-    String[] uDueDates;
-    String[] uDescriptions;
-
-    int[] pTypes;
-    int[] uTypes;
-
-    class HeaderViewHolder extends RecyclerView.ViewHolder {
-
-        TextView tvHeader;
-
-        public HeaderViewHolder(View itemView) {
-            super(itemView);
-
-            tvHeader = (TextView) itemView.findViewById(R.id.tv_row_header);
-        }
-    }
-
-    class AssignmentViewHolder extends RecyclerView.ViewHolder {
-
-        FrameLayout frameIconBackground;
-        TextView tvTitle;
-        TextView tvDueDate;
-        TextView tvDescription;
-        ImageView ivType;
-        ImageView ivDone;
-
-        MaterialCardView cardView;
-
-        int position;
-
-        public AssignmentViewHolder(View itemView) {
-            super(itemView);
-
-            frameIconBackground = (FrameLayout) itemView.findViewById(R.id.assignment_frame_icon);
-            tvTitle = (TextView) itemView.findViewById(R.id.assignment_tv_title);
-            tvDueDate = (TextView) itemView.findViewById(R.id.assignment_tv_due_date);
-            tvDescription = (TextView) itemView.findViewById(R.id.assignment_tv_description);
-            ivType = (ImageView) itemView.findViewById(R.id.assignment_iv_title);
-            ivDone = (ImageView) itemView.findViewById(R.id.assignment_iv_done);
-
-            cardView = (MaterialCardView) itemView;
-
-            position = 0;
-
-            setListener();
-        }
-
-        private void setListener() {
-            cardView.setOnClickListener(view -> {
-                FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
-                transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-
-                if(position <= pTitles.length) {
-                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(pTitles[position - 1],
-                            pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1], position));
-                } else {
-                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(uTitles[position - pTitles.length - 2],
-                            uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
-                            uTypes[position - pTitles.length - 2], position));
-                }
-
-                transaction.addToBackStack(Utility.EDIT_FRAGMENT);
-                transaction.commit();
-            });
-
-            cardView.setOnLongClickListener(view -> {
-                ((MaterialCardView) view).setChecked(!((MaterialCardView) view).isChecked());
-
-                if(ivDone.getVisibility() == View.INVISIBLE) {
-                    ivDone.setVisibility(View.VISIBLE);
-                } else {
-                    ivDone.setVisibility(View.INVISIBLE);
-                }
-
-                return true;
-            });
-
-            ivDone.setOnClickListener(view -> {
-                removeItem(position);
-
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, pTitles.length + uTitles.length + 2);
-
-                if(pTitles.length == 0) {
-                    notifyItemRangeChanged(0, 1);
-                }
-
-                if(uTitles.length == 0) {
-                    notifyItemRangeChanged(pTitles.length + 1, 1);
-                }
-            });
-        }
-
-        private void removeItem(int position) {
-            if(position <= pTitles.length) {
-                String[] titles = new String[pTitles.length - 1];
-                String[] dueDates = new String[pDueDates.length - 1];
-                String[] descriptions = new String[pDescriptions.length - 1];
-                int[] types = new int[pTypes.length - 1];
-
-                System.arraycopy(pTitles, 0, titles, 0, position - 1);
-                System.arraycopy(pDueDates, 0, dueDates, 0, position - 1);
-                System.arraycopy(pDescriptions, 0, descriptions, 0, position - 1);
-                System.arraycopy(pTypes, 0, types, 0, position - 1);
-                System.arraycopy(pTitles, position, titles, position - 1, pTitles.length - position);
-                System.arraycopy(pDueDates, position, dueDates, position - 1, pDueDates.length - position);
-                System.arraycopy(pDescriptions, position, descriptions, position - 1, pDescriptions.length - position);
-                System.arraycopy(pTypes, position, types, position - 1, pTypes.length - position);
-
-                pTitles = titles;
-                pDueDates = dueDates;
-                pDescriptions = descriptions;
-                pTypes = types;
-
-                HomeFragment.pDateInfo.remove(position - 1);
-                HomeFragment.pTitles.remove(position - 1);
-                HomeFragment.pDueDates.remove(position - 1);
-                HomeFragment.pDescriptions.remove(position - 1);
-                HomeFragment.pTypes.remove(position - 1);
-            } else {
-                String[] titles = new String[uTitles.length - 1];
-                String[] dueDates = new String[uDueDates.length - 1];
-                String[] descriptions = new String[uDescriptions.length - 1];
-                int[] types = new int[uTypes.length - 1];
-
-                System.arraycopy(uTitles, 0, titles, 0, position - pTitles.length - 2);
-                System.arraycopy(uDueDates, 0, dueDates, 0, position - pTitles.length - 2);
-                System.arraycopy(uDescriptions, 0, descriptions, 0, position - pTitles.length - 2);
-                System.arraycopy(uTypes, 0, types, 0, position - pTitles.length - 2);
-                System.arraycopy(uTitles, position - pTitles.length - 1, titles, position - pTitles.length - 2,
-                        uTitles.length - (position - pTitles.length - 1));
-                System.arraycopy(uDueDates, position - pTitles.length - 1, dueDates, position - pTitles.length - 2,
-                        uDueDates.length - (position - pDueDates.length - 1));
-                System.arraycopy(uDescriptions, position - pTitles.length - 1, descriptions, position - pTitles.length - 2,
-                        uDescriptions.length - (position - pDescriptions.length - 1));
-                System.arraycopy(uTypes, position - pTitles.length - 1, types, position - pTitles.length - 2,
-                        uTypes.length - (position - pTypes.length - 1));
-
-                uTitles = titles;
-                uDueDates = dueDates;
-                uDescriptions = descriptions;
-                uTypes = types;
-
-                HomeFragment.uDateInfo.remove(position - (pTitles.length + 2));
-                HomeFragment.uTitles.remove(position - (pTitles.length + 2));
-                HomeFragment.uDueDates.remove(position - (pTitles.length + 2));
-                HomeFragment.uDescriptions.remove(position - (pTitles.length + 2));
-                HomeFragment.uTypes.remove(position - (pTitles.length + 2));
-            }
-
-            HomeFragment.serializeArrays();
-        }
-    }
-
-    class SpacerViewHolder extends RecyclerView.ViewHolder {
-
-        View spacer;
-
-        public SpacerViewHolder(View itemView) {
-            super(itemView);
-
-            spacer = (View) itemView.findViewById(R.id.spacer);
-        }
-    }
-
-    public AssignmentRecyclerAdapter(Context context, String[] pTitles, String[] pDueDates, String[] pDescriptions, int[] pTypes,
-                                     String[] uTitles, String[] uDueDates, String[] uDescriptions, int[] uTypes) {
-
-        this.context = context;
-        this.pTitles = pTitles;
-        this.pDueDates = pDueDates;
-        this.pDescriptions = pDescriptions;
-        this.pTypes = pTypes;
-        this.uTitles = uTitles;
-        this.uDueDates = uDueDates;
-        this.uDescriptions = uDescriptions;
-        this.uTypes = uTypes;
-    }
-
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int itemType) {
-        switch(itemType) {
-            case TYPE_HEADER :
-                View headerItem = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_header, parent, false);
-                return new HeaderViewHolder(headerItem);
-            case TYPE_ASSIGNMENT :
-                View assignmentItem = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_assignment, parent, false);
-                return new AssignmentViewHolder(assignmentItem);
-            case TYPE_SPACER :
-                View spacerItem = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_spacer, parent, false);
-                return new SpacerViewHolder(spacerItem);
-            default :
-                return null;
-        }
-    }
-
-    @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(holder instanceof HeaderViewHolder ) {
-            HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
-
-            switch(position) {
-                case 0 :
-                    headerHolder.tvHeader.setText(context.getString(R.string.priority));
-
-                    if(pTitles.length == 0) {
-                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
-                    }
-                    break;
-                default :
-                    headerHolder.tvHeader.setText(context.getString(R.string.upcoming_assignments));
-
-                    if(uTitles.length == 0) {
-                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
-                    }
-                    break;
-            }
-        } else if(holder instanceof AssignmentViewHolder) {
-            AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
-            assignmentHolder.position = position;
-
-            if(position <= pTitles.length) {
-                assignmentHolder.tvTitle.setText(pTitles[position - 1]);
-                assignmentHolder.tvDueDate.setText(pDueDates[position - 1]);
-                assignmentHolder.tvDescription.setText(pDescriptions[position - 1]);
-                assignmentHolder.ivType.setImageResource(pTypes[position - 1]);
-            } else {
-                assignmentHolder.tvTitle.setText(uTitles[position - pTitles.length - 2]);
-                assignmentHolder.tvDueDate.setText(uDueDates[position - pTitles.length - 2]);
-                assignmentHolder.tvDescription.setText(uDescriptions[position - pTitles.length - 2]);
-                assignmentHolder.ivType.setImageResource(uTypes[position - pTitles.length - 2]);
-            }
-
-            setColor(assignmentHolder.frameIconBackground.getBackground(), position);
-        }
-    }
-
-    @Override
-    public int getItemCount() {
-        return pTitles.length + uTitles.length + 3; // added one extra for spacing
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if(position == 0 || position == pTitles.length + 1) {
-            return TYPE_HEADER;
-        } else if(position == getItemCount() - 1) {
-            return TYPE_SPACER;
-        } else {
-            return TYPE_ASSIGNMENT;
-        }
-    }
-
-    private void setColor(Drawable drawable, int position) {
-        Drawable unwrappedDrawable = drawable;
-        Drawable wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
-        DrawableCompat.setTint(wrappedDrawable, Utility.getColor(context, getDrawableId(position)));
-    }
-
-    private int getDrawableId(int position) {
-        if(position <= pTitles.length) {
-            return pTypes[position - 1];
-        }
-
-        return uTypes[position - pTitles.length - 2];
     }
 }
