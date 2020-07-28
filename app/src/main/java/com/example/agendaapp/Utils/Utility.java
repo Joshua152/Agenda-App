@@ -30,6 +30,7 @@ public class Utility {
     public final static String SAVE_BUNDLE_DAY_KEY = "Save Bundle Day Key";
     public final static String SAVE_BUNDLE_MONTH_KEY = "Save Bundle Month Key";
     public final static String SAVE_BUNDLE_YEAR_KEY = "Save Bundle Year Key";
+    public final static String SAVE_BUNDLE_PRIORITY_KEY = "Save Bundle Priority Key";
     public final static String SAVE_BUNDLE_CREATE_NEW_KEY = "Save Bundle Create New Key";
     public final static String SAVE_BUNDLE_POSITION_KEY = "Save Bundle Position Key";
     public final static String SAVE_RESULT_KEY = "Save Result Key";
@@ -91,6 +92,26 @@ public class Utility {
         DateInfo info = new DateInfo(date, day, month, year);
 
         return info;
+    }
+
+    // returns true if di1 is further away than di2
+    public static boolean compareDates(DateInfo di1, DateInfo di2) {
+        if(di1.getYear() > di2.getYear()) {
+            return true;
+        } else if(di1.getYear() == di2.getYear()) {
+            if(di1.getMonth() > di2.getMonth()) {
+                return true;
+            } else if(di1.getMonth() == di2.getMonth()) {
+                if(di1.getDay() > di2.getDay()) {
+                    return true;
+                }
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public static int getSubjectPosition(int drawableId) {

@@ -33,7 +33,6 @@ public class HomeFragment extends Fragment {
     Toolbar toolbar;
     FloatingActionButton fab;
 
-    NestedScrollView nestedScrollView;
     RecyclerView recyclerView;
 
     RecyclerView.LayoutManager recyclerViewLayoutManager;
@@ -76,7 +75,6 @@ public class HomeFragment extends Fragment {
         initArrays();
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        nestedScrollView = (NestedScrollView) view.findViewById(R.id.home_nested_scroll);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
 
         recyclerViewLayoutManager = new LinearLayoutManager(context);
@@ -157,6 +155,8 @@ public class HomeFragment extends Fragment {
         DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY),
             bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY));
 
+        boolean priority = bundle.getBoolean(Utility.SAVE_BUNDLE_PRIORITY_KEY);
+
         int originalPosition = bundle.getInt(Utility.SAVE_BUNDLE_POSITION_KEY, -1);
         boolean createNew = bundle.getBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
 
@@ -190,7 +190,7 @@ public class HomeFragment extends Fragment {
             subjectDrawable = R.drawable.ic_miscellaneous_services_black_24dp;
         }
 
-        if(compareDates(Utility.getDay(getActivity(), 2), dateInfo)) {
+        if(priority) {
             addToPriority(title, dueDate, description, subjectDrawable, dateInfo);
         } else {
             addToUpcoming(title, dueDate, description, subjectDrawable, dateInfo);
@@ -205,7 +205,7 @@ public class HomeFragment extends Fragment {
         for(int i = 0; i < pDateInfo.size(); i++) {
             DateInfo fromArray = pDateInfo.get(i);
             
-            if(compareDates(fromArray, dateInfo)) {
+            if(Utility.compareDates(fromArray, dateInfo)) {
                 pDateInfo.add(i, dateInfo);
 
                 pTitles.add(i, title);
@@ -228,7 +228,7 @@ public class HomeFragment extends Fragment {
         for(int i = 0; i < uDateInfo.size(); i++) {
             DateInfo fromArray = uDateInfo.get(i);
 
-            if(compareDates(fromArray, dateInfo)) {
+            if(Utility.compareDates(fromArray, dateInfo)) {
                 uDateInfo.add(i, dateInfo);
 
                 uTitles.add(i, title);
@@ -245,26 +245,6 @@ public class HomeFragment extends Fragment {
         uDueDates.add(dueDate);
         uDescriptions.add(description);
         uTypes.add(subjectDrawable);
-    }
-
-    // returns true if di1 is further away than di2
-    private boolean compareDates(DateInfo di1, DateInfo di2) {
-        if(di1.getYear() > di2.getYear()) {
-            return true;
-        } else if(di1.getYear() == di2.getYear()) {
-            if(di1.getMonth() > di2.getMonth()) {
-                return true;
-            } else if(di1.getMonth() == di2.getMonth()) {
-                if(di1.getDay() > di2.getDay()) {
-                    return true;
-                }
-                return false;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
     }
 
     private void removeFromPriority(int position) {

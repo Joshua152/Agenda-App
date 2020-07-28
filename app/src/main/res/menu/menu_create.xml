@@ -3,8 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/create_star"
+        android:title="@string/mark_priority"
+        android:icon="@drawable/star_anim"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/create_save"
         android:title="@string/save"
-        app:showAsAction="always|withText"/>
+        app:showAsAction="ifRoom|withText"/>
 
 </menu>

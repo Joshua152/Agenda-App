@@ -16,6 +16,7 @@
     <!--Create Fragment/Edit Fragment-->
 
     <string name="save">save</string>
+    <string name="mark_priority">Mark as Priority</string>
 
     <string name="title_label">Title</string>
     <string name="due_date_label">Due Date</string>

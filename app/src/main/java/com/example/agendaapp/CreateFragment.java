@@ -1,5 +1,6 @@
 package com.example.agendaapp;
 
+import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
@@ -52,6 +54,8 @@ public class CreateFragment extends Fragment {
 
     int descriptionMinHeight;
     int originalContentHeight;
+
+    boolean priority;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_create, container, false);
@@ -95,6 +99,8 @@ public class CreateFragment extends Fragment {
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
+
+        priority = true;
     }
 
     private void initLayout() {
@@ -157,6 +163,8 @@ public class CreateFragment extends Fragment {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
                 currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
                 etDueDate.setText(currentDateInfo.getDate());
+
+                priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo);
             });
 
             fragment.show(getParentFragmentManager(), "Date Picker");
@@ -187,6 +195,7 @@ public class CreateFragment extends Fragment {
         bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
         bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
         bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+        bundle.putBoolean(Utility.SAVE_BUNDLE_PRIORITY_KEY, priority);
         bundle.putBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
 
         getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
@@ -216,8 +225,11 @@ public class CreateFragment extends Fragment {
                 saveTransaction.addToBackStack(Utility.HOME_FRAGMENT);
                 saveTransaction.commit();
                 return true;
-            default :
-                return false;
+            case R.id.create_star :
+                priority = true;
+                break;
         }
+
+        return false;
     }
 }
