@@ -71,13 +71,13 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
         float top = viewHolder.itemView.getTop() + dY;
         float bottom = top + viewHolder.itemView.getHeight();
 
-        if(top > 0 && bottom < recyclerView.getHeight()) {
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-        } else if(top < 0) {
-            recyclerView.scrollBy(0, -10);
+        if(top < 0) {
+            dY = -viewHolder.itemView.getTop();
         } else if(bottom > recyclerView.getHeight()) {
-            recyclerView.scrollBy(0, 10);
+            dY = recyclerView.getHeight() - viewHolder.itemView.getHeight() - viewHolder.itemView.getTop();
         }
+
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
     @Override
