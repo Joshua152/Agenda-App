@@ -39,6 +39,9 @@ public class Utility {
     public final static String EDIT_DUE_DATE_KEY = "Edit Due Date Key";
     public final static String EDIT_DESCRIPTION_KEY = "Edit Description Key";
     public final static String EDIT_SUBJECT_KEY = "Edit Subject Key";
+    public final static String EDIT_DAY_KEY = "Edit Day Key";
+    public final static String EDIT_MONTH_KEY = "Edit Month Key";
+    public final static String EDIT_YEAR_KEY = "Edit Year Key";
     public final static String EDIT_ORIGINAL_POSITION_KEY = "Edit Original Position Key";
 
     public final static int SERIALIZATION_P_TITLES = 0;
@@ -60,6 +63,10 @@ public class Utility {
     public final static int POSITION_MUSIC = 5;
     public final static int POSITION_SCIENCE = 6;
     public final static int POSITION_OTHER = 7;
+
+    public final static int FURTHER = 0;
+    public final static int SAME = 1;
+    public final static int CLOSER = 2;
 
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager manager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -94,23 +101,26 @@ public class Utility {
         return info;
     }
 
-    // returns true if di1 is further away than di2
-    public static boolean compareDates(DateInfo di1, DateInfo di2) {
+    // compares di1 to di2
+    public static int compareDates(DateInfo di1, DateInfo di2) {
         if(di1.getYear() > di2.getYear()) {
-            return true;
+            return FURTHER;
         } else if(di1.getYear() == di2.getYear()) {
             if(di1.getMonth() > di2.getMonth()) {
-                return true;
+                return FURTHER;
             } else if(di1.getMonth() == di2.getMonth()) {
                 if(di1.getDay() > di2.getDay()) {
-                    return true;
+                    return FURTHER;
+                } else if(di1.getDay() == di2.getDay()) {
+                    return SAME;
                 }
-                return false;
+
+                return CLOSER;
             } else {
-                return false;
+                return CLOSER;
             }
         } else {
-            return false;
+            return CLOSER;
         }
     }
 

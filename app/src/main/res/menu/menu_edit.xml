@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/edit_star"
+        android:title="@string/mark_priority"
+        android:icon="@drawable/star_anim"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/edit_save"
         android:title="@string/save"
         app:showAsAction="always|withText"/>

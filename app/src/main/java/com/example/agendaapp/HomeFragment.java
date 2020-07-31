@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
@@ -204,8 +203,14 @@ public class HomeFragment extends Fragment {
     private void addToPriority(String title, String dueDate, String description, int subjectDrawable, DateInfo dateInfo) {
         for(int i = 0; i < pDateInfo.size(); i++) {
             DateInfo fromArray = pDateInfo.get(i);
-            
-            if(Utility.compareDates(fromArray, dateInfo)) {
+
+            boolean moved = false;
+
+            if(i != pDateInfo.size() - 1) {
+                moved = Utility.compareDates(fromArray, pDateInfo.get(i + 1)) == Utility.FURTHER;
+            }
+
+            if(!moved && Utility.compareDates(fromArray, dateInfo) == Utility.FURTHER) {
                 pDateInfo.add(i, dateInfo);
 
                 pTitles.add(i, title);
@@ -228,7 +233,13 @@ public class HomeFragment extends Fragment {
         for(int i = 0; i < uDateInfo.size(); i++) {
             DateInfo fromArray = uDateInfo.get(i);
 
-            if(Utility.compareDates(fromArray, dateInfo)) {
+            boolean moved = false;
+
+            if(i != uDateInfo.size() - 1) {
+                moved = Utility.compareDates(fromArray, uDateInfo.get(i + 1)) == Utility.FURTHER;
+            }
+
+            if(!moved && Utility.compareDates(fromArray, dateInfo) == Utility.FURTHER) {
                 uDateInfo.add(i, dateInfo);
 
                 uTitles.add(i, title);

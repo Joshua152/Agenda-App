@@ -12,17 +12,37 @@ public class DatePickerFragment extends DialogFragment{
 
     DatePickerDialog.OnDateSetListener listener;
 
+    DateInfo dateInfo;
+
     public DatePickerFragment(DatePickerDialog.OnDateSetListener listener) {
         this.listener = listener;
+
+        dateInfo = null;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH) + 1;
+        int year = 0;
+        int month = 0;
+        int day = 0;
+
+        System.out.println(dateInfo == null);
+
+        if(dateInfo == null) {
+            Calendar calendar = Calendar.getInstance();
+            year = calendar.get(Calendar.YEAR);
+            month = calendar.get(Calendar.MONTH);
+            day = calendar.get(Calendar.DAY_OF_MONTH) + 1;
+        } else {
+            year = dateInfo.getYear();
+            month = dateInfo.getMonth() - 1;
+            day = dateInfo.getDay();
+        }
 
         return new DatePickerDialog(getActivity(), listener, year, month, day);
+    }
+
+    public void setDateInfo(DateInfo dateInfo) {
+        this.dateInfo = dateInfo;
     }
 }

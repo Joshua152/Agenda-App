@@ -1,5 +1,4 @@
-<animated-vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="NewApi">
@@ -17,7 +16,7 @@
                 <path
                     android:name="path"
                     android:pathData="M 14.43 10 L 12 2 L 9.57 10 L 2 10 L 8.18 14.41 L 5.83 22 L 12 17.31 L 18.18 22 L 15.83 14.41 L 22 10 Z"
-                    android:fillColor="#00000000"
+                    android:fillColor="#FFFFFF"
                     android:strokeColor="#FFFFFF"
                     android:strokeWidth="2"/>
             </group>
@@ -28,8 +27,8 @@
             <objectAnimator
                 android:propertyName="fillColor"
                 android:duration="100"
-                android:valueFrom="#00000000"
-                android:valueTo="#FFFFFF"
+                android:valueFrom="#FFFFFF"
+                android:valueTo="#00000000"
                 android:valueType="colorType"
                 android:interpolator="@android:interpolator/fast_out_slow_in"/>
         </aapt:attr>

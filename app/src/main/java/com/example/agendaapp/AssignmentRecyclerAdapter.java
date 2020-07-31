@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.card.MaterialCardView;
@@ -87,11 +88,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
                 if(position <= pTitles.length) {
                     transaction.replace(R.id.fragment_container, EditFragment.newInstance(pTitles[position - 1],
-                            pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1], position));
+                            pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1],
+                            HomeFragment.pDateInfo.get(position - 1), position));
                 } else {
                     transaction.replace(R.id.fragment_container, EditFragment.newInstance(uTitles[position - pTitles.length - 2],
                             uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
-                            uTypes[position - pTitles.length - 2], position));
+                            uTypes[position - pTitles.length - 2], HomeFragment.uDateInfo.get(position - pTitles.length - 2), position));
                 }
 
                 transaction.addToBackStack(Utility.EDIT_FRAGMENT);
@@ -276,7 +278,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     @Override
-    public void onRowMoved(int fromPosition, int toPosition) {
+    public void onRowMoved(AssignmentViewHolder holder, int fromPosition, int toPosition) {
         boolean inPriority = pTitles.length > 0;
         boolean inUpcoming = uTitles.length > 0;
 

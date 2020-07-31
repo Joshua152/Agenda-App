@@ -1,6 +1,6 @@
 package com.example.agendaapp;
 
-import android.graphics.drawable.Animatable;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +33,8 @@ import com.google.android.material.textfield.TextInputLayout;
 
 public class CreateFragment extends Fragment {
 
+    Context context;
+
     AppBarLayout appBarLayout;
     Toolbar toolbar;
     LinearLayout linearLayout;
@@ -47,6 +49,8 @@ public class CreateFragment extends Fragment {
     TextInputEditText etDescription;
     Spinner sSubjects;
 
+    MenuItem star;
+
     HomeFragment homeFragment;
 
     DateInfo currentDateInfo;
@@ -56,6 +60,7 @@ public class CreateFragment extends Fragment {
     int originalContentHeight;
 
     boolean priority;
+    boolean pressedPriority;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_create, container, false);
@@ -79,6 +84,8 @@ public class CreateFragment extends Fragment {
     }
 
     private void init(View view) {
+        context = getContext();
+
         appBarLayout = (AppBarLayout) view.findViewById(R.id.create_app_bar_layout);
         linearLayout = (LinearLayout) view.findViewById(R.id.create_linear_layout);
         scrollView = (ScrollView) view.findViewById(R.id.create_scroll_view);
@@ -101,6 +108,7 @@ public class CreateFragment extends Fragment {
         originalContentHeight = resize.getContentHeight();
 
         priority = true;
+        pressedPriority = false;
     }
 
     private void initLayout() {
@@ -164,9 +172,13 @@ public class CreateFragment extends Fragment {
                 currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
                 etDueDate.setText(currentDateInfo.getDate());
 
-                priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo);
+                if(!pressedPriority) {
+                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == Utility.FURTHER;
+                    toggleStar();
+                }
             });
 
+            fragment.setDateInfo(currentDateInfo);
             fragment.show(getParentFragmentManager(), "Date Picker");
         });
 
@@ -201,9 +213,21 @@ public class CreateFragment extends Fragment {
         getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
     }
 
+    public void toggleStar() {
+        if(priority) {
+            star.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+        } else {
+            star.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
+        }
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_create, menu);
+
+        menu.getItem(0).setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+        star = menu.getItem(0);
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -226,8 +250,19 @@ public class CreateFragment extends Fragment {
                 saveTransaction.commit();
                 return true;
             case R.id.create_star :
-                priority = true;
-                break;
+                pressedPriority = true;
+
+                if(priority) {
+                    item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+                } else {
+                    item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
+                }
+
+                ((AnimatedVectorDrawableCompat) item.getIcon()).start();
+
+                priority = !priority;
+
+                return true;
         }
 
         return false;

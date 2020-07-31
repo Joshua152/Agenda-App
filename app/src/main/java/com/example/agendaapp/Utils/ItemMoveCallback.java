@@ -33,7 +33,8 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder holder, RecyclerView.ViewHolder target) {
-        adapter.onRowMoved(holder.getAdapterPosition(), target.getAdapterPosition());
+        adapter.onRowMoved((AssignmentRecyclerAdapter.AssignmentViewHolder) holder,
+                holder.getAdapterPosition(), target.getAdapterPosition());
 
         return true;
     }
@@ -72,7 +73,7 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
         float bottom = top + viewHolder.itemView.getHeight();
 
         if(top < 0) {
-            dY = -viewHolder.itemView.getTop();
+            dY  = -viewHolder.itemView.getTop();
         } else if(bottom > recyclerView.getHeight()) {
             dY = recyclerView.getHeight() - viewHolder.itemView.getHeight() - viewHolder.itemView.getTop();
         }
@@ -84,7 +85,7 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
     public void onSwiped(RecyclerView.ViewHolder holder, int direction) {}
 
     public interface ItemTouchHelperContract {
-        void onRowMoved(int fromPosition, int toPosition);
+        void onRowMoved(AssignmentRecyclerAdapter.AssignmentViewHolder holder, int fromPosition, int toPosition);
         void onRowSelected(AssignmentRecyclerAdapter.AssignmentViewHolder holder);
         void onRowClear(AssignmentRecyclerAdapter.AssignmentViewHolder holder);
     }
