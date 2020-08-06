@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment {
         toolbar.setTitle(getString(R.string.home_title));
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        getParentFragmentManager().setFragmentResultListener(Utility.SAVE_RESULT_KEY, this,
+        getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
 
         init(view);
@@ -72,6 +72,8 @@ public class HomeFragment extends Fragment {
         context = getContext();
 
         initArrays();
+
+        update();
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
@@ -128,6 +130,15 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void update() {
+        for(int i = 0; i < uTitles.size(); i++) {
+            if(Utility.inPriorityRange(uDateInfo.get(i), context)) {
+                addToPriority(uTitles.get(i), uDueDates.get(i), uDescriptions.get(i), uTypes.get(i), uDateInfo.get(i));
+                removeFromUpcoming(i + pTitles.size() + 2);
+            }
+        }
+    }
+
     private void setArrayAdapter() {
         recyclerViewAdapter = new AssignmentRecyclerAdapter(context, pTitles.toArray(new String[pTitles.size()]),
                 pDueDates.toArray(new String[pDueDates.size()]), pDescriptions.toArray(new String[pDescriptions.size()]),
@@ -147,17 +158,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void save(Bundle bundle) {
-        String title = bundle.getString(Utility.SAVE_BUNDLE_TITLE_KEY);
-        String subject = bundle.getString(Utility.SAVE_BUNDLE_SUBJECT_KEY);
-        String description = bundle.getString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY);
-        String dueDate = bundle.getString(Utility.SAVE_BUNDLE_DUE_DATE_KEY);
-        DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.SAVE_BUNDLE_DAY_KEY),
-            bundle.getInt(Utility.SAVE_BUNDLE_MONTH_KEY), bundle.getInt(Utility.SAVE_BUNDLE_YEAR_KEY));
+        String title = bundle.getString(Utility.EDIT_BUNDLE_TITLE_KEY);
+        String subject = bundle.getString(Utility.EDIT_BUNDLE_SUBJECT_KEY);
+        String description = bundle.getString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY);
+        String dueDate = bundle.getString(Utility.EDIT_BUNDLE_DUE_DATE_KEY);
+        DateInfo dateInfo = new DateInfo(dueDate, bundle.getInt(Utility.EDIT_BUNDLE_DAY_KEY),
+            bundle.getInt(Utility.EDIT_BUNDLE_MONTH_KEY), bundle.getInt(Utility.EDIT_BUNDLE_YEAR_KEY));
 
-        boolean priority = bundle.getBoolean(Utility.SAVE_BUNDLE_PRIORITY_KEY);
+        boolean priority = bundle.getBoolean(Utility.EDIT_BUNDLE_PRIORITY_KEY);
 
-        int originalPosition = bundle.getInt(Utility.SAVE_BUNDLE_POSITION_KEY, -1);
-        boolean createNew = bundle.getBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
+        int originalPosition = bundle.getInt(Utility.EDIT_BUNDLE_POSITION_KEY, -1);
+        boolean createNew = bundle.getBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, true);
 
         if(!createNew) {
             if(originalPosition <= pTitles.size()) {
@@ -258,20 +269,20 @@ public class HomeFragment extends Fragment {
         uTypes.add(subjectDrawable);
     }
 
-    private void removeFromPriority(int position) {
-        pDateInfo.remove(position - 1);
-        pTitles.remove(position - 1);
-        pDueDates.remove(position - 1);
-        pDescriptions.remove(position - 1);
-        pTypes.remove(position - 1);
+    private void removeFromPriority(int overallPosition) {
+        pDateInfo.remove(overallPosition - 1);
+        pTitles.remove(overallPosition - 1);
+        pDueDates.remove(overallPosition - 1);
+        pDescriptions.remove(overallPosition - 1);
+        pTypes.remove(overallPosition - 1);
     }
 
-    private void removeFromUpcoming(int position) {
-        uDateInfo.remove(position - pTitles.size() - 2);
-        uTitles.remove(position - pTitles.size() - 2);
-        uDueDates.remove(position - pTitles.size() - 2);
-        uDescriptions.remove(position - pTitles.size() - 2);
-        uTypes.remove(position - pTitles.size() - 2);
+    private void removeFromUpcoming(int overallPosition) {
+        uDateInfo.remove(overallPosition - pTitles.size() - 2);
+        uTitles.remove(overallPosition - pTitles.size() - 2);
+        uDueDates.remove(overallPosition - pTitles.size() - 2);
+        uDescriptions.remove(overallPosition - pTitles.size() - 2);
+        uTypes.remove(overallPosition - pTitles.size() - 2);
     }
 
     public static void serializeArrays() {

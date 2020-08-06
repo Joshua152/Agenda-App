@@ -11,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -42,11 +44,11 @@ public class CreateFragment extends Fragment {
     ConstraintLayout constraintLayout;
     LinearLayout llDescription;
     TextInputLayout tiTitle;
-    TextInputLayout tiDueDate;
     TextInputLayout tiDescription;
     TextInputEditText etTitle;
-    TextInputEditText etDueDate;
     TextInputEditText etDescription;
+    TextView tvDueDate;
+    ImageButton ibDate;
     Spinner sSubjects;
 
     MenuItem star;
@@ -92,11 +94,11 @@ public class CreateFragment extends Fragment {
         constraintLayout = (ConstraintLayout) view.findViewById(R.id.create_constraint_layout);
         llDescription = (LinearLayout) view.findViewById(R.id.create_ll_description);
         tiTitle = (TextInputLayout) view.findViewById(R.id.create_ti_title);
-        tiDueDate = (TextInputLayout) view.findViewById(R.id.create_ti_due_date);
         tiDescription = (TextInputLayout) view.findViewById(R.id.create_ti_description);
         etTitle = (TextInputEditText) view.findViewById(R.id.create_et_title);
-        etDueDate = (TextInputEditText) view.findViewById(R.id.create_et_due_date);
         etDescription = (TextInputEditText) view.findViewById(R.id.create_et_description);
+        tvDueDate = (TextView) view.findViewById(R.id.create_tv_due_date);
+        ibDate = (ImageButton) view.findViewById(R.id.create_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.create_s_subject);
 
         homeFragment = new HomeFragment();
@@ -113,7 +115,6 @@ public class CreateFragment extends Fragment {
 
     private void initLayout() {
         etTitle.setFocusable(true);
-        etDueDate.setFocusable(true);
         etDescription.setFocusable(true);
         sSubjects.setFocusable(true);
 
@@ -122,7 +123,7 @@ public class CreateFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sSubjects.setAdapter(adapter);
 
-        etDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
+        tvDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
 
         llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -138,7 +139,7 @@ public class CreateFragment extends Fragment {
 
                 ConstraintSet set = new ConstraintSet();
                 set.clone(constraintLayout);
-                set.connect(R.id.create_ll_description, ConstraintSet.TOP, R.id.create_ll_middle, ConstraintSet.BOTTOM);
+                set.connect(R.id.create_ll_description, ConstraintSet.TOP, R.id.create_constraint_middle, ConstraintSet.BOTTOM);
                 set.connect(R.id.create_ll_description, ConstraintSet.BOTTOM, R.id.create_scroll_view, ConstraintSet.BOTTOM);
                 set.connect(R.id.create_ll_description, ConstraintSet.START, R.id.create_scroll_view, ConstraintSet.START);
                 set.connect(R.id.create_ll_description, ConstraintSet.END, R.id.create_scroll_view, ConstraintSet.END);
@@ -159,7 +160,6 @@ public class CreateFragment extends Fragment {
                 etDescription.setMinHeight(descriptionMinHeight);
 
                 tiTitle.clearFocus();
-                tiDueDate.clearFocus();
                 tiDescription.clearFocus();
             } else {
                 etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
@@ -167,15 +167,17 @@ public class CreateFragment extends Fragment {
             }
         });
 
-        tiDueDate.setEndIconOnClickListener(view -> {
+        ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
                 currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
-                etDueDate.setText(currentDateInfo.getDate());
+                tvDueDate.setText(currentDateInfo.getDate());
 
                 if(!pressedPriority) {
                     priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == Utility.FURTHER;
                     toggleStar();
                 }
+
+                star.setVisible(!Utility.inPriorityRange(currentDateInfo, context));
             });
 
             fragment.setDateInfo(currentDateInfo);
@@ -188,7 +190,6 @@ public class CreateFragment extends Fragment {
                 Utility.hideSoftKeyboard(getActivity());
 
                 etTitle.clearFocus();
-                etDueDate.clearFocus();
                 etDescription.clearFocus();
 
                 return false;
@@ -199,18 +200,18 @@ public class CreateFragment extends Fragment {
 
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY,
+        bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY,
                 !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
-        bundle.putString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, etDueDate.getText().toString());
-        bundle.putString(Utility.SAVE_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
-        bundle.putString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
-        bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
-        bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
-        bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
-        bundle.putBoolean(Utility.SAVE_BUNDLE_PRIORITY_KEY, priority);
-        bundle.putBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, true);
+        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, tvDueDate.getText().toString());
+        bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
+        bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
+        bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, currentDateInfo.getDay());
+        bundle.putInt(Utility.EDIT_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
+        bundle.putInt(Utility.EDIT_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+        bundle.putBoolean(Utility.EDIT_BUNDLE_PRIORITY_KEY, priority);
+        bundle.putBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, true);
 
-        getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
+        getParentFragmentManager().setFragmentResult(Utility.HOME_RESULT_KEY, bundle);
     }
 
     public void toggleStar() {
@@ -229,6 +230,13 @@ public class CreateFragment extends Fragment {
         star = menu.getItem(0);
 
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(Utility.inPriorityRange(currentDateInfo, context)) {
+            menu.getItem(0).setVisible(false);
+        }
     }
 
     @Override

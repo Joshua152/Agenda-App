@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ViewFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/view_app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/view_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <TextView
+        android:id="@+id/view_tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Lorem ipsum"
+        android:textAppearance="?attr/textAppearanceHeadline6"/>
+
+    <LinearLayout
+        android:id="@+id/view_ll_middle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/view_tv_due_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Due: 12/3/30"
+            android:textAppearance="?attr/textAppearanceSubtitle2"/>
+
+        <TextView
+            android:id="@+id/view_tv_subject"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Subject: Math"
+            android:textAppearance="?attr/textAppearanceSubtitle2"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/view_tv_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam bibendum velit nec velit elementum, sed congue ligula suscipit. Donec mauris sem, sodales vitae feugiat nec, luctus ac mauris. Aliquam in pretium tellus, in suscipit ante. Mauris in nisi rutrum, aliquam ex at, interdum lacus. Fusce fermentum mattis pharetra. Praesent sed libero dui. Sed eleifend ullamcorper orci auctor fringilla. Cras sed elit elementum, scelerisque urna non, lacinia libero. Aliquam rutrum aliquam sem, id commodo purus venenatis at. Phasellus suscipit justo eget nulla porttitor mollis ac fermentum enim. Phasellus ornare mauris sit amet leo accumsan, quis cursus risus accumsan. Quisque vulputate lorem a ultrices ultricies. Suspendisse odio sapien, fermentum dapibus lectus a, sodales sollicitudin erat. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus vehicula, metus quis ultrices ultricies, ante ligula feugiat urna, a egestas tortor sem ut nibh. Curabitur vel nisl sem."
+        android:textAppearance="?attr/textAppearanceSubtitle1"/>
+
+</LinearLayout>

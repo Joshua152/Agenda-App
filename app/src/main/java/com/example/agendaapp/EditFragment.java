@@ -13,9 +13,11 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -44,16 +46,14 @@ public class EditFragment extends Fragment {
     ConstraintLayout constraintLayout;
     LinearLayout llDescription;
     TextInputLayout tiTitle;
-    TextInputLayout tiDueDate;
     TextInputLayout tiDescription;
     TextInputEditText etTitle;
-    TextInputEditText etDueDate;
     TextInputEditText etDescription;
+    TextView tvDueDate;
+    ImageButton ibDate;
     Spinner sSubjects;
 
     MenuItem star;
-
-    HomeFragment homeFragment;
 
     DateInfo currentDateInfo;
     Resize resize;
@@ -62,7 +62,7 @@ public class EditFragment extends Fragment {
     String dueDate;
     String description;
 
-    int subject;
+    String subject;
 
     int originalPosition;
 
@@ -102,14 +102,12 @@ public class EditFragment extends Fragment {
         constraintLayout = (ConstraintLayout) view.findViewById(R.id.edit_constraint_layout);
         llDescription = (LinearLayout) view.findViewById(R.id.edit_ll_description);
         tiTitle = (TextInputLayout) view.findViewById(R.id.edit_ti_title);
-        tiDueDate = (TextInputLayout) view.findViewById(R.id.edit_ti_due_date);
         tiDescription = (TextInputLayout) view.findViewById(R.id.edit_ti_description);
         etTitle = (TextInputEditText) view.findViewById(R.id.edit_et_title);
-        etDueDate = (TextInputEditText) view.findViewById(R.id.edit_et_due_date);
         etDescription = (TextInputEditText) view.findViewById(R.id.edit_et_description);
+        tvDueDate = (TextView) view.findViewById(R.id.edit_tv_due_date);
+        ibDate = (ImageButton) view.findViewById(R.id.edit_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.edit_s_subject);
-
-        homeFragment = new HomeFragment();
 
         currentDateInfo = new DateInfo(getArguments().getString(Utility.EDIT_DUE_DATE_KEY),
                 getArguments().getInt(Utility.EDIT_DAY_KEY), getArguments().getInt(Utility.EDIT_MONTH_KEY),
@@ -120,19 +118,18 @@ public class EditFragment extends Fragment {
         title = getArguments().getString(Utility.EDIT_TITLE_KEY);
         dueDate = getArguments().getString(Utility.EDIT_DUE_DATE_KEY);
         description = getArguments().getString(Utility.EDIT_DESCRIPTION_KEY);
-        subject = getArguments().getInt(Utility.EDIT_SUBJECT_KEY);
+        subject = getArguments().getString(Utility.EDIT_SUBJECT_KEY);
         originalPosition = getArguments().getInt(Utility.EDIT_ORIGINAL_POSITION_KEY);
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
 
-        priority = true;
+        priority = getArguments().getBoolean(Utility.EDIT_PRIORITY_KEY);
         pressedPriority = false;
     }
 
     private void initLayout() {
         etTitle.setFocusable(true);
-        etDueDate.setFocusable(true);
         etDescription.setFocusable(true);
         sSubjects.setFocusable(true);
 
@@ -142,9 +139,9 @@ public class EditFragment extends Fragment {
         sSubjects.setAdapter(adapter);
 
         etTitle.setText(title);
-        etDueDate.setText(dueDate);
+        tvDueDate.setText(dueDate);
         etDescription.setText(description);
-        sSubjects.setSelection(Utility.getSubjectPosition(subject), true);
+        sSubjects.setSelection(Utility.getSubjectPositionFromTitle(subject, context), true);
 
         llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -160,7 +157,7 @@ public class EditFragment extends Fragment {
 
                 ConstraintSet set = new ConstraintSet();
                 set.clone(constraintLayout);
-                set.connect(R.id.edit_ll_description, ConstraintSet.TOP, R.id.edit_ll_middle, ConstraintSet.BOTTOM);
+                set.connect(R.id.edit_ll_description, ConstraintSet.TOP, R.id.edit_constraint_middle, ConstraintSet.BOTTOM);
                 set.connect(R.id.edit_ll_description, ConstraintSet.BOTTOM, R.id.edit_scroll_view, ConstraintSet.BOTTOM);
                 set.connect(R.id.edit_ll_description, ConstraintSet.START, R.id.edit_scroll_view, ConstraintSet.START);
                 set.connect(R.id.edit_ll_description, ConstraintSet.END, R.id.edit_scroll_view, ConstraintSet.END);
@@ -172,45 +169,40 @@ public class EditFragment extends Fragment {
     }
 
     private void initListeners() {
-        resize.addListener(new Resize.ResizeListener() {
-            @Override
-            public void onResize(int fromHeight, int toHeight, ViewGroup contentView) {
-                if(toHeight == originalContentHeight) {
-                    etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
-                            * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
-                            + etDescription.getCompoundPaddingBottom());
+        resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
+            if(toHeight == originalContentHeight) {
+                etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
+                        * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
+                        + etDescription.getCompoundPaddingBottom());
 
-                    etDescription.setMinHeight(descriptionMinHeight);
+                etDescription.setMinHeight(descriptionMinHeight);
 
-                    tiTitle.clearFocus();
-                    tiDueDate.clearFocus();
-                    tiDescription.clearFocus();
-                } else {
-                    etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
-                            tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
-                }
+                tiTitle.clearFocus();
+                tiDescription.clearFocus();
+            } else {
+                etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
+                        tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
             }
         });
 
-        tiDueDate.setEndIconOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerFragment fragment = new DatePickerFragment(new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
-                        etDueDate.setText(currentDateInfo.getDate());
+        ibDate.setOnClickListener(view -> {
+            DatePickerFragment fragment = new DatePickerFragment(new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                    currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
+                    tvDueDate.setText(currentDateInfo.getDate());
 
-                        if(!pressedPriority) {
-                            priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == Utility.FURTHER;
-                            toggleStar();
-                        }
+                    if(!pressedPriority) {
+                        priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == Utility.FURTHER;
+                        toggleStar();
                     }
-                });
 
-                fragment.setDateInfo(currentDateInfo);
-                fragment.show(getParentFragmentManager(), "Date Picker");
-            }
+                    star.setVisible(!Utility.inPriorityRange(currentDateInfo, context));
+                }
+            });
+
+            fragment.setDateInfo(currentDateInfo);
+            fragment.show(getParentFragmentManager(), "Date Picker");
         });
 
         sSubjects.setOnTouchListener(new View.OnTouchListener() {
@@ -219,7 +211,6 @@ public class EditFragment extends Fragment {
                 Utility.hideSoftKeyboard(getActivity());
 
                 etTitle.clearFocus();
-                etDueDate.clearFocus();
                 etDescription.clearFocus();
 
                 return false;
@@ -230,19 +221,19 @@ public class EditFragment extends Fragment {
 
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putString(Utility.SAVE_BUNDLE_TITLE_KEY,
+        bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY,
                 !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
-        bundle.putString(Utility.SAVE_BUNDLE_DUE_DATE_KEY, etDueDate.getText().toString());
-        bundle.putString(Utility.SAVE_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
-        bundle.putString(Utility.SAVE_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
-        bundle.putInt(Utility.SAVE_BUNDLE_DAY_KEY, currentDateInfo.getDay());
-        bundle.putInt(Utility.SAVE_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
-        bundle.putInt(Utility.SAVE_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
-        bundle.putBoolean(Utility.SAVE_BUNDLE_PRIORITY_KEY, priority);
-        bundle.putInt(Utility.SAVE_BUNDLE_POSITION_KEY, originalPosition);
-        bundle.putBoolean(Utility.SAVE_BUNDLE_CREATE_NEW_KEY, false);
+        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, tvDueDate.getText().toString());
+        bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, Utility.getSubjectFromPosition(sSubjects.getSelectedItemPosition(), context));
+        bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
+        bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, currentDateInfo.getDay());
+        bundle.putInt(Utility.EDIT_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
+        bundle.putInt(Utility.EDIT_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
+        bundle.putBoolean(Utility.EDIT_BUNDLE_PRIORITY_KEY, priority);
+        bundle.putInt(Utility.EDIT_BUNDLE_POSITION_KEY, originalPosition);
+        bundle.putBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, false);
 
-        getParentFragmentManager().setFragmentResult(Utility.SAVE_RESULT_KEY, bundle);
+        getParentFragmentManager().setFragmentResult(Utility.EDIT_RESULT_KEY, bundle);
     }
 
     public void toggleStar() {
@@ -257,7 +248,12 @@ public class EditFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_edit, menu);
 
-        menu.getItem(0).setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+        if(priority) {
+            menu.getItem(0).setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+        } else {
+            menu.getItem(0).setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
+        }
+
         star = menu.getItem(0);
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -267,19 +263,11 @@ public class EditFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home :
-                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                transaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
-                transaction.replace(R.id.fragment_container, homeFragment);
-                transaction.addToBackStack(Utility.HOME_FRAGMENT);
-                transaction.commit();
+                getParentFragmentManager().popBackStack();
                 return true;
             case R.id.edit_save :
                 save();
-                FragmentTransaction saveTransaction = getParentFragmentManager().beginTransaction();
-                saveTransaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
-                saveTransaction.replace(R.id.fragment_container, homeFragment);
-                saveTransaction.addToBackStack(Utility.HOME_FRAGMENT);
-                saveTransaction.commit();
+                getParentFragmentManager().popBackStack();
                 return true;
             case R.id.edit_star :
                 pressedPriority = true;
@@ -300,21 +288,30 @@ public class EditFragment extends Fragment {
         return false;
     }
 
-    public static EditFragment newInstance(String title, String dueDate, String description, int subject,
-                                           DateInfo dateInfo, int originalPosition) {
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(Utility.inPriorityRange(currentDateInfo, context)) {
+            menu.getItem(0).setVisible(false);
+        }
+    }
+
+    public static EditFragment newInstance(String title, String dueDate, String description, String subject,
+                                           DateInfo dateInfo, int originalPosition, boolean priority) {
 
         Bundle bundle = new Bundle();
         bundle.putString(Utility.EDIT_TITLE_KEY, title);
         bundle.putString(Utility.EDIT_DUE_DATE_KEY, dueDate);
+        bundle.putString(Utility.EDIT_SUBJECT_KEY, subject);
         bundle.putString(Utility.EDIT_DESCRIPTION_KEY, description);
-        bundle.putInt(Utility.EDIT_SUBJECT_KEY, subject);
         bundle.putInt(Utility.EDIT_DAY_KEY, dateInfo.getDay());
         bundle.putInt(Utility.EDIT_MONTH_KEY, dateInfo.getMonth());
         bundle.putInt(Utility.EDIT_YEAR_KEY, dateInfo.getYear());
         bundle.putInt(Utility.EDIT_ORIGINAL_POSITION_KEY, originalPosition);
+        bundle.putBoolean(Utility.EDIT_PRIORITY_KEY, priority);
 
-        EditFragment fragment = new EditFragment();
-        fragment.setArguments(bundle);
-        return fragment;
+        EditFragment editFragment = new EditFragment();
+        editFragment.setArguments(bundle);
+
+        return editFragment;
     }
 }

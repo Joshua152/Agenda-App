@@ -9,12 +9,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.card.MaterialCardView;
@@ -87,16 +86,17 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 int position = getAdapterPosition();
 
                 if(position <= pTitles.length) {
-                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(pTitles[position - 1],
-                            pDueDates[position - 1], pDescriptions[position - 1], pTypes[position - 1],
-                            HomeFragment.pDateInfo.get(position - 1), position));
+                    transaction.replace(R.id.fragment_container, ViewFragment.newInstance(pTitles[position - 1],
+                            pDueDates[position - 1], pDescriptions[position - 1], Utility.getSubjectFromId(pTypes[position - 1], context),
+                            HomeFragment.pDateInfo.get(position - 1), position, true));
                 } else {
-                    transaction.replace(R.id.fragment_container, EditFragment.newInstance(uTitles[position - pTitles.length - 2],
+                    transaction.replace(R.id.fragment_container, ViewFragment.newInstance(uTitles[position - pTitles.length - 2],
                             uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
-                            uTypes[position - pTitles.length - 2], HomeFragment.uDateInfo.get(position - pTitles.length - 2), position));
+                            Utility.getSubjectFromId(uTypes[position - pTitles.length - 2], context),
+                            HomeFragment.uDateInfo.get(position - pTitles.length - 2), position, false));
                 }
 
-                transaction.addToBackStack(Utility.EDIT_FRAGMENT);
+                transaction.addToBackStack(Utility.VIEW_FRAGMENT);
                 transaction.commit();
             });
 
@@ -250,11 +250,25 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 assignmentHolder.tvDueDate.setText(pDueDates[position - 1]);
                 assignmentHolder.tvDescription.setText(pDescriptions[position - 1]);
                 assignmentHolder.ivType.setImageResource(pTypes[position - 1]);
+
+                if(Utility.isLate(HomeFragment.pDateInfo.get(position - 1), context)) {
+                    assignmentHolder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.late));
+                    assignmentHolder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.late));
+                    assignmentHolder.tvDescription.setTextColor(ContextCompat.getColor(context, R.color.late));
+                } else {
+                    assignmentHolder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
+                    assignmentHolder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
+                    assignmentHolder.tvDescription.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
+                }
             } else {
                 assignmentHolder.tvTitle.setText(uTitles[position - pTitles.length - 2]);
                 assignmentHolder.tvDueDate.setText(uDueDates[position - pTitles.length - 2]);
                 assignmentHolder.tvDescription.setText(uDescriptions[position - pTitles.length - 2]);
                 assignmentHolder.ivType.setImageResource(uTypes[position - pTitles.length - 2]);
+
+                assignmentHolder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
+                assignmentHolder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
+                assignmentHolder.tvDescription.setTextColor(ContextCompat.getColor(context, R.color.colorOnSurface));
             }
 
             setColor(assignmentHolder.frameIconBackground.getBackground(), position);

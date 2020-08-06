@@ -20,20 +20,23 @@ public class Utility {
     public final static String HOME_FRAGMENT = "Home Fragment";
     public final static String CREATE_FRAGMENT = "Create Fragment";
     public final static String EDIT_FRAGMENT = "Edit Fragment";
+    public final static String VIEW_FRAGMENT = "View Fragment";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
 
-    public final static String SAVE_BUNDLE_TITLE_KEY = "Save Bundle Title Key";
-    public final static String SAVE_BUNDLE_DUE_DATE_KEY = "Save Bundle Due Date Key";
-    public final static String SAVE_BUNDLE_SUBJECT_KEY = "Save Bundle Subject Key";
-    public final static String SAVE_BUNDLE_DESCRIPTION_KEY = "Save Bundle Description Key";
-    public final static String SAVE_BUNDLE_DAY_KEY = "Save Bundle Day Key";
-    public final static String SAVE_BUNDLE_MONTH_KEY = "Save Bundle Month Key";
-    public final static String SAVE_BUNDLE_YEAR_KEY = "Save Bundle Year Key";
-    public final static String SAVE_BUNDLE_PRIORITY_KEY = "Save Bundle Priority Key";
-    public final static String SAVE_BUNDLE_CREATE_NEW_KEY = "Save Bundle Create New Key";
-    public final static String SAVE_BUNDLE_POSITION_KEY = "Save Bundle Position Key";
-    public final static String SAVE_RESULT_KEY = "Save Result Key";
+    public final static String HOME_RESULT_KEY = "Home Result Key";
+
+    public final static String EDIT_BUNDLE_TITLE_KEY = "Edit Bundle Title Key";
+    public final static String EDIT_BUNDLE_DUE_DATE_KEY = "Edit Bundle Due Date Key";
+    public final static String EDIT_BUNDLE_SUBJECT_KEY = "Edit Bundle Subject Key";
+    public final static String EDIT_BUNDLE_DESCRIPTION_KEY = "Edit Bundle Description Key";
+    public final static String EDIT_BUNDLE_DAY_KEY = "Edit Bundle Day Key";
+    public final static String EDIT_BUNDLE_MONTH_KEY = "Edit Bundle Month Key";
+    public final static String EDIT_BUNDLE_YEAR_KEY = "Edit Bundle Year Key";
+    public final static String EDIT_BUNDLE_PRIORITY_KEY = "Edit Bundle Priority Key";
+    public final static String EDIT_BUNDLE_CREATE_NEW_KEY = "Edit Bundle Create New Key";
+    public final static String EDIT_BUNDLE_POSITION_KEY = "Edit Bundle Position Key";
+    public final static String EDIT_RESULT_KEY = "Edit Result Key";
 
     public final static String EDIT_TITLE_KEY = "Edit Bundle Key";
     public final static String EDIT_DUE_DATE_KEY = "Edit Due Date Key";
@@ -43,6 +46,7 @@ public class Utility {
     public final static String EDIT_MONTH_KEY = "Edit Month Key";
     public final static String EDIT_YEAR_KEY = "Edit Year Key";
     public final static String EDIT_ORIGINAL_POSITION_KEY = "Edit Original Position Key";
+    public final static String EDIT_PRIORITY_KEY = "Edit Priority Key";
 
     public final static int SERIALIZATION_P_TITLES = 0;
     public final static int SERIALIZATION_P_DUE_DATE = 1;
@@ -124,7 +128,15 @@ public class Utility {
         }
     }
 
-    public static int getSubjectPosition(int drawableId) {
+    public static boolean inPriorityRange(DateInfo dateInfo, Context context) {
+        return compareDates(dateInfo, getDay(context, 2)) == CLOSER;
+    }
+
+    public static boolean isLate(DateInfo dateInfo, Context context) {
+        return compareDates(dateInfo, getDay(context, 0)) == CLOSER;
+    }
+
+    public static int getSubjectPositionFromId(int drawableId) {
         switch(drawableId) {
             case R.drawable.ic_brush_black_24dp :
                 return POSITION_ART;
@@ -147,8 +159,47 @@ public class Utility {
         }
     }
 
+    public static int getSubjectPositionFromTitle(String subject, Context context) {
+        String[] array = context.getResources().getStringArray(R.array.subject_array);
+
+        for(int i = 0; i < array.length; i++) {
+            if(array[i].equals(subject)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static String getSubjectFromPosition(int position, Context context) {
+        return context.getResources().getStringArray(R.array.subject_array)[position];
+    }
+
+    public static String getSubjectFromId(int id, Context context) {
+        switch(id) {
+            case R.drawable.ic_brush_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_ART];
+            case R.drawable.ic_history_edu_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_HISTORY];
+            case R.drawable.ic_language_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_LANGUAGE];
+            case R.drawable.ic_book_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_LITERATURE];
+            case R.drawable.ic_calculate_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_MATH];
+            case R.drawable.ic_music_note_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_MUSIC];
+            case R.drawable.ic_science_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_SCIENCE];
+            case R.drawable.ic_miscellaneous_services_black_24dp :
+                return context.getResources().getStringArray(R.array.subject_array)[POSITION_OTHER];
+            default :
+                return null;
+        }
+    }
+
     public static int getColor(Context context, int drawable) {
-        int position = getSubjectPosition(drawable);
+        int position = getSubjectPositionFromId(drawable);
 
         switch(position) {
             case POSITION_ART :

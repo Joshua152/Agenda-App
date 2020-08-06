@@ -2,9 +2,9 @@
     <string name="app_name">Agenda App</string>
 
     <!--Fragment Titles-->
-
     <string name="home_title">Agenda</string>
     <string name="create_title">Create Assignment</string>
+    <string name="view_title">View Assignment</string>
     <string name="edit_title">Edit Assignment</string>
 
     <!--Home Fragment-->
@@ -14,7 +14,6 @@
     <string name="none">- None</string>
 
     <!--Create Fragment/Edit Fragment-->
-
     <string name="save">save</string>
     <string name="mark_priority">Mark as Priority</string>
 
@@ -36,5 +35,11 @@
         <item>Science</item>
         <item>Other</item>
     </string-array>
+
+    <!--View Fragment-->
+    <string name="edit">Edit</string>
+
+    <string name="due_date">Title: %s</string>
+    <string name="subject">Subject: %s</string>
 
 </resources>
