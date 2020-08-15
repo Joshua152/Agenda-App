@@ -232,4 +232,10 @@ public class Utility {
 
         return array;
     }
+
+    public static int toPixels(Context context, int dp) {
+        float scale = context.getResources().getDisplayMetrics().density;
+
+        return (int) (dp * scale + 0.5f);
+    }
 }

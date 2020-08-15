@@ -2,15 +2,18 @@ package com.example.agendaapp;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,6 +31,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     final static int TYPE_SPACER = 2;
 
     Context context;
+
+    RecyclerView recyclerView;
 
     //p : priority | u : upcoming
 
@@ -75,27 +80,38 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
             cardView = (MaterialCardView) itemView;
 
-            setListener();
+            initListeners();
         }
 
-        private void setListener() {
+        private void initListeners() {
             cardView.setOnClickListener(view -> {
+                ViewFragment viewFragment;
+
                 FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
-                transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
 
                 int position = getAdapterPosition();
 
                 if(position <= pTitles.length) {
-                    transaction.replace(R.id.fragment_container, ViewFragment.newInstance(pTitles[position - 1],
+                    viewFragment = ViewFragment.newInstance(pTitles[position - 1],
                             pDueDates[position - 1], pDescriptions[position - 1], Utility.getSubjectFromId(pTypes[position - 1], context),
-                            HomeFragment.pDateInfo.get(position - 1), position, true));
+                            HomeFragment.pDateInfo.get(position - 1), position, true);
                 } else {
-                    transaction.replace(R.id.fragment_container, ViewFragment.newInstance(uTitles[position - pTitles.length - 2],
+                    viewFragment = ViewFragment.newInstance(uTitles[position - pTitles.length - 2],
                             uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
                             Utility.getSubjectFromId(uTypes[position - pTitles.length - 2], context),
-                            HomeFragment.uDateInfo.get(position - pTitles.length - 2), position, false));
+                            HomeFragment.uDateInfo.get(position - pTitles.length - 2), position, false);
                 }
 
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ViewCompat.setTransitionName(tvTitle, context.getString(R.string.transition_title) + position);
+                    ViewCompat.setTransitionName(tvDueDate, context.getString(R.string.transition_due_date) + position);
+
+                    transaction.setReorderingAllowed(true);
+                    transaction.addSharedElement(tvTitle, tvTitle.getTransitionName());
+                    transaction.addSharedElement(tvDueDate, tvDueDate.getTransitionName());
+                }
+
+                transaction.replace(R.id.fragment_container, viewFragment);
                 transaction.addToBackStack(Utility.VIEW_FRAGMENT);
                 transaction.commit();
             });
@@ -205,6 +221,13 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        this.recyclerView = recyclerView;
+    }
+
+    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int itemType) {
         switch(itemType) {
             case TYPE_HEADER :
@@ -244,6 +267,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             }
         } else if(holder instanceof AssignmentViewHolder) {
             AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
+            ViewCompat.setTransitionName(assignmentHolder.tvTitle, context.getString(R.string.transition_title) + assignmentHolder.getAdapterPosition());
 
             if(position <= pTitles.length) {
                 assignmentHolder.tvTitle.setText(pTitles[position - 1]);
@@ -329,17 +353,21 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
     private void swap(int fromPosition, int toPosition) {
         if(fromPosition < toPosition && toPosition == HomeFragment.pTitles.size() + 1) {
-            HomeFragment.uTitles.add(0, HomeFragment.pTitles.get(fromPosition - 1));
-            HomeFragment.uDueDates.add(0, HomeFragment.pDueDates.get(fromPosition - 1));
-            HomeFragment.uDescriptions.add(0, HomeFragment.pDescriptions.get(fromPosition - 1));
-            HomeFragment.uTypes.add(0, HomeFragment.pTypes.get(fromPosition - 1));
-            HomeFragment.uDateInfo.add(0, HomeFragment.pDateInfo.get(fromPosition - 1));
+            if(!Utility.inPriorityRange(HomeFragment.pDateInfo.get(fromPosition - 1), context)) {
+                HomeFragment.uTitles.add(0, HomeFragment.pTitles.get(fromPosition - 1));
+                HomeFragment.uDueDates.add(0, HomeFragment.pDueDates.get(fromPosition - 1));
+                HomeFragment.uDescriptions.add(0, HomeFragment.pDescriptions.get(fromPosition - 1));
+                HomeFragment.uTypes.add(0, HomeFragment.pTypes.get(fromPosition - 1));
+                HomeFragment.uDateInfo.add(0, HomeFragment.pDateInfo.get(fromPosition - 1));
 
-            HomeFragment.pTitles.remove(fromPosition - 1);
-            HomeFragment.pDueDates.remove(fromPosition - 1);
-            HomeFragment.pDescriptions.remove(fromPosition - 1);
-            HomeFragment.pTypes.remove(fromPosition - 1);
-            HomeFragment.pDateInfo.remove(fromPosition - 1);
+                HomeFragment.pTitles.remove(fromPosition - 1);
+                HomeFragment.pDueDates.remove(fromPosition - 1);
+                HomeFragment.pDescriptions.remove(fromPosition - 1);
+                HomeFragment.pTypes.remove(fromPosition - 1);
+                HomeFragment.pDateInfo.remove(fromPosition - 1);
+            } else {
+                Toast.makeText(context, context.getString(R.string.already_in_range_toast), Toast.LENGTH_SHORT).show();
+            }
         } else if(fromPosition > toPosition && toPosition == HomeFragment.pTitles.size() + 1) {
             HomeFragment.pTitles.add(HomeFragment.uTitles.get(0));
             HomeFragment.pDueDates.add(HomeFragment.uDueDates.get(0));

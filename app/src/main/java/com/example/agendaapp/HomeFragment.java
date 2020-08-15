@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -14,6 +15,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
 
 import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
@@ -51,6 +53,7 @@ public class HomeFragment extends Fragment {
     static ArrayList<Integer> pTypes;
     static ArrayList<Integer> uTypes;
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -66,6 +69,20 @@ public class HomeFragment extends Fragment {
         initListeners();
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle onSavedInstance) {
+        postponeEnterTransition();
+
+        recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                startPostponedEnterTransition();
+                return true;
+            }
+        });
     }
 
     private void init(View view) {

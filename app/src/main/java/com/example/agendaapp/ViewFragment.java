@@ -1,5 +1,7 @@
 package com.example.agendaapp;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,13 +10,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.transition.Transition;
+import androidx.transition.TransitionInflater;
 
 import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.Utility;
@@ -30,6 +38,15 @@ public class ViewFragment extends Fragment {
     TextView tvDescription;
 
     Bundle editBundle;
+
+    Transition sharedElementEnter;
+    Transition sharedElementReturn;
+
+    int position;
+
+    boolean titleLoaded;
+    boolean dueDateLoaded;
+    boolean descriptionLoaded;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
@@ -50,6 +67,8 @@ public class ViewFragment extends Fragment {
 
         initLayout(view);
 
+        initListeners(view);
+
         return view;
     }
 
@@ -62,6 +81,15 @@ public class ViewFragment extends Fragment {
         tvDueDate = (TextView) view.findViewById(R.id.view_tv_due_date);
         tvSubject = (TextView) view.findViewById(R.id.view_tv_subject);
         tvDescription = (TextView) view.findViewById(R.id.view_tv_description);
+
+        sharedElementEnter = TransitionInflater.from(context).inflateTransition(R.transition.transition_shared_element_enter);
+        sharedElementReturn = TransitionInflater.from(context).inflateTransition(R.transition.transition_shared_element_return);
+
+        position = getArguments().getInt(Utility.EDIT_BUNDLE_POSITION_KEY);
+
+        titleLoaded = false;
+        dueDateLoaded = false;
+        descriptionLoaded = false;
     }
 
     private void initLayout(View view) {
@@ -69,6 +97,61 @@ public class ViewFragment extends Fragment {
         tvDueDate.setText(getString(R.string.due_date, getArguments().getString(Utility.EDIT_BUNDLE_DUE_DATE_KEY)));
         tvSubject.setText(getString(R.string.subject, getArguments().getString(Utility.EDIT_BUNDLE_SUBJECT_KEY)));
         tvDescription.setText(getArguments().getString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY));
+
+        ViewCompat.setTransitionName(tvTitle, getString(R.string.transition_title) + position);
+        ViewCompat.setTransitionName(tvDueDate, getString(R.string.transition_due_date) + position);
+
+        setSharedElementEnterTransition(sharedElementEnter);
+        setSharedElementReturnTransition(sharedElementReturn);
+
+        postponeEnterTransition();
+    }
+
+    private void initListeners(View view) {
+        tvTitle.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                tvTitle.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                titleLoaded = true;
+
+                if(allLoaded()) {
+                    startEnter();
+                }
+
+                return true;
+            }
+        });
+
+        tvDueDate.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                tvDueDate.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                dueDateLoaded = true;
+
+                if(allLoaded()) {
+                    startEnter();
+                }
+
+                return true;
+            }
+        });
+
+        tvDescription.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                tvDescription.getViewTreeObserver().removeOnPreDrawListener(this);
+
+                descriptionLoaded = true;
+
+                if(allLoaded()) {
+                    startEnter();
+                }
+
+                return true;
+            }
+        });
     }
 
     private void update() {
@@ -76,6 +159,25 @@ public class ViewFragment extends Fragment {
         tvDueDate.setText(getString(R.string.due_date, editBundle.getString(Utility.EDIT_BUNDLE_DUE_DATE_KEY)));
         tvSubject.setText(getString(R.string.subject, editBundle.getString(Utility.EDIT_BUNDLE_SUBJECT_KEY)));
         tvDescription.setText(editBundle.getString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY));
+    }
+
+    private boolean allLoaded() {
+        return titleLoaded && dueDateLoaded && descriptionLoaded;
+    }
+
+    public void startEnter() {
+        startPostponedEnterTransition();
+
+        ObjectAnimator subject = ObjectAnimator.ofFloat(tvSubject, "alpha", 0f, 1f);
+        subject.setDuration(300);
+        subject.setInterpolator(new AnticipateInterpolator());
+
+        ObjectAnimator description = ObjectAnimator.ofFloat(tvDescription, "alpha", 0f, 1f);
+        description.setDuration(300);
+        description.setInterpolator(new LinearInterpolator());
+
+        subject.start();
+        description.start();
     }
 
     @Override
@@ -91,10 +193,7 @@ public class ViewFragment extends Fragment {
 
         switch(item.getItemId()) {
             case android.R.id.home :
-                transaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
-                transaction.replace(R.id.fragment_container, MainActivity.homeFragment);
-                transaction.addToBackStack(Utility.HOME_FRAGMENT);
-                transaction.commit();
+                getParentFragmentManager().popBackStack();
                 return true;
             case R.id.view_edit :
                 String title = editBundle.getString(Utility.EDIT_BUNDLE_TITLE_KEY);
