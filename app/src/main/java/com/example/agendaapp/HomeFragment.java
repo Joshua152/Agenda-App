@@ -6,9 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.ViewGroupCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
@@ -22,6 +24,8 @@ import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.transition.Hold;
+import com.google.android.material.transition.MaterialElevationScale;
 
 import java.util.ArrayList;
 
@@ -33,6 +37,7 @@ public class HomeFragment extends Fragment {
 
     Toolbar toolbar;
     FloatingActionButton fab;
+    LinearLayout llRoot;
 
     RecyclerView recyclerView;
 
@@ -73,13 +78,22 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle onSavedInstance) {
+        ViewGroupCompat.setTransitionGroup(llRoot, true);
+
+        setExitTransition(new MaterialElevationScale(false));
+        setReenterTransition(new MaterialElevationScale(true));
+
         postponeEnterTransition();
 
         recyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 recyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                System.out.println("on pre draw");
+
                 startPostponedEnterTransition();
+
+                System.out.println("start enter transition");
                 return true;
             }
         });
@@ -94,6 +108,7 @@ public class HomeFragment extends Fragment {
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
+        llRoot = (LinearLayout) view.findViewById(R.id.home_ll_root);
 
         recyclerViewLayoutManager = new LinearLayoutManager(context);
         setArrayAdapter();

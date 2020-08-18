@@ -103,12 +103,10 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 }
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ViewCompat.setTransitionName(tvTitle, context.getString(R.string.transition_title) + position);
-                    ViewCompat.setTransitionName(tvDueDate, context.getString(R.string.transition_due_date) + position);
+                    ViewCompat.setTransitionName(cardView, context.getString(R.string.transition_background) + position);
 
                     transaction.setReorderingAllowed(true);
-                    transaction.addSharedElement(tvTitle, tvTitle.getTransitionName());
-                    transaction.addSharedElement(tvDueDate, tvDueDate.getTransitionName());
+                    transaction.addSharedElement(cardView, cardView.getTransitionName());
                 }
 
                 transaction.replace(R.id.fragment_container, viewFragment);
