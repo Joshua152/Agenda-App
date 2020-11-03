@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -49,15 +50,13 @@ public class Utility {
     public final static String EDIT_PRIORITY_KEY = "Edit Priority Key";
 
     public final static int SERIALIZATION_P_TITLES = 0;
-    public final static int SERIALIZATION_P_DUE_DATE = 1;
-    public final static int SERIALIZATION_P_SUBJECT = 2;
-    public final static int SERIALIZATION_P_DESCRIPTION = 3;
-    public final static int SERIALIZATION_P_DATE_INFO = 4;
-    public final static int SERIALIZATION_U_TITLES = 5;
-    public final static int SERIALIZATION_U_DUE_DATE = 6;
-    public final static int SERIALIZATION_U_SUBJECT = 7;
-    public final static int SERIALIZATION_U_DESCRIPTION = 8;
-    public final static int SERIALIZATION_U_DATE_INFO = 9;
+    public final static int SERIALIZATION_P_SUBJECT = 1;
+    public final static int SERIALIZATION_P_DESCRIPTION = 2;
+    public final static int SERIALIZATION_P_DATE_INFO = 3;
+    public final static int SERIALIZATION_U_TITLES = 4;
+    public final static int SERIALIZATION_U_SUBJECT = 5;
+    public final static int SERIALIZATION_U_DESCRIPTION = 6;
+    public final static int SERIALIZATION_U_DATE_INFO = 7;
 
     public final static int POSITION_ART = 0;
     public final static int POSITION_HISTORY = 1;
@@ -77,7 +76,7 @@ public class Utility {
 
         try {
             manager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-        } catch(Exception e){}
+        } catch(Exception e) {}
     }
 
     public static DateInfo getDay (Context context, int inDaysTime) {
@@ -197,6 +196,16 @@ public class Utility {
                 return null;
         }
     }
+
+//    public static String[] getDueDates(ArrayList<DateInfo> dateInfos) {
+//        String[] dueDates = new String[dateInfos.size()];
+//
+//        for(int i = 0; i < dateInfos.size(); i++) {
+//            dueDates[i] = dateInfos.get(i).getDate();
+//        }
+//
+//        return dueDates;
+//    }
 
     public static int getColor(Context context, int drawable) {
         int position = getSubjectPositionFromId(drawable);

@@ -201,6 +201,12 @@ public class EditFragment extends Fragment {
                 }
             });
 
+            Utility.hideSoftKeyboard(getActivity());
+
+            etTitle.clearFocus();
+            etDescription.clearFocus();
+            sSubjects.clearFocus();
+
             fragment.setDateInfo(currentDateInfo);
             fragment.show(getParentFragmentManager(), "Date Picker");
         });
@@ -223,9 +229,9 @@ public class EditFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY,
                 !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
-        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, tvDueDate.getText().toString());
         bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, Utility.getSubjectFromPosition(sSubjects.getSelectedItemPosition(), context));
         bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
+        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, tvDueDate.getText().toString());
         bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, currentDateInfo.getDay());
         bundle.putInt(Utility.EDIT_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
         bundle.putInt(Utility.EDIT_BUNDLE_YEAR_KEY, currentDateInfo.getYear());

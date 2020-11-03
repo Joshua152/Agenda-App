@@ -26,8 +26,6 @@ public class DatePickerFragment extends DialogFragment{
         int month = 0;
         int day = 0;
 
-        System.out.println(dateInfo == null);
-
         if(dateInfo == null) {
             Calendar calendar = Calendar.getInstance();
             year = calendar.get(Calendar.YEAR);

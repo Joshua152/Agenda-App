@@ -131,7 +131,6 @@ public class ViewFragment extends Fragment {
         switch(item.getItemId()) {
             case android.R.id.home :
                 getParentFragmentManager().popBackStack();
-                System.out.println("go home");
                 return true;
             case R.id.view_edit :
                 String title = editBundle.getString(Utility.EDIT_BUNDLE_TITLE_KEY);
@@ -156,12 +155,11 @@ public class ViewFragment extends Fragment {
         return false;
     }
 
-    public static ViewFragment newInstance(String title, String dueDate, String description, String subject,
+    public static ViewFragment newInstance(String title, String description, String subject,
                                            DateInfo dateInfo, int originalPosition, boolean priority) {
 
         Bundle bundle = new Bundle();
         bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY, title);
-        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, dueDate);
         bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, subject);
         bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, description);
         bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, dateInfo.getDay());

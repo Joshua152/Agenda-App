@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.card.MaterialCardView;
@@ -37,10 +38,10 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     //p : priority | u : upcoming
 
     public String[] pTitles;
-    public String[] pDueDates;
+    public DateInfo[] pDateInfos;
     public String[] pDescriptions;
     public String[] uTitles;
-    public String[] uDueDates;
+    public DateInfo[] uDateInfos;
     public String[] uDescriptions;
 
     public int[] pTypes;
@@ -92,13 +93,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 int position = getAdapterPosition();
 
                 if(position <= pTitles.length) {
-                    viewFragment = ViewFragment.newInstance(pTitles[position - 1],
-                            pDueDates[position - 1], pDescriptions[position - 1], Utility.getSubjectFromId(pTypes[position - 1], context),
-                            HomeFragment.pDateInfo.get(position - 1), position, true);
+                    viewFragment = ViewFragment.newInstance(pTitles[position - 1], pDescriptions[position - 1],
+                            Utility.getSubjectFromId(pTypes[position - 1], context), HomeFragment.pDateInfo.get(position - 1),
+                            position, true);
                 } else {
                     viewFragment = ViewFragment.newInstance(uTitles[position - pTitles.length - 2],
-                            uDueDates[position - pTitles.length - 2], uDescriptions[position - pTitles.length - 2],
-                            Utility.getSubjectFromId(uTypes[position - pTitles.length - 2], context),
+                            uDescriptions[position - pTitles.length - 2], Utility.getSubjectFromId(uTypes[position - pTitles.length - 2], context),
                             HomeFragment.uDateInfo.get(position - pTitles.length - 2), position, false);
                 }
 
@@ -135,56 +135,54 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         private void removeItem(int position) {
             if(position <= pTitles.length) {
                 String[] titles = new String[pTitles.length - 1];
-                String[] dueDates = new String[pDueDates.length - 1];
+                DateInfo[] dateInfos = new DateInfo[pDateInfos.length - 1];
                 String[] descriptions = new String[pDescriptions.length - 1];
                 int[] types = new int[pTypes.length - 1];
 
                 System.arraycopy(pTitles, 0, titles, 0, position - 1);
-                System.arraycopy(pDueDates, 0, dueDates, 0, position - 1);
+                System.arraycopy(pDateInfos, 0, dateInfos, 0, position - 1);
                 System.arraycopy(pDescriptions, 0, descriptions, 0, position - 1);
                 System.arraycopy(pTypes, 0, types, 0, position - 1);
                 System.arraycopy(pTitles, position, titles, position - 1, pTitles.length - position);
-                System.arraycopy(pDueDates, position, dueDates, position - 1, pDueDates.length - position);
+                System.arraycopy(pDateInfos, position, dateInfos, position - 1, pDateInfos.length - position);
                 System.arraycopy(pDescriptions, position, descriptions, position - 1, pDescriptions.length - position);
                 System.arraycopy(pTypes, position, types, position - 1, pTypes.length - position);
 
                 pTitles = titles;
-                pDueDates = dueDates;
+                pDateInfos = dateInfos;
                 pDescriptions = descriptions;
                 pTypes = types;
 
                 HomeFragment.pDateInfo.remove(position - 1);
                 HomeFragment.pTitles.remove(position - 1);
-                HomeFragment.pDueDates.remove(position - 1);
                 HomeFragment.pDescriptions.remove(position - 1);
                 HomeFragment.pTypes.remove(position - 1);
             } else {
                 String[] titles = new String[uTitles.length - 1];
-                String[] dueDates = new String[uDueDates.length - 1];
+                DateInfo[] dateInfos = new DateInfo[uDateInfos.length - 1];
                 String[] descriptions = new String[uDescriptions.length - 1];
                 int[] types = new int[uTypes.length - 1];
 
                 System.arraycopy(uTitles, 0, titles, 0, position - pTitles.length - 2);
-                System.arraycopy(uDueDates, 0, dueDates, 0, position - pTitles.length - 2);
+                System.arraycopy(uDateInfos, 0, dateInfos, 0, position - pTitles.length - 2);
                 System.arraycopy(uDescriptions, 0, descriptions, 0, position - pTitles.length - 2);
                 System.arraycopy(uTypes, 0, types, 0, position - pTitles.length - 2);
                 System.arraycopy(uTitles, position - pTitles.length - 1, titles, position - pTitles.length - 2,
                         uTitles.length - (position - pTitles.length - 1));
-                System.arraycopy(uDueDates, position - pTitles.length - 1, dueDates, position - pTitles.length - 2,
-                        uDueDates.length - (position - pDueDates.length - 1));
+                System.arraycopy(uDateInfos, position - pTitles.length - 1, dateInfos, position - pTitles.length - 2,
+                        uDateInfos.length - (position - uDateInfos.length - 1));
                 System.arraycopy(uDescriptions, position - pTitles.length - 1, descriptions, position - pTitles.length - 2,
                         uDescriptions.length - (position - pDescriptions.length - 1));
                 System.arraycopy(uTypes, position - pTitles.length - 1, types, position - pTitles.length - 2,
                         uTypes.length - (position - pTypes.length - 1));
 
                 uTitles = titles;
-                uDueDates = dueDates;
+                uDateInfos = dateInfos;
                 uDescriptions = descriptions;
                 uTypes = types;
 
                 HomeFragment.uDateInfo.remove(position - (pTitles.length + 2));
                 HomeFragment.uTitles.remove(position - (pTitles.length + 2));
-                HomeFragment.uDueDates.remove(position - (pTitles.length + 2));
                 HomeFragment.uDescriptions.remove(position - (pTitles.length + 2));
                 HomeFragment.uTypes.remove(position - (pTitles.length + 2));
             }
@@ -204,16 +202,16 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         }
     }
 
-    public AssignmentRecyclerAdapter(Context context, String[] pTitles, String[] pDueDates, String[] pDescriptions, int[] pTypes,
-                                     String[] uTitles, String[] uDueDates, String[] uDescriptions, int[] uTypes) {
+    public AssignmentRecyclerAdapter(Context context, String[] pTitles, DateInfo[] pDateInfos, String[] pDescriptions, int[] pTypes,
+                                     String[] uTitles, DateInfo[] uDateInfos, String[] uDescriptions, int[] uTypes) {
 
         this.context = context;
         this.pTitles = pTitles;
-        this.pDueDates = pDueDates;
+        this.pDateInfos = pDateInfos;
         this.pDescriptions = pDescriptions;
         this.pTypes = pTypes;
         this.uTitles = uTitles;
-        this.uDueDates = uDueDates;
+        this.uDateInfos = uDateInfos;
         this.uDescriptions = uDescriptions;
         this.uTypes = uTypes;
     }
@@ -269,7 +267,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
             if(position <= pTitles.length) {
                 assignmentHolder.tvTitle.setText(pTitles[position - 1]);
-                assignmentHolder.tvDueDate.setText(pDueDates[position - 1]);
+                assignmentHolder.tvDueDate.setText(pDateInfos[position - 1].getDate());
                 assignmentHolder.tvDescription.setText(pDescriptions[position - 1]);
                 assignmentHolder.ivType.setImageResource(pTypes[position - 1]);
 
@@ -284,7 +282,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 }
             } else {
                 assignmentHolder.tvTitle.setText(uTitles[position - pTitles.length - 2]);
-                assignmentHolder.tvDueDate.setText(uDueDates[position - pTitles.length - 2]);
+                assignmentHolder.tvDueDate.setText(uDateInfos[position - pTitles.length - 2].getDate());
                 assignmentHolder.tvDescription.setText(uDescriptions[position - pTitles.length - 2]);
                 assignmentHolder.ivType.setImageResource(uTypes[position - pTitles.length - 2]);
 
@@ -317,6 +315,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     public void onRowMoved(AssignmentViewHolder holder, int fromPosition, int toPosition) {
         boolean inPriority = pTitles.length > 0;
         boolean inUpcoming = uTitles.length > 0;
+
+        System.out.println("On Row Moved");
 
         if(fromPosition < toPosition) {
             for(int i = fromPosition; i < toPosition; i++) {
@@ -353,13 +353,11 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         if(fromPosition < toPosition && toPosition == HomeFragment.pTitles.size() + 1) {
             if(!Utility.inPriorityRange(HomeFragment.pDateInfo.get(fromPosition - 1), context)) {
                 HomeFragment.uTitles.add(0, HomeFragment.pTitles.get(fromPosition - 1));
-                HomeFragment.uDueDates.add(0, HomeFragment.pDueDates.get(fromPosition - 1));
                 HomeFragment.uDescriptions.add(0, HomeFragment.pDescriptions.get(fromPosition - 1));
                 HomeFragment.uTypes.add(0, HomeFragment.pTypes.get(fromPosition - 1));
                 HomeFragment.uDateInfo.add(0, HomeFragment.pDateInfo.get(fromPosition - 1));
 
                 HomeFragment.pTitles.remove(fromPosition - 1);
-                HomeFragment.pDueDates.remove(fromPosition - 1);
                 HomeFragment.pDescriptions.remove(fromPosition - 1);
                 HomeFragment.pTypes.remove(fromPosition - 1);
                 HomeFragment.pDateInfo.remove(fromPosition - 1);
@@ -368,19 +366,16 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             }
         } else if(fromPosition > toPosition && toPosition == HomeFragment.pTitles.size() + 1) {
             HomeFragment.pTitles.add(HomeFragment.uTitles.get(0));
-            HomeFragment.pDueDates.add(HomeFragment.uDueDates.get(0));
             HomeFragment.pDescriptions.add(HomeFragment.uDescriptions.get(0));
             HomeFragment.pTypes.add(HomeFragment.uTypes.get(0));
             HomeFragment.pDateInfo.add(HomeFragment.uDateInfo.get(0));
 
             HomeFragment.uTitles.remove(0);
-            HomeFragment.uDueDates.remove(0);
             HomeFragment.uDescriptions.remove(0);
             HomeFragment.uTypes.remove(0);
             HomeFragment.uDateInfo.remove(0);
         } else if (toPosition <= pTitles.length && toPosition > 0 && HomeFragment.pTitles.size() > 1 ) {
             Collections.swap(HomeFragment.pTitles, fromPosition - 1, toPosition - 1);
-            Collections.swap(HomeFragment.pDueDates, fromPosition - 1, toPosition - 1);
             Collections.swap(HomeFragment.pDescriptions, fromPosition - 1, toPosition - 1);
             Collections.swap(HomeFragment.pTypes, fromPosition - 1, toPosition - 1);
             Collections.swap(HomeFragment.pDateInfo, fromPosition - 1, toPosition - 1);
@@ -388,18 +383,17 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 toPosition >  HomeFragment.pTitles.size() + 2 && HomeFragment.uTitles.size() > 1) {
 
             Collections.swap(HomeFragment.uTitles, fromPosition - HomeFragment.pTitles.size() - 2, toPosition - HomeFragment.pTitles.size() - 2);
-            Collections.swap(HomeFragment.uDueDates, fromPosition - HomeFragment.pTitles.size() - 2, toPosition - HomeFragment.pTitles.size() - 2);
             Collections.swap(HomeFragment.uDescriptions, fromPosition - HomeFragment.pTitles.size() - 2, toPosition - HomeFragment.pTitles.size() - 2);
             Collections.swap(HomeFragment.uTypes, fromPosition - HomeFragment.pTitles.size() - 2, toPosition - HomeFragment.pTitles.size() - 2);
             Collections.swap(HomeFragment.uDateInfo, fromPosition - HomeFragment.pTitles.size() - 2, toPosition - HomeFragment.pTitles.size() - 2);
         }
 
         pTitles = HomeFragment.pTitles.toArray(new String[HomeFragment.pTitles.size()]);
-        pDueDates = HomeFragment.pDueDates.toArray(new String[HomeFragment.pDueDates.size()]);
+        pDateInfos = HomeFragment.pDateInfo.toArray(new DateInfo[HomeFragment.pDateInfo.size()]);
         pDescriptions = HomeFragment.pDescriptions.toArray(new String[HomeFragment.pDescriptions.size()]);
         pTypes = Utility.toIntArray(HomeFragment.pTypes);
         uTitles = HomeFragment.uTitles.toArray(new String[HomeFragment.uTitles.size()]);
-        uDueDates = HomeFragment.uDueDates.toArray(new String[HomeFragment.uDueDates.size()]);
+        uDateInfos = HomeFragment.uDateInfo.toArray(new DateInfo[HomeFragment.uDateInfo.size()]);
         uDescriptions = HomeFragment.uDescriptions.toArray(new String[HomeFragment.uDescriptions.size()]);
         uTypes = Utility.toIntArray(HomeFragment.uTypes);
 
