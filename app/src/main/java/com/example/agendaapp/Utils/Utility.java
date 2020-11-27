@@ -12,7 +12,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class Utility {
     public final static int SERIALIZATION_U_DESCRIPTION = 6;
     public final static int SERIALIZATION_U_DATE_INFO = 7;
 
-    public final static int POSITION_ART = 0;
+    public final static int POSITION_ART = 0; // TODO : hashmap instead?
     public final static int POSITION_HISTORY = 1;
     public final static int POSITION_LANGUAGE = 2;
     public final static int POSITION_LITERATURE = 3;
@@ -71,6 +70,11 @@ public class Utility {
     public final static int SAME = 1;
     public final static int CLOSER = 2;
 
+    /**
+     * Hide keyboard from phone
+     *
+     * @param activity Activity which holds the keyboard
+     */
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager manager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 
@@ -79,6 +83,13 @@ public class Utility {
         } catch(Exception e) {}
     }
 
+    /**
+     * Gets the DateInfo for the current day + inDaysTime.
+     *
+     * @param context Context
+     * @param inDaysTime Days after the current day
+     * @return Returns a DateInfo object which holds the requested date in the local date format
+     */
     public static DateInfo getDay (Context context, int inDaysTime) {
         LocalDate localDate = LocalDate.now();
         int day = localDate.getDayOfMonth() + inDaysTime;
@@ -88,6 +99,15 @@ public class Utility {
         return getLocalDateFormat(context, day, month, year);
     }
 
+    /**
+     * Gets the date format of the user's area (ex. mm-dd-yyyy)
+     *
+     * @param context Context
+     * @param day Day of the month
+     * @param month Month (0 - 11)
+     * @param year Year
+     * @return Returns a DateInfo object localized for the user's area
+     */
     public static DateInfo getLocalDateFormat(Context context, int day, int month, int year) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Date parsedDate = null;
@@ -104,7 +124,16 @@ public class Utility {
         return info;
     }
 
-    // compares di1 to di2
+    /**
+     * Compares the dates of di1 to di2 in terms of di1.
+     *
+     * @param di1 Main DateInfo
+     * @param di2 Second DateInfo (will be compared against di1)
+     * @return Returns 0 (further), 1 (same), or 2 (closer) depending on how di1 compares to di2.
+     * 0 - di1 is further than di2
+     * 1 - di1 is the same as di2
+     * 2 - di1 is closer than di2
+     */
     public static int compareDates(DateInfo di1, DateInfo di2) {
         if(di1.getYear() > di2.getYear()) {
             return FURTHER;
@@ -127,14 +156,35 @@ public class Utility {
         }
     }
 
+    /**
+     * Checks if a date is should be placed in priority (if current day or day after)
+     *
+     * @param dateInfo Date to be checked
+     * @param context Context
+     * @return Returns true or false whether or not the date given is in the priority range
+     */
     public static boolean inPriorityRange(DateInfo dateInfo, Context context) {
         return compareDates(dateInfo, getDay(context, 2)) == CLOSER;
     }
 
+    /**
+     * Returns whether or an assignment should be marked as late (date has passed the current date)
+     *
+     * @param dateInfo Assignment DateInfo
+     * @param context Context
+     * @return Returns true or false depending on whether or not the due date of the assignment has
+     * passed
+     */
     public static boolean isLate(DateInfo dateInfo, Context context) {
         return compareDates(dateInfo, getDay(context, 0)) == CLOSER;
     }
 
+    /**
+     * Gets the spinner position of a subject based on the drawable ID
+     *
+     * @param drawableId Subject drawable ID
+     * @return Returns an int representing the index of the subject in the spinner
+     */
     public static int getSubjectPositionFromId(int drawableId) {
         switch(drawableId) {
             case R.drawable.ic_brush_black_24dp :
@@ -158,6 +208,13 @@ public class Utility {
         }
     }
 
+    /**
+     * Gets the subject's spinner index based on the subject title (ex. Math, Other)
+     *
+     * @param subject The subject title
+     * @param context Context
+     * @return Returns the subject's spinner index
+     */
     public static int getSubjectPositionFromTitle(String subject, Context context) {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 
@@ -170,10 +227,24 @@ public class Utility {
         return -1;
     }
 
+    /**
+     * Gets the subject title from its spinner index
+     *
+     * @param position Spinner index of the subject
+     * @param context Context
+     * @return Returns a String holding the subject title (ex. Math, Other)
+     */
     public static String getSubjectFromPosition(int position, Context context) {
         return context.getResources().getStringArray(R.array.subject_array)[position];
     }
 
+    /**
+     * Gets the subject title from the subject's drawable ID
+     *
+     * @param id Subject's drawable ID
+     * @param context Context
+     * @return Returns a String containing the subject title (ex. Math, Other)
+     */
     public static String getSubjectFromId(int id, Context context) {
         switch(id) {
             case R.drawable.ic_brush_black_24dp :
@@ -197,16 +268,13 @@ public class Utility {
         }
     }
 
-//    public static String[] getDueDates(ArrayList<DateInfo> dateInfos) {
-//        String[] dueDates = new String[dateInfos.size()];
-//
-//        for(int i = 0; i < dateInfos.size(); i++) {
-//            dueDates[i] = dateInfos.get(i).getDate();
-//        }
-//
-//        return dueDates;
-//    }
-
+    /**
+     * Gets the respective color form the given drawable ID
+     *
+     * @param context Context
+     * @param drawable Subject drawable ID
+     * @return Returns the color to go along with the subject in the form 0xAARRGGBB
+     */
     public static int getColor(Context context, int drawable) {
         int position = getSubjectPositionFromId(drawable);
 
@@ -232,6 +300,12 @@ public class Utility {
         return 0;
     }
 
+    /**
+     * Converts a List<Integer> to an int[]
+     *
+     * @param list The list to be converted
+     * @return Returns the int[] converted fro the List<Integer>
+     */
     public static int[] toIntArray(List<Integer> list) {
         int[] array = new int[list.size()];
 
@@ -242,6 +316,13 @@ public class Utility {
         return array;
     }
 
+    /**
+     * Converts dp to px
+     *
+     * @param context Context
+     * @param dp dp to be converted
+     * @return Returns the px equivalent of the dp value given
+     */
     public static int toPixels(Context context, int dp) {
         float scale = context.getResources().getDisplayMetrics().density;
 

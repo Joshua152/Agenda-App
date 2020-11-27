@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Resize {
-    private Activity activity;
     private ViewGroup decorView;
     private ViewGroup contentView;
 
@@ -19,7 +18,6 @@ public class Resize {
     private int currentHeight;
 
     public Resize(Activity activity) {
-        this.activity = activity;
         decorView = (ViewGroup) activity.getWindow().getDecorView();
         contentView = decorView.findViewById(Window.ID_ANDROID_CONTENT);
 

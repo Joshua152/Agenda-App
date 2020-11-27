@@ -41,7 +41,7 @@
     <!--View Fragment-->
     <string name="edit">Edit</string>
 
-    <string name="due_date">Title: %s</string>
+    <string name="due_date">Due Date: %s</string>
     <string name="subject">Subject: %s</string>
 
     <!--Shared Element Transition Names-->

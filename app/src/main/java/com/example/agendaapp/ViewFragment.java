@@ -162,6 +162,7 @@ public class ViewFragment extends Fragment {
         bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY, title);
         bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, subject);
         bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, description);
+        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, dateInfo.getDate());
         bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, dateInfo.getDay());
         bundle.putInt(Utility.EDIT_BUNDLE_MONTH_KEY, dateInfo.getMonth());
         bundle.putInt(Utility.EDIT_BUNDLE_YEAR_KEY, dateInfo.getYear());

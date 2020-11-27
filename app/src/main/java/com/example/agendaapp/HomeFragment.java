@@ -31,7 +31,7 @@ public class HomeFragment extends Fragment {
 
     CreateFragment createFragment;
 
-    static Context context;
+    static Context context; // TODO : MAKE CONTEXT NON-STATIC
 
     Toolbar toolbar;
     FloatingActionButton fab;
@@ -152,6 +152,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void update() {
+        // Move from upcoming to priority if necessary
         for(int i = 0; i < uTitles.size(); i++) {
             if(Utility.inPriorityRange(uDateInfo.get(i), context)) {
                 addToPriority(uTitles.get(i), uDescriptions.get(i), uTypes.get(i), uDateInfo.get(i));
@@ -191,6 +192,7 @@ public class HomeFragment extends Fragment {
         int originalPosition = bundle.getInt(Utility.EDIT_BUNDLE_POSITION_KEY, -1);
         boolean createNew = bundle.getBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, true);
 
+        // If do not need to create a new assignment (assignment is being moved)
         if(!createNew) {
             if(originalPosition <= pTitles.size()) {
                 removeFromPriority(originalPosition);
@@ -318,6 +320,9 @@ public class HomeFragment extends Fragment {
         Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
     }
 
+    /*
+      For Fragment communication
+     */
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {
