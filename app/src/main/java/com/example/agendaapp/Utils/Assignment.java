@@ -13,7 +13,9 @@ package com.example.agendaapp.Utils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Assignment implements Parcelable {
+import java.io.Serializable;
+
+public class Assignment implements Parcelable, Serializable {
 
     // Assignment due date
     private DateInfo dateInfo;

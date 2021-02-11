@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
+import com.example.agendaapp.Utils.Assignment;
 import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
 import com.example.agendaapp.Utils.Resize;
@@ -35,34 +36,34 @@ import com.google.android.material.textfield.TextInputLayout;
 
 public class CreateFragment extends Fragment {
 
-    Context context;
+    private Context context;
 
-    AppBarLayout appBarLayout;
-    Toolbar toolbar;
-    LinearLayout linearLayout;
-    ScrollView scrollView;
-    ConstraintLayout constraintLayout;
-    LinearLayout llDescription;
-    TextInputLayout tiTitle;
-    TextInputLayout tiDescription;
-    TextInputEditText etTitle;
-    TextInputEditText etDescription;
-    TextView tvDueDate;
-    ImageButton ibDate;
-    Spinner sSubjects;
+    private AppBarLayout appBarLayout;
+    private Toolbar toolbar;
+    private LinearLayout linearLayout;
+    private ScrollView scrollView;
+    private ConstraintLayout constraintLayout;
+    private LinearLayout llDescription;
+    private TextInputLayout tiTitle;
+    private TextInputLayout tiDescription;
+    private TextInputEditText etTitle;
+    private TextInputEditText etDescription;
+    private TextView tvDueDate;
+    private ImageButton ibDate;
+    private Spinner sSubjects;
 
-    MenuItem star;
+    private MenuItem star;
 
-    HomeFragment homeFragment;
+    private HomeFragment homeFragment;
 
-    DateInfo currentDateInfo;
-    Resize resize;
+    private DateInfo currentDateInfo;
+    private Resize resize;
 
-    int descriptionMinHeight;
-    int originalContentHeight;
+    private int descriptionMinHeight;
+    private int originalContentHeight;
 
-    boolean priority;
-    boolean pressedPriority;
+    private boolean priority;
+    private boolean pressedPriority;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_create, container, false);
@@ -206,16 +207,16 @@ public class CreateFragment extends Fragment {
 
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putString(Utility.EDIT_BUNDLE_TITLE_KEY,
-                !etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
-        bundle.putString(Utility.EDIT_BUNDLE_SUBJECT_KEY, sSubjects.getSelectedItem().toString());
-        bundle.putString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY, etDescription.getText().toString());
-        bundle.putString(Utility.EDIT_BUNDLE_DUE_DATE_KEY, tvDueDate.getText().toString());
-        bundle.putInt(Utility.EDIT_BUNDLE_DAY_KEY, currentDateInfo.getDay());
-        bundle.putInt(Utility.EDIT_BUNDLE_MONTH_KEY, currentDateInfo.getMonth());
-        bundle.putInt(Utility.EDIT_BUNDLE_YEAR_KEY, currentDateInfo.getYear());
-        bundle.putBoolean(Utility.EDIT_BUNDLE_PRIORITY_KEY, priority);
-        bundle.putBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, true);
+
+        Assignment assignment = new Assignment();
+        assignment.setTitle(!etTitle.getText().toString().equals("") ? etTitle.getText().toString() : getString(R.string.untitled));
+        assignment.setSubject(sSubjects.getSelectedItem().toString());
+        assignment.setDescription(etDescription.getText().toString());
+        assignment.setDateInfo(currentDateInfo);
+
+        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
+        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
+        bundle.putBoolean(Utility.CREATE_NEW_KEY, true);
 
         getParentFragmentManager().setFragmentResult(Utility.HOME_RESULT_KEY, bundle);
     }
@@ -257,6 +258,9 @@ public class CreateFragment extends Fragment {
                 return true;
             case R.id.create_save :
                 save();
+
+                Utility.hideSoftKeyboard(getActivity());
+
                 FragmentTransaction saveTransaction = getParentFragmentManager().beginTransaction();
                 saveTransaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
                 saveTransaction.replace(R.id.fragment_container, homeFragment);
@@ -266,11 +270,10 @@ public class CreateFragment extends Fragment {
             case R.id.create_star :
                 pressedPriority = true;
 
-                if(priority) {
+                if(priority)
                     item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
-                } else {
+                else
                     item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
-                }
 
                 ((AnimatedVectorDrawableCompat) item.getIcon()).start();
 

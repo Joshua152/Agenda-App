@@ -18,8 +18,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.agendaapp.Utils.Assignment;
 import com.example.agendaapp.Utils.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
+import com.example.agendaapp.Utils.ListModerator;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -29,30 +31,25 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
-    CreateFragment createFragment;
+    private CreateFragment createFragment;
 
-    static Context context; // TODO : MAKE CONTEXT NON-STATIC
+    private Context context;
 
-    Toolbar toolbar;
-    FloatingActionButton fab;
-    LinearLayout llRoot;
+    private Toolbar toolbar;
+    private FloatingActionButton fab;
+    private LinearLayout llRoot;
 
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
 
-    RecyclerView.LayoutManager recyclerViewLayoutManager;
-    AssignmentRecyclerAdapter recyclerViewAdapter;
+    private RecyclerView.LayoutManager recyclerViewLayoutManager;
+    private AssignmentRecyclerAdapter recyclerViewAdapter;
 
-    ItemTouchHelper.Callback callback;
-    ItemTouchHelper itemTouchHelper;
+    private ItemTouchHelper.Callback callback;
+    private ItemTouchHelper itemTouchHelper;
 
-    static ArrayList<DateInfo> pDateInfo;
-    static ArrayList<DateInfo> uDateInfo;
-    static ArrayList<String> pTitles;
-    static ArrayList<String> pDescriptions;
-    static ArrayList<String> uTitles;
-    static ArrayList<String> uDescriptions;
-    static ArrayList<Integer> pTypes;
-    static ArrayList<Integer> uTypes;
+    public static ArrayList<Assignment> priority;
+    public static ArrayList<Assignment> upcoming;
+    public static ListModerator<Assignment> assignmentModerator;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
@@ -97,8 +94,6 @@ public class HomeFragment extends Fragment {
 
         initArrays();
 
-        update();
-
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
         llRoot = (LinearLayout) view.findViewById(R.id.home_ll_root);
@@ -115,30 +110,22 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(recyclerViewLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
+
+        update();
     }
 
     private void initArrays() {
         ArrayList[] serialized = (ArrayList[]) Serialize.deserialize(context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
 
         if(serialized != null) {
-            pTitles = serialized[Utility.SERIALIZATION_P_TITLES];
-            pTypes = serialized[Utility.SERIALIZATION_P_SUBJECT];
-            pDescriptions = serialized[Utility.SERIALIZATION_P_DESCRIPTION];
-            pDateInfo = serialized[Utility.SERIALIZATION_P_DATE_INFO];
-            uTitles = serialized[Utility.SERIALIZATION_U_TITLES];
-            uTypes = serialized[Utility.SERIALIZATION_U_SUBJECT];
-            uDescriptions = serialized[Utility.SERIALIZATION_U_DESCRIPTION];
-            uDateInfo = serialized[Utility.SERIALIZATION_U_DATE_INFO];
+            priority = serialized[Utility.SERIALIZATION_PRIORITY];
+            upcoming = serialized[Utility.SERIALIZATION_UPCOMING];
         } else {
-            pDateInfo = new ArrayList<DateInfo>();
-            uDateInfo = new ArrayList<DateInfo>();
-            pTitles = new ArrayList<String>();
-            pDescriptions = new ArrayList<String>();
-            uTitles = new ArrayList<String>();
-            uDescriptions = new ArrayList<String>();
-            pTypes = new ArrayList<Integer>();
-            uTypes = new ArrayList<Integer>();
+            priority = new ArrayList<Assignment>();
+            upcoming = new ArrayList<Assignment>();
         }
+
+        assignmentModerator = new ListModerator<Assignment>(priority, upcoming);
     }
 
     private void initListeners() {
@@ -153,103 +140,60 @@ public class HomeFragment extends Fragment {
 
     private void update() {
         // Move from upcoming to priority if necessary
-        for(int i = 0; i < uTitles.size(); i++) {
-            if(Utility.inPriorityRange(uDateInfo.get(i), context)) {
-                addToPriority(uTitles.get(i), uDescriptions.get(i), uTypes.get(i), uDateInfo.get(i));
-                removeFromUpcoming(i + pTitles.size() + 2);
-            }
+        for(int i = 0; i < upcoming.size(); i++) {
+            if(Utility.inPriorityRange(upcoming.get(i).getDateInfo(), context))
+                addToPriority(upcoming.get(i));
         }
     }
 
     private void setArrayAdapter() {
-        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, pTitles.toArray(new String[pTitles.size()]),
-                pDateInfo.toArray(new DateInfo[pDateInfo.size()]), pDescriptions.toArray(new String[pDescriptions.size()]),
-                Utility.toIntArray(pTypes), uTitles.toArray(new String[uTitles.size()]), uDateInfo.toArray(new DateInfo[uDateInfo.size()]),
-                uDescriptions.toArray(new String[uDescriptions.size()]), Utility.toIntArray(uTypes));
+        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
     }
 
     private void updateArrayAdapter() {
-        recyclerViewAdapter.pTitles = pTitles.toArray(new String[pTitles.size()]);
-        recyclerViewAdapter.pDateInfos = pDateInfo.toArray(new DateInfo[pDateInfo.size()]);
-        recyclerViewAdapter.pDescriptions = pDescriptions.toArray(new String[pDescriptions.size()]);
-        recyclerViewAdapter.pTypes = Utility.toIntArray(pTypes);
-        recyclerViewAdapter.uTitles = uTitles.toArray(new String[uTitles.size()]);
-        recyclerViewAdapter.uDateInfos = uDateInfo.toArray(new DateInfo[uDateInfo.size()]);
-        recyclerViewAdapter.uDescriptions = uDescriptions.toArray(new String[uDescriptions.size()]);
-        recyclerViewAdapter.uTypes = Utility.toIntArray(uTypes);
+        recyclerViewAdapter.setArrays(priority, upcoming);
     }
 
     private void save(Bundle bundle) {
-        String title = bundle.getString(Utility.EDIT_BUNDLE_TITLE_KEY);
-        String subject = bundle.getString(Utility.EDIT_BUNDLE_SUBJECT_KEY);
-        String description = bundle.getString(Utility.EDIT_BUNDLE_DESCRIPTION_KEY);
-        DateInfo dateInfo = new DateInfo(bundle.getString(Utility.EDIT_BUNDLE_DUE_DATE_KEY),
-                bundle.getInt(Utility.EDIT_BUNDLE_DAY_KEY), bundle.getInt(Utility.EDIT_BUNDLE_MONTH_KEY),
-                bundle.getInt(Utility.EDIT_BUNDLE_YEAR_KEY));
+        Assignment assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
 
-        boolean priority = bundle.getBoolean(Utility.EDIT_BUNDLE_PRIORITY_KEY);
+        boolean isPriority = bundle.getBoolean(Utility.PRIORITY_KEY);
 
-        int originalPosition = bundle.getInt(Utility.EDIT_BUNDLE_POSITION_KEY, -1);
-        boolean createNew = bundle.getBoolean(Utility.EDIT_BUNDLE_CREATE_NEW_KEY, true);
+        int originalPosition = bundle.getInt(Utility.POSITION_KEY, -1);
+        boolean createNew = bundle.getBoolean(Utility.CREATE_NEW_KEY, true);
+
+        System.out.println((assignmentModerator == null) + " " + assignmentModerator.getList(0).size() + " " + createNew + " " + originalPosition);
+
+        System.out.println(priority);
 
         // If do not need to create a new assignment (assignment is being moved)
-        if(!createNew) {
-            if(originalPosition <= pTitles.size()) {
-                removeFromPriority(originalPosition);
-            } else {
-                removeFromUpcoming(originalPosition);
-            }
-        }
+        if(!createNew)
+            assignmentModerator.removeOverall(originalPosition);
 
-        String[] sArray = getResources().getStringArray(R.array.subject_array);
+        System.out.println(priority);
 
-        int subjectDrawable = 0;
+        if(isPriority)
+            addToPriority(assignment);
+        else
+            addToUpcoming(assignment);
 
-        if(subject.equals(sArray[0])) { // Art
-            subjectDrawable = R.drawable.ic_brush_black_24dp;
-        } else if(subject.equals(sArray[1])) { // History
-            subjectDrawable = R.drawable.ic_history_edu_black_24dp;
-        } else if(subject.equals(sArray[2])) { // Language
-            subjectDrawable = R.drawable.ic_language_black_24dp;
-        } else if(subject.equals(sArray[3])) { // Literature
-            subjectDrawable = R.drawable.ic_book_black_24dp;
-        } else if(subject.equals(sArray[4])) { // Math
-            subjectDrawable = R.drawable.ic_calculate_black_24dp;
-        } else if(subject.equals(sArray[5])) { // Music
-            subjectDrawable = R.drawable.ic_music_note_black_24dp;
-        } else if(subject.equals(sArray[6])) { // Science
-            subjectDrawable = R.drawable.ic_science_black_24dp;
-        } else if(subject.equals(sArray[7])) { // Other
-            subjectDrawable = R.drawable.ic_miscellaneous_services_black_24dp;
-        }
-
-        if(priority) {
-            addToPriority(title, description, subjectDrawable, dateInfo);
-        } else {
-            addToUpcoming(title, description, subjectDrawable, dateInfo);
-        }
-
-        serializeArrays();
+        Utility.serializeArrays(context, priority, upcoming);
 
         updateArrayAdapter();
     }
 
-    private void addToPriority(String title, String description, int subjectDrawable, DateInfo dateInfo) {
-        for(int i = 0; i < pDateInfo.size(); i++) {
-            DateInfo fromArray = pDateInfo.get(i);
+    private void addToPriority(Assignment assignment) {
+        for(int i = 0; i < priority.size(); i++) {
+            DateInfo fromArray = priority.get(i).getDateInfo();
 
             boolean moved = false;
 
-            if(i != pDateInfo.size() - 1) {
-                moved = Utility.compareDates(fromArray, pDateInfo.get(i + 1)) == Utility.FURTHER;
+            if(i != priority.size() - 1) {
+                moved = Utility.compareDates(fromArray, priority.get(i + 1).getDateInfo()) == Utility.FURTHER;
             }
 
-            if(!moved && Utility.compareDates(fromArray, dateInfo) == Utility.FURTHER) {
-                pDateInfo.add(i, dateInfo);
-
-                pTitles.add(i, title);
-                pDescriptions.add(i, description);
-                pTypes.add(i, subjectDrawable);
+            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == Utility.FURTHER) {
+                priority.add(i, assignment);
 
                 recyclerView.scrollToPosition(i + 1);
 
@@ -257,67 +201,28 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        pDateInfo.add(dateInfo);
-        pTitles.add(title);
-        pDescriptions.add(description);
-        pTypes.add(subjectDrawable);
+        priority.add(assignment);
     }
 
-    private void addToUpcoming(String title, String description, int subjectDrawable, DateInfo dateInfo) {
-        for(int i = 0; i < uDateInfo.size(); i++) {
-            DateInfo fromArray = uDateInfo.get(i);
+    private void addToUpcoming(Assignment assignment) {
+        for(int i = 0; i < upcoming.size(); i++) {
+            DateInfo fromArray = upcoming.get(i).getDateInfo();
 
             boolean moved = false;
 
-            if(i != uDateInfo.size() - 1) {
-                moved = Utility.compareDates(fromArray, uDateInfo.get(i + 1)) == Utility.FURTHER;
-            }
+            if(i != upcoming.size() - 1)
+                moved = Utility.compareDates(fromArray, upcoming.get(i + 1).getDateInfo()) == Utility.FURTHER;
 
-            if(!moved && Utility.compareDates(fromArray, dateInfo) == Utility.FURTHER) {
-                uDateInfo.add(i, dateInfo);
+            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == Utility.FURTHER) {
+                upcoming.add(i, assignment);
 
-                uTitles.add(i, title);
-                uDescriptions.add(i, description);
-                uTypes.add(i, subjectDrawable);
-
-                recyclerView.scrollToPosition(i + pTitles.size() + 2);
+                recyclerView.scrollToPosition(i + priority.size() + 2);
 
                 return;
             }
         }
 
-        uDateInfo.add(dateInfo);
-        uTitles.add(title);
-        uDescriptions.add(description);
-        uTypes.add(subjectDrawable);
-    }
-
-    private void removeFromPriority(int overallPosition) {
-        pDateInfo.remove(overallPosition - 1);
-        pTitles.remove(overallPosition - 1);
-        pDescriptions.remove(overallPosition - 1);
-        pTypes.remove(overallPosition - 1);
-    }
-
-    private void removeFromUpcoming(int overallPosition) {
-        uDateInfo.remove(overallPosition - pTitles.size() - 2);
-        uTitles.remove(overallPosition - pTitles.size() - 2);
-        uDescriptions.remove(overallPosition - pTitles.size() - 2);
-        uTypes.remove(overallPosition - pTitles.size() - 2);
-    }
-
-    public static void serializeArrays() {
-        ArrayList[] serialize = new ArrayList[10];
-        serialize[Utility.SERIALIZATION_P_TITLES] = pTitles;
-        serialize[Utility.SERIALIZATION_P_SUBJECT] = pTypes;
-        serialize[Utility.SERIALIZATION_P_DESCRIPTION] = pDescriptions;
-        serialize[Utility.SERIALIZATION_P_DATE_INFO] = pDateInfo;
-        serialize[Utility.SERIALIZATION_U_TITLES] = uTitles;
-        serialize[Utility.SERIALIZATION_U_SUBJECT] = uTypes;
-        serialize[Utility.SERIALIZATION_U_DESCRIPTION] = uDescriptions;
-        serialize[Utility.SERIALIZATION_U_DATE_INFO] = uDateInfo;
-
-        Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
+        upcoming.add(assignment);
     }
 
     /*

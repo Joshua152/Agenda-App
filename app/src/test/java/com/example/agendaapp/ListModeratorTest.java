@@ -17,44 +17,64 @@ import static org.junit.Assert.*;
 public class ListModeratorTest {
 
     /**
-     * Test for getOverall()
+     * Test for setOverall()
      */
     @Test
-    public void testSetOverall() {
+    public void test_setOverall() {
         ListModerator<String> listModerator = getSampleModerator();
 
-        assertEquals(2, listModerator.setOverall(10, "99"));
-        assertTrue( listModerator.getList(2).equals(new ArrayList<String>(
-                Arrays.asList("99", "22", "23", "24", "25"))));
+        assertEquals(1, listModerator.setOverall(10, "99"));
+        assertTrue(listModerator.getList(1).equals(new ArrayList<String>(
+                Arrays.asList("07", "08", "09", "99", "11"))));
+    }
+
+    /**
+     * Test for removeOverall()
+     */
+    @Test
+    public void test_removeOverall() {
+        ListModerator<String> listModerator = getSampleModerator();
+
+        listModerator.removeOverall(8);
+        assertTrue(listModerator.getList(1).equals(new ArrayList<String>(
+                Arrays.asList("07", "09", "10", "11"))));
     }
 
     /**
      * Test for geOverall()
      */
     @Test
-    public void testGetOverall() {
+    public void test_getOverall() {
         ListModerator<String> listModerator = getSampleModerator();
 
-        assertEquals("25", listModerator.getOverall(14));
+        assertEquals("14", listModerator.getOverall(14));
     }
 
     /**
      * Test for swap()
      */
     @Test
-    public void testSwap() {
+    public void test_swap() {
         ListModerator<String> listModerator = getSampleModerator();
 
-        listModerator.swap(0, 1);
+        listModerator.swap(1, 2);
         listModerator.swap(3, 8);
 
-        System.out.println(listModerator.toString());
-
         assertTrue(listModerator.equals(new ListModerator<String>(
-                new ArrayList<String>(Arrays.asList("02", "01", "03", "14", "05")),
-                new ArrayList<String>(Arrays.asList("11", "12", "13", "04", "15")),
-                new ArrayList<String>(Arrays.asList("21", "22", "23", "24", "25"))
+                new ArrayList<String>(Arrays.asList("02", "01", "08", "04", "05")),
+                new ArrayList<String>(Arrays.asList("07", "03", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16", "17"))
         )));
+    }
+
+    /**
+     * Test for getArrayPosFromOverall()
+     */
+    @Test
+    public void test_getArrayPosFromOverall() {
+        ListModerator<String> listModerator = getSampleModerator();
+
+        assertEquals(4, listModerator.getArrayPosFromOverall(17));
     }
 
     /**
@@ -64,8 +84,8 @@ public class ListModeratorTest {
     private ListModerator<String> getSampleModerator() {
         return new ListModerator<String>(
                 new ArrayList<String>(Arrays.asList("01", "02", "03", "04", "05")),
-                new ArrayList<String>(Arrays.asList("11", "12", "13", "14", "15")),
-                new ArrayList<String>(Arrays.asList("21", "22", "23", "24", "25"))
+                new ArrayList<String>(Arrays.asList("07", "08", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16", "17"))
         );
     }
 }

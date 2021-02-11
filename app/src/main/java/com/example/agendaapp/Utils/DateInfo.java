@@ -15,7 +15,9 @@ package com.example.agendaapp.Utils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class DateInfo implements Parcelable {
+import java.io.Serializable;
+
+public class DateInfo implements Parcelable, Serializable {
 
     // Day of the month of the date
     protected int day;

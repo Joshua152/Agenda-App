@@ -5,6 +5,8 @@
  * to act on them either as if they were separate
  * or combined.
  *
+ * Note: Assumes each list has a header in the RecyclerView
+ *
  * @author Joshua Au
  * @version 1.0
  * @since 11/26/2020
@@ -50,14 +52,29 @@ public class ListModerator<T> {
     public int setOverall(int index, T item) {
         int list = 0;
 
-        while(index >= lists[list].size()) {
-            index -= lists[list].size();
+        while(index > lists[list].size()) {
+            index -= lists[list].size() + 1; // + 1 to account for the header
             list++;
         }
 
-        lists[list].set(index, item);
+        lists[list].set(index - 1, item); // - 1 to account for the header for the list at which the index is
 
         return list;
+    }
+
+    /**
+     * Removes the item at the given overall index
+     * @param index The index of the item to be removed
+     */
+    public void removeOverall(int index) {
+        int list = 0;
+
+        while(index > lists[list].size()) {
+            index -= lists[list].size() + 1; // + 1 to account for header
+            list++;
+        }
+
+        lists[list].remove(index - 1); // - 1 to account for the header for the list at which the index is
     }
 
     /**
@@ -68,12 +85,49 @@ public class ListModerator<T> {
     public T getOverall(int index) {
         int list = 0;
 
-        while(index >= lists[list].size()) {
-            index -= lists[list].size();
+        while(index > lists[list].size()) {
+            index -= lists[list].size() + 1; // + 1 to account for header
             list++;
         }
 
-        return lists[list].get(index);
+        return lists[list].get(index - 1); // - 1 to account for the header for the list at which the index is
+    }
+
+    /**
+     * Gets the item's array position given the overall index. (Accounts for headers)
+     * @param index Overall item index
+     * @return Returns the item's array position
+     */
+    public int getArrayPosFromOverall(int index) {
+        int list = 0;
+
+        while(index > lists[list].size()) {
+            index -= lists[list].size() + 1; // + 1 to account for the header
+            list++;
+        }
+
+        return index - 1; // - 1 to account for the header for the list at which the index is
+    }
+
+    /**
+     * Gets the total number of items in the arrays
+     * @return Returns an int containing the item count
+     */
+    public int getItemCount() {
+        int count = 0;
+
+        for(ArrayList<T> list : lists)
+            count += list.size();
+
+        return count;
+    }
+
+    /**
+     * Returns the number of arrays in the moderator
+     * @return Returns an int containing the number of arrays
+     */
+    public int lists() {
+        return lists.length;
     }
 
     /**
@@ -85,19 +139,14 @@ public class ListModerator<T> {
         return lists[index];
     }
 
-    @Override
-    public String toString() {
-        String converted = "";
-
-        for(int i = 0; i < lists.length; i++)
-            converted += (lists[i].toString() + "\n");
-
-        return converted;
-    }
-
+    /**
+     * Overriding equals(). Compares underlying arrays.
+     * @param obj The object to compare to this
+     * @return Returns true if this and obj's underlying arrays have the same values
+     */
     @Override
     public boolean equals(Object obj) {
-        if(! (obj instanceof ListModerator))
+        if(!(obj instanceof ListModerator))
             return false;
 
         for(int i = 0; i < lists.length; i++) {
@@ -106,5 +155,20 @@ public class ListModerator<T> {
         }
 
         return true;
+    }
+
+    /**
+     * Overriding toString()
+     * @return Returns the ListModerator in the form of a String (all underlying
+     * lists are printed out)
+     */
+    @Override
+    public String toString() {
+        String converted = "";
+
+        for(int i = 0; i < lists.length; i++)
+            converted += (lists[i].toString() + "\n");
+
+        return converted;
     }
 }

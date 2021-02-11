@@ -10,9 +10,9 @@ import java.util.Calendar;
 
 public class DatePickerFragment extends DialogFragment{
 
-    DatePickerDialog.OnDateSetListener listener;
+    private DatePickerDialog.OnDateSetListener listener;
 
-    DateInfo dateInfo;
+    private DateInfo dateInfo;
 
     public DatePickerFragment(DatePickerDialog.OnDateSetListener listener) {
         this.listener = listener;

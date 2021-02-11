@@ -20,7 +20,9 @@ public class Serialize {
 
             outputStream.close();
             file.close();
-        } catch(IOException e){}
+        } catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     public static Object deserialize(String fileName) {
