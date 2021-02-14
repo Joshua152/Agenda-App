@@ -1,3 +1,14 @@
+/**
+ * This class is for the RecyclerAdapter. The adapter has a ViewHolder to
+ * represent an assignment. There are also ViewHolders for a header (priority,
+ * upcoming) and for a spacer at the bottom to make sure that the last assignment
+ * is not covered up by the bottom app bar.
+ *
+ * @author Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp;
 
 import android.content.Context;
@@ -32,16 +43,19 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     private final static int TYPE_ASSIGNMENT = 1;
     private final static int TYPE_SPACER = 2;
 
+    // Context of the RecyclerView
     private Context context;
 
-    private RecyclerView recyclerView;
-
-    //p : priority | u : upcoming
-
+    // ListModerator for the ArrayLists
     private ListModerator<Assignment> moderator;
+    // ArrayList of priority assignments
     private ArrayList<Assignment> priority;
+    // ArrayList of upcoming assignmnts
     private ArrayList<Assignment> upcoming;
 
+    /**
+     * ViewHolder for the header (Priority, Upcoming)
+     */
     private class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvHeader;
@@ -53,6 +67,9 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         }
     }
 
+    /**
+     * ViewHolder for an assignment (public for ItemMoveCallback)
+     */
     public class AssignmentViewHolder extends RecyclerView.ViewHolder {
 
         private FrameLayout frameIconBackground;
@@ -79,6 +96,9 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             initListeners();
         }
 
+        /**
+         * Initializes the listeners for the CardView and for the checkmark button
+         */
         private void initListeners() {
             cardView.setOnClickListener(view -> {
                 ViewFragment viewFragment;
@@ -114,6 +134,10 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             });
         }
 
+        /**
+         * Removes an item from the ArrayList
+         * @param position The position of this assignment
+         */
         private void removeItem(int position) {
             moderator.removeOverall(position);
 
@@ -121,17 +145,22 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         }
     }
 
-    class SpacerViewHolder extends RecyclerView.ViewHolder {
-
-        private View spacer;
+    /**
+     * ViewHolder for a spacer (separation view)
+     */
+    private class SpacerViewHolder extends RecyclerView.ViewHolder {
 
         public SpacerViewHolder(View itemView) {
             super(itemView);
-
-            spacer = (View) itemView.findViewById(R.id.spacer);
         }
     }
 
+    /**
+     * Constructor for the adapter
+     * @param context RecyclerView context
+     * @param priority ArrayList of priority assignments
+     * @param upcoming ArrayList of upcmoing assignments
+     */
     public AssignmentRecyclerAdapter(Context context, ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
         this.context = context;
         this.priority = priority;
@@ -143,8 +172,6 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-
-        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -218,13 +245,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public int getItemViewType(int position) {
-        if(position == 0 || position == priority.size() + 1) {
+        if(position == 0 || position == priority.size() + 1)
             return TYPE_HEADER;
-        } else if(position == getItemCount() - 1) {
+        else if(position == getItemCount() - 1)
             return TYPE_SPACER;
-        } else {
+        else
             return TYPE_ASSIGNMENT;
-        }
     }
 
     @Override
@@ -263,14 +289,22 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         holder.cardView.setSelected(false);
     }
 
+    /**
+     * Setter method for both arrays at once
+     * @param priority The new priority ArrayList
+     * @param upcoming The new upcoming ArrayList
+     */
     public void setArrays(ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
         this.priority = priority;
         this.upcoming = upcoming;
     }
 
+    /**
+     * Sets the color of a drawable based on the subject
+     * @param subject The subject to base the color off of
+     * @param drawable The drawable to set the tint of
+     */
     private void setColor(String subject, Drawable drawable) {
-        Drawable unwrappedDrawable = drawable;
-        Drawable wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
-        DrawableCompat.setTint(wrappedDrawable, Utility.getSubjectColor(context, subject));
+        DrawableCompat.setTint(DrawableCompat.wrap(drawable), Utility.getSubjectColor(context, subject));
     }
 }

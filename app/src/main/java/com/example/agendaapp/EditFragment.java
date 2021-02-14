@@ -1,3 +1,11 @@
+/**
+ * Fragment for editing an assignment
+ *
+ * @uthor Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp;
 
 import android.app.DatePickerDialog;
@@ -40,10 +48,7 @@ public class EditFragment extends Fragment {
 
     private Context context;
 
-    private AppBarLayout appBarLayout;
     private Toolbar toolbar;
-    private LinearLayout linearLayout;
-    private ScrollView scrollView;
     private ConstraintLayout constraintLayout;
     private LinearLayout llDescription;
     private TextInputLayout tiTitle;
@@ -68,6 +73,7 @@ public class EditFragment extends Fragment {
     private boolean priority;
     private boolean pressedPriority;
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
@@ -89,12 +95,13 @@ public class EditFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Init method for all the views
+     * @param view The inflated Fragment view
+     */
     private void init(View view) {
         context = getContext();
 
-        appBarLayout = (AppBarLayout) view.findViewById(R.id.edit_app_bar_layout);
-        linearLayout = (LinearLayout) view.findViewById(R.id.edit_linear_layout);
-        scrollView = (ScrollView) view.findViewById(R.id.edit_scroll_view);
         constraintLayout = (ConstraintLayout) view.findViewById(R.id.edit_constraint_layout);
         llDescription = (LinearLayout) view.findViewById(R.id.edit_ll_description);
         tiTitle = (TextInputLayout) view.findViewById(R.id.edit_ti_title);
@@ -117,6 +124,9 @@ public class EditFragment extends Fragment {
         pressedPriority = false;
     }
 
+    /**
+     * Inits the layout (sets texts, spinners...)
+     */
     private void initLayout() {
         etTitle.setFocusable(true);
         etDescription.setFocusable(true);
@@ -131,32 +141,11 @@ public class EditFragment extends Fragment {
         tvDueDate.setText(assignment.getDateInfo().getDate());
         etDescription.setText(assignment.getDescription());
         sSubjects.setSelection(Utility.getSubjectPositionFromTitle(assignment.getSubject(), context), true);
-
-        llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int padding = (int) (8 * getActivity().getResources().getDisplayMetrics().density);
-
-                etDescription.setMinHeight(llDescription.getHeight() - padding * 3);
-
-                descriptionMinHeight = llDescription.getHeight() - padding * 3;
-
-                llDescription.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
-                        ConstraintLayout.LayoutParams.WRAP_CONTENT));
-
-                ConstraintSet set = new ConstraintSet();
-                set.clone(constraintLayout);
-                set.connect(R.id.edit_ll_description, ConstraintSet.TOP, R.id.edit_constraint_middle, ConstraintSet.BOTTOM);
-                set.connect(R.id.edit_ll_description, ConstraintSet.BOTTOM, R.id.edit_scroll_view, ConstraintSet.BOTTOM);
-                set.connect(R.id.edit_ll_description, ConstraintSet.START, R.id.edit_scroll_view, ConstraintSet.START);
-                set.connect(R.id.edit_ll_description, ConstraintSet.END, R.id.edit_scroll_view, ConstraintSet.END);
-                set.applyTo(constraintLayout);
-
-                llDescription.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            }
-        });
     }
 
+    /**
+     * Inits the listeners
+     */
     private void initListeners() {
         resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
             if(toHeight == originalContentHeight) {
@@ -182,7 +171,7 @@ public class EditFragment extends Fragment {
                     tvDueDate.setText(assignment.getDateInfo().getDate());
 
                     if(!pressedPriority) {
-                        priority = Utility.compareDates(Utility.getDay(getActivity(), 2), assignment.getDateInfo()) == Utility.FURTHER;
+                        priority = Utility.compareDates(Utility.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
                         toggleStar();
                     }
 
@@ -200,6 +189,30 @@ public class EditFragment extends Fragment {
             fragment.show(getParentFragmentManager(), "Date Picker");
         });
 
+        llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int padding = (int) (8 * getActivity().getResources().getDisplayMetrics().density);
+
+                etDescription.setMinHeight(llDescription.getHeight() - padding * 3);
+
+                descriptionMinHeight = llDescription.getHeight() - padding * 3;
+
+                llDescription.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT));
+
+                ConstraintSet set = new ConstraintSet();
+                set.clone(constraintLayout);
+                set.connect(R.id.edit_ll_description, ConstraintSet.TOP, R.id.edit_constraint_middle, ConstraintSet.BOTTOM);
+                set.connect(R.id.edit_ll_description, ConstraintSet.BOTTOM, R.id.edit_scroll_view, ConstraintSet.BOTTOM);
+                set.connect(R.id.edit_ll_description, ConstraintSet.START, R.id.edit_scroll_view, ConstraintSet.START);
+                set.connect(R.id.edit_ll_description, ConstraintSet.END, R.id.edit_scroll_view, ConstraintSet.END);
+                set.applyTo(constraintLayout);
+
+                llDescription.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+
         sSubjects.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -211,9 +224,11 @@ public class EditFragment extends Fragment {
                 return false;
             }
         });
-
     }
 
+    /**
+     * Puts the data into a Bundle to a fragment result
+     */
     private void save() {
         Bundle bundle = new Bundle();
         bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
@@ -225,6 +240,9 @@ public class EditFragment extends Fragment {
         getParentFragmentManager().setFragmentResult(Utility.EDIT_RESULT_KEY, bundle);
     }
 
+    /**
+     * Toggles the star from priority to upcoming
+     */
     public void toggleStar() {
         if(priority)
             star.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
@@ -280,6 +298,13 @@ public class EditFragment extends Fragment {
             menu.getItem(0).setVisible(false);
     }
 
+    /**
+     * Creates a new instance of the EditFragment
+     * @param assignment The assignment to be shown
+     * @param originalPosition The original position of the fragment
+     * @param priority If the assignment is a priority assignment
+     * @return Returns a new instance of EditFragment
+     */
     public static EditFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
         bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);

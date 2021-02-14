@@ -1,15 +1,15 @@
-/**
- * This class represents a ListModerator.
- * The ListModerator allows you to have
- * multiple ArrayLists while having the ability
- * to act on them either as if they were separate
- * or combined.
- *
- * Note: Assumes each list has a header in the RecyclerView
- *
- * @author Joshua Au
- * @version 1.0
- * @since 11/26/2020
+/*
+  This class represents a ListModerator.
+  The ListModerator allows you to have
+  multiple ArrayLists while having the ability
+  to act on them either as if they were separate
+  or combined.
+
+  Note: Assumes each list has a header in the RecyclerView
+
+  @author Joshua Au
+  @version 1.0
+  @since 11/26/2020
  */
 
 package com.example.agendaapp.Utils;

@@ -19,6 +19,11 @@ import java.io.Serializable;
 
 public class DateInfo implements Parcelable, Serializable {
 
+    // Constants for comparing Dates
+    public final static int FURTHER = 0;
+    public final static int SAME = 1;
+    public final static int CLOSER = 2;
+
     // Day of the month of the date
     protected int day;
     // Month of the date

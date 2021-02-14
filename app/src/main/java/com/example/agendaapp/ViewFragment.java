@@ -1,3 +1,12 @@
+/**
+ * This is the fragment to view an assignment. You can also
+ * navigate to the EditFragment.
+ *
+ * @author Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp;
 
 import android.content.Context;
@@ -61,11 +70,15 @@ public class ViewFragment extends Fragment {
 
         initLayout(view);
 
-        initListeners(view);
+        initListeners();
 
         return view;
     }
 
+    /**
+     * Inits the fields
+     * @param view The inflated fragment
+     */
     private void init(View view) {
         context = getContext();
 
@@ -82,6 +95,10 @@ public class ViewFragment extends Fragment {
         isPriority = getArguments().getBoolean(Utility.PRIORITY_KEY);
     }
 
+    /**
+     * Inits the layout specifics (texts)
+     * @param view The inflated fragment
+     */
     private void initLayout(View view) {
         tvTitle.setText(assignment.getTitle());
         tvDueDate.setText(getString(R.string.due_date, assignment.getDateInfo().getDate()));
@@ -95,7 +112,10 @@ public class ViewFragment extends Fragment {
         postponeEnterTransition();
     }
 
-    private void initListeners(View view) {
+    /**
+     * Inits the listeners
+     */
+    private void initListeners() {
         llRoot.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -108,6 +128,9 @@ public class ViewFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates the TextViews with new Strings
+     */
     private void update() {
         tvTitle.setText(assignment.getTitle());
         tvDueDate.setText(getString(R.string.due_date, assignment.getDateInfo().getDate()));
@@ -141,6 +164,13 @@ public class ViewFragment extends Fragment {
         return false;
     }
 
+    /**
+     * Creates a new instance of a ViewFragment
+     * @param assignment The assignment to be viewed
+     * @param originalPosition The original position of the assignment's CardView in the RecyclerView
+     * @param priority Whether or not the assignment is priority
+     * @return Returns a new ViewFragment instance
+     */
     public static ViewFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
         bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
@@ -154,6 +184,9 @@ public class ViewFragment extends Fragment {
         return viewFragment;
     }
 
+    /**
+     * The FragmentResultListener class. The ViewFragment listens for results from the HomeFragment
+     */
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {

@@ -1,3 +1,12 @@
+/**
+ * Fragment for creating a new assignment. This is the same as the view fragment
+ * except there are now EditTexts.
+ *
+ * @author Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp;
 
 import android.content.Context;
@@ -38,10 +47,7 @@ public class CreateFragment extends Fragment {
 
     private Context context;
 
-    private AppBarLayout appBarLayout;
     private Toolbar toolbar;
-    private LinearLayout linearLayout;
-    private ScrollView scrollView;
     private ConstraintLayout constraintLayout;
     private LinearLayout llDescription;
     private TextInputLayout tiTitle;
@@ -54,8 +60,6 @@ public class CreateFragment extends Fragment {
 
     private MenuItem star;
 
-    private HomeFragment homeFragment;
-
     private DateInfo currentDateInfo;
     private Resize resize;
 
@@ -65,6 +69,7 @@ public class CreateFragment extends Fragment {
     private boolean priority;
     private boolean pressedPriority;
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_create, container, false);
 
@@ -86,12 +91,13 @@ public class CreateFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Inits the fields
+     * @param view The inflated fragment
+     */
     private void init(View view) {
         context = getContext();
 
-        appBarLayout = (AppBarLayout) view.findViewById(R.id.create_app_bar_layout);
-        linearLayout = (LinearLayout) view.findViewById(R.id.create_linear_layout);
-        scrollView = (ScrollView) view.findViewById(R.id.create_scroll_view);
         constraintLayout = (ConstraintLayout) view.findViewById(R.id.create_constraint_layout);
         llDescription = (LinearLayout) view.findViewById(R.id.create_ll_description);
         tiTitle = (TextInputLayout) view.findViewById(R.id.create_ti_title);
@@ -101,8 +107,6 @@ public class CreateFragment extends Fragment {
         tvDueDate = (TextView) view.findViewById(R.id.create_tv_due_date);
         ibDate = (ImageButton) view.findViewById(R.id.create_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.create_s_subject);
-
-        homeFragment = new HomeFragment();
 
         currentDateInfo = Utility.getDay(getActivity(), 1);
         resize = new Resize(getActivity());
@@ -114,6 +118,9 @@ public class CreateFragment extends Fragment {
         pressedPriority = false;
     }
 
+    /**
+     * Inits the layout (ex. texts, spinners)
+     */
     private void initLayout() {
         etTitle.setFocusable(true);
         etDescription.setFocusable(true);
@@ -125,6 +132,27 @@ public class CreateFragment extends Fragment {
         sSubjects.setAdapter(adapter);
 
         tvDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
+    }
+
+    /**
+     * Inits the listeners
+     */
+    private void initListeners() {
+        resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
+            if(toHeight == originalContentHeight) {
+                etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
+                        * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
+                        + etDescription.getCompoundPaddingBottom());
+
+                etDescription.setMinHeight(descriptionMinHeight);
+
+                tiTitle.clearFocus();
+                tiDescription.clearFocus();
+            } else {
+                etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
+                        tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
+            }
+        });
 
         llDescription.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -149,24 +177,6 @@ public class CreateFragment extends Fragment {
                 llDescription.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
-    }
-
-    private void initListeners() {
-        resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
-            if(toHeight == originalContentHeight) {
-                etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
-                        * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
-                        + etDescription.getCompoundPaddingBottom());
-
-                etDescription.setMinHeight(descriptionMinHeight);
-
-                tiTitle.clearFocus();
-                tiDescription.clearFocus();
-            } else {
-                etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
-                        tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
-            }
-        });
 
         ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
@@ -174,7 +184,7 @@ public class CreateFragment extends Fragment {
                 tvDueDate.setText(currentDateInfo.getDate());
 
                 if(!pressedPriority) {
-                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == Utility.FURTHER;
+                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == DateInfo.FURTHER;
                     toggleStar();
                 }
 
@@ -205,6 +215,9 @@ public class CreateFragment extends Fragment {
 
     }
 
+    /**
+     * Saves the data to a Bundle and sets it as a FragmentResult
+     */
     private void save() {
         Bundle bundle = new Bundle();
 
@@ -221,12 +234,14 @@ public class CreateFragment extends Fragment {
         getParentFragmentManager().setFragmentResult(Utility.HOME_RESULT_KEY, bundle);
     }
 
+    /**
+     * Toggles the star to either priority or upcoming
+     */
     public void toggleStar() {
-        if(priority) {
+        if(priority)
             star.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
-        } else {
+        else
             star.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
-        }
     }
 
     @Override
@@ -252,7 +267,7 @@ public class CreateFragment extends Fragment {
             case android.R.id.home :
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
-                transaction.replace(R.id.fragment_container, homeFragment);
+                transaction.replace(R.id.fragment_container, MainActivity.homeFragment);
                 transaction.addToBackStack(Utility.HOME_FRAGMENT);
                 transaction.commit();
                 return true;
@@ -263,7 +278,7 @@ public class CreateFragment extends Fragment {
 
                 FragmentTransaction saveTransaction = getParentFragmentManager().beginTransaction();
                 saveTransaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
-                saveTransaction.replace(R.id.fragment_container, homeFragment);
+                saveTransaction.replace(R.id.fragment_container, MainActivity.homeFragment);
                 saveTransaction.addToBackStack(Utility.HOME_FRAGMENT);
                 saveTransaction.commit();
                 return true;

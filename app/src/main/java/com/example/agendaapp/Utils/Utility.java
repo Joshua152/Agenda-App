@@ -1,3 +1,11 @@
+/**
+ * Defines utility methods and the internal constants
+ *
+ * @author Joshua AU
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp.Utils;
 
 import android.app.Activity;
@@ -27,6 +35,7 @@ public class Utility {
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
 
+    // For FragmentResults
     public final static String HOME_RESULT_KEY = "Home Result Key";
     public final static String EDIT_RESULT_KEY = "Edit Result Key";
 
@@ -46,10 +55,6 @@ public class Utility {
     public final static int POSITION_MUSIC = 5;
     public final static int POSITION_SCIENCE = 6;
     public final static int POSITION_OTHER = 7;
-
-    public final static int FURTHER = 0;
-    public final static int SAME = 1;
-    public final static int CLOSER = 2;
 
     /**
      * Hide keyboard from phone
@@ -126,23 +131,22 @@ public class Utility {
      */
     public static int compareDates(DateInfo di1, DateInfo di2) {
         if(di1.getYear() > di2.getYear()) {
-            return FURTHER;
+            return DateInfo.FURTHER;
         } else if(di1.getYear() == di2.getYear()) {
             if(di1.getMonth() > di2.getMonth()) {
-                return FURTHER;
+                return DateInfo.FURTHER;
             } else if(di1.getMonth() == di2.getMonth()) {
-                if(di1.getDay() > di2.getDay()) {
-                    return FURTHER;
-                } else if(di1.getDay() == di2.getDay()) {
-                    return SAME;
-                }
+                if(di1.getDay() > di2.getDay())
+                    return DateInfo.FURTHER;
+                else if(di1.getDay() == di2.getDay())
+                    return DateInfo.SAME;
 
-                return CLOSER;
+                return DateInfo.CLOSER;
             } else {
-                return CLOSER;
+                return DateInfo.CLOSER;
             }
         } else {
-            return CLOSER;
+            return DateInfo.CLOSER;
         }
     }
 
@@ -154,7 +158,7 @@ public class Utility {
      * @return Returns true or false whether or not the date given is in the priority range
      */
     public static boolean inPriorityRange(DateInfo dateInfo, Context context) {
-        return compareDates(dateInfo, getDay(context, 2)) == CLOSER;
+        return compareDates(dateInfo, getDay(context, 2)) == DateInfo.CLOSER;
     }
 
     /**
@@ -166,7 +170,7 @@ public class Utility {
      * passed
      */
     public static boolean isLate(Context context, DateInfo dateInfo) {
-        return compareDates(dateInfo, getDay(context, 0)) == CLOSER;
+        return compareDates(dateInfo, getDay(context, 0)) == DateInfo.CLOSER;
     }
 
     public static int getSubjectDrawable(Context context, String subject) {
@@ -188,6 +192,12 @@ public class Utility {
             return R.drawable.ic_miscellaneous_services_black_24dp;
     }
 
+    /**
+     * Gets the subject's corresponding color
+     * @param context The activity context
+     * @param subject The subject to get the color for
+     * @return Returns the color which goes along with the given subject
+     */
     public static int getSubjectColor(Context context, String subject) {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 

@@ -1,3 +1,12 @@
+/**
+ * This is the ItemMoveCallback class needed for allowing the Views in the RecyclerView
+ * to move.
+ *
+ * @author Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp.Utils;
 
 import android.graphics.Canvas;
@@ -8,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.agendaapp.AssignmentRecyclerAdapter;
 
 public class ItemMoveCallback extends ItemTouchHelper.Callback {
+
+    // The interface for how the views will behave when interacted with
     private ItemTouchHelperContract adapter;
 
     public ItemMoveCallback(ItemTouchHelperContract adapter) {
@@ -84,6 +95,9 @@ public class ItemMoveCallback extends ItemTouchHelper.Callback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder holder, int direction) {}
 
+    /**
+     * Interface which defines the methods for how the Views can be interacted with
+     */
     public interface ItemTouchHelperContract {
         void onRowMoved(AssignmentRecyclerAdapter.AssignmentViewHolder holder, int fromPosition, int toPosition);
         void onRowSelected(AssignmentRecyclerAdapter.AssignmentViewHolder holder);

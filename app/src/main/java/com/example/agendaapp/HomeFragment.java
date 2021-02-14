@@ -1,3 +1,11 @@
+/**
+ * This is the fragment that holds the RecyclerView.
+ *
+ * @uthor Joshua Au
+ * @version 1.0
+ * @since 6/24/2020
+ */
+
 package com.example.agendaapp;
 
 import android.content.Context;
@@ -31,31 +39,25 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
-    private CreateFragment createFragment;
-
     private Context context;
 
-    private Toolbar toolbar;
     private FloatingActionButton fab;
-    private LinearLayout llRoot;
 
     private RecyclerView recyclerView;
-
-    private RecyclerView.LayoutManager recyclerViewLayoutManager;
     private AssignmentRecyclerAdapter recyclerViewAdapter;
 
-    private ItemTouchHelper.Callback callback;
-    private ItemTouchHelper itemTouchHelper;
-
+    // ArrayList of priority assignments
     public static ArrayList<Assignment> priority;
+    // ArrayList of upcoming assignments
     public static ArrayList<Assignment> upcoming;
+    // ListModerator for the priority and upcoming array s
     public static ListModerator<Assignment> assignmentModerator;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        toolbar = (Toolbar) view.findViewById(R.id.home_toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.home_toolbar);
         toolbar.setTitle(getString(R.string.home_title));
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
@@ -71,7 +73,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle onSavedInstance) {
-        ViewGroupCompat.setTransitionGroup(llRoot, true);
+        ViewGroupCompat.setTransitionGroup(view.findViewById(R.id.home_ll_root), true);
 
         setExitTransition(new MaterialElevationScale(false));
         setReenterTransition(new MaterialElevationScale(true));
@@ -89,6 +91,10 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Inits the views
+     * @param view Inflated Fragment
+     */
     private void init(View view) {
         context = getContext();
 
@@ -96,24 +102,22 @@ public class HomeFragment extends Fragment {
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
-        llRoot = (LinearLayout) view.findViewById(R.id.home_ll_root);
 
-        recyclerViewLayoutManager = new LinearLayoutManager(context);
         setArrayAdapter();
 
-        callback = new ItemMoveCallback((ItemMoveCallback.ItemTouchHelperContract) recyclerViewAdapter);
-        itemTouchHelper = new ItemTouchHelper(callback);
-
-        createFragment = new CreateFragment();
-
+        ItemTouchHelper.Callback callback = new ItemMoveCallback((ItemMoveCallback.ItemTouchHelperContract) recyclerViewAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(recyclerViewAdapter);
 
         update();
     }
 
+    /**
+     * Inits the priority and upcoming arrays
+     */
     private void initArrays() {
         ArrayList[] serialized = (ArrayList[]) Serialize.deserialize(context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
 
@@ -128,16 +132,22 @@ public class HomeFragment extends Fragment {
         assignmentModerator = new ListModerator<Assignment>(priority, upcoming);
     }
 
+    /**
+     * Initializes the onClickListeners
+     */
     private void initListeners() {
         fab.setOnClickListener(view -> {
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-            transaction.replace(R.id.fragment_container, createFragment);
+            transaction.replace(R.id.fragment_container, new CreateFragment());
             transaction.addToBackStack(Utility.CREATE_FRAGMENT);
             transaction.commit();
         });
     }
 
+    /**
+     * Updates the lists
+     */
     private void update() {
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
@@ -146,14 +156,24 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /**
+     * Sets the array adapter for the RecyclerView
+     */
     private void setArrayAdapter() {
         recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
     }
 
+    /**
+     * Updates the array adapter with new arrays
+     */
     private void updateArrayAdapter() {
         recyclerViewAdapter.setArrays(priority, upcoming);
     }
 
+    /**
+     * SSerializes the arrays
+     * @param bundle The bundle to save from
+     */
     private void save(Bundle bundle) {
         Assignment assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
 
@@ -182,6 +202,10 @@ public class HomeFragment extends Fragment {
         updateArrayAdapter();
     }
 
+    /**
+     * Adds to the priority array
+     * @param assignment The assignment to be added to the array
+     */
     private void addToPriority(Assignment assignment) {
         for(int i = 0; i < priority.size(); i++) {
             DateInfo fromArray = priority.get(i).getDateInfo();
@@ -189,10 +213,10 @@ public class HomeFragment extends Fragment {
             boolean moved = false;
 
             if(i != priority.size() - 1) {
-                moved = Utility.compareDates(fromArray, priority.get(i + 1).getDateInfo()) == Utility.FURTHER;
+                moved = Utility.compareDates(fromArray, priority.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
             }
 
-            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == Utility.FURTHER) {
+            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
                 priority.add(i, assignment);
 
                 recyclerView.scrollToPosition(i + 1);
@@ -204,6 +228,10 @@ public class HomeFragment extends Fragment {
         priority.add(assignment);
     }
 
+    /**
+     * Adds to the upcoming array
+     * @param assignment The assignment to be added to the array
+     */
     private void addToUpcoming(Assignment assignment) {
         for(int i = 0; i < upcoming.size(); i++) {
             DateInfo fromArray = upcoming.get(i).getDateInfo();
@@ -211,9 +239,9 @@ public class HomeFragment extends Fragment {
             boolean moved = false;
 
             if(i != upcoming.size() - 1)
-                moved = Utility.compareDates(fromArray, upcoming.get(i + 1).getDateInfo()) == Utility.FURTHER;
+                moved = Utility.compareDates(fromArray, upcoming.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
 
-            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == Utility.FURTHER) {
+            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
                 upcoming.add(i, assignment);
 
                 recyclerView.scrollToPosition(i + priority.size() + 2);
