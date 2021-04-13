@@ -26,9 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
         init();
 
-        if(savedInstanceState == null) {
+        if(savedInstanceState == null)
             addHomeFragment();
-        }
     }
 
     /**

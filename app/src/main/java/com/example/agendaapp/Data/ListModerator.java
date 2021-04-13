@@ -12,9 +12,7 @@
   @since 11/26/2020
  */
 
-package com.example.agendaapp.Utils;
-
-import android.os.Bundle;
+package com.example.agendaapp.Data;
 
 import java.util.ArrayList;
 
@@ -63,21 +61,6 @@ public class ListModerator<T> {
     }
 
     /**
-     * Removes the item at the given overall index
-     * @param index The index of the item to be removed
-     */
-    public void removeOverall(int index) {
-        int list = 0;
-
-        while(index > lists[list].size()) {
-            index -= lists[list].size() + 1; // + 1 to account for header
-            list++;
-        }
-
-        lists[list].remove(index - 1); // - 1 to account for the header for the list at which the index is
-    }
-
-    /**
      * Gets an item given the overall index
      * @param index Overall item index
      * @return Returns item at the given index
@@ -91,6 +74,21 @@ public class ListModerator<T> {
         }
 
         return lists[list].get(index - 1); // - 1 to account for the header for the list at which the index is
+    }
+
+    /**
+     * Removes the item at the given overall index
+     * @param index The index of the item to be removed
+     */
+    public void removeOverall(int index) {
+        int list = 0;
+
+        while(index > lists[list].size()) {
+            index -= lists[list].size() + 1; // + 1 to account for header
+            list++;
+        }
+
+        lists[list].remove(index - 1); // - 1 to account for the header for the list at which the index is
     }
 
     /**

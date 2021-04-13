@@ -10,12 +10,13 @@ package com.example.agendaapp.Utils;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.method.HideReturnsTransformationMethod;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.content.ContextCompat;
 
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.DateInfo;
+import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.R;
 
 import java.text.DateFormat;
@@ -24,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class Utility {
 
@@ -37,12 +37,9 @@ public class Utility {
 
     // For FragmentResults
     public final static String HOME_RESULT_KEY = "Home Result Key";
-    public final static String EDIT_RESULT_KEY = "Edit Result Key";
+    public final static String VIEW_RESULT_KEY = "View Result Key";
 
-    public final static String ASSIGNMENT_KEY = "Assignment Key";
-    public final static String PRIORITY_KEY = "Priority Key";
-    public final static String CREATE_NEW_KEY = "Create New";
-    public final static String POSITION_KEY = "Position Key";
+    public final static String SAVE_INFO = "Save Info";
 
     public final static int SERIALIZATION_PRIORITY = 0;
     public final static int SERIALIZATION_UPCOMING = 1;
@@ -157,7 +154,7 @@ public class Utility {
      * @param context Context
      * @return Returns true or false whether or not the date given is in the priority range
      */
-    public static boolean inPriorityRange(DateInfo dateInfo, Context context) {
+    public static boolean inPriorityRange(Context context, DateInfo dateInfo) {
         return compareDates(dateInfo, getDay(context, 2)) == DateInfo.CLOSER;
     }
 
@@ -186,6 +183,8 @@ public class Utility {
             return R.drawable.ic_book_black_24dp;
         else if(subject.equals(array[POSITION_MATH]))
             return R.drawable.ic_calculate_black_24dp;
+        else if(subject.equals(array[POSITION_MUSIC]))
+            return R.drawable.ic_music_note_black_24dp;
         else if(subject.equals(array[POSITION_SCIENCE]))
             return R.drawable.ic_science_black_24dp;
         else
@@ -210,70 +209,13 @@ public class Utility {
         else if(subject.equals(array[POSITION_LITERATURE]))
             return ContextCompat.getColor(context, R.color.green);
         else if(subject.equals(array[POSITION_MATH]))
+            return ContextCompat.getColor(context, R.color.turquoise);
+        else if(subject.equals(array[POSITION_MUSIC]))
             return ContextCompat.getColor(context, R.color.blue);
         else if(subject.equals(array[POSITION_SCIENCE]))
             return ContextCompat.getColor(context, R.color.magenta);
         else
             return ContextCompat.getColor(context, R.color.purple);
-    }
-
-    /**
-     * Gets the spinner position of a subject based on the drawable ID
-     *
-     * @param drawableId Subject drawable ID
-     * @return Returns an int representing the index of the subject in the spinner
-     */
-    public static int getSubjectPositionFromId(int drawableId) {
-        switch(drawableId) {
-            case R.drawable.ic_brush_black_24dp :
-                return POSITION_ART;
-            case R.drawable.ic_history_edu_black_24dp :
-                return POSITION_HISTORY;
-            case R.drawable.ic_language_black_24dp :
-                return POSITION_LANGUAGE;
-            case R.drawable.ic_book_black_24dp :
-                return POSITION_LITERATURE;
-            case R.drawable.ic_calculate_black_24dp :
-                return POSITION_MATH;
-            case R.drawable.ic_music_note_black_24dp :
-                return POSITION_MUSIC;
-            case R.drawable.ic_science_black_24dp :
-                return POSITION_SCIENCE;
-            case R.drawable.ic_miscellaneous_services_black_24dp :
-                return POSITION_OTHER;
-            default :
-                return -1;
-        }
-    }
-
-    /**
-     * Gets the subject title from the subject's drawable ID
-     *
-     * @param id Subject's drawable ID
-     * @param context Context
-     * @return Returns a String containing the subject title (ex. Math, Other)
-     */
-    public static String getSubjectFromId(int id, Context context) {
-        switch(id) {
-            case R.drawable.ic_brush_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_ART];
-            case R.drawable.ic_history_edu_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_HISTORY];
-            case R.drawable.ic_language_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_LANGUAGE];
-            case R.drawable.ic_book_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_LITERATURE];
-            case R.drawable.ic_calculate_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_MATH];
-            case R.drawable.ic_music_note_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_MUSIC];
-            case R.drawable.ic_science_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_SCIENCE];
-            case R.drawable.ic_miscellaneous_services_black_24dp :
-                return context.getResources().getStringArray(R.array.subject_array)[POSITION_OTHER];
-            default :
-                return null;
-        }
     }
 
     /**
@@ -287,83 +229,10 @@ public class Utility {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 
         for(int i = 0; i < array.length; i++) {
-            if(array[i].equals(subject)) {
+            if(array[i].equals(subject))
                 return i;
-            }
         }
 
         return -1;
-    }
-
-    /**
-     * Gets the subject title from its spinner index
-     *
-     * @param position Spinner index of the subject
-     * @param context Context
-     * @return Returns a String holding the subject title (ex. Math, Other)
-     */
-    public static String getSubjectFromPosition(int position, Context context) {
-        return context.getResources().getStringArray(R.array.subject_array)[position];
-    }
-
-    /**
-     * Gets the respective color form the given drawable ID
-     *
-     * @param context Context
-     * @param drawable Subject drawable ID
-     * @return Returns the color to go along with the subject in the form 0xAARRGGBB
-     */
-    public static int getColor(Context context, int drawable) {
-        int position = getSubjectPositionFromId(drawable);
-
-        switch(position) {
-            case POSITION_ART :
-                return ContextCompat.getColor(context, R.color.red);
-            case POSITION_HISTORY :
-                return ContextCompat.getColor(context, R.color.orange);
-            case POSITION_LANGUAGE :
-                return ContextCompat.getColor(context, R.color.yellow);
-            case POSITION_LITERATURE :
-                return ContextCompat.getColor(context, R.color.green);
-            case POSITION_MATH :
-                return ContextCompat.getColor(context, R.color.turquoise);
-            case POSITION_MUSIC :
-                return ContextCompat.getColor(context, R.color.blue);
-            case POSITION_SCIENCE :
-                return ContextCompat.getColor(context, R.color.magenta);
-            case POSITION_OTHER :
-                return ContextCompat.getColor(context, R.color.purple);
-        }
-
-        return 0;
-    }
-
-    /**
-     * Converts a List<Integer> to an int[]
-     *
-     * @param list The list to be converted
-     * @return Returns the int[] converted fro the List<Integer>
-     */
-    public static int[] toIntArray(List<Integer> list) {
-        int[] array = new int[list.size()];
-
-        for(int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-
-        return array;
-    }
-
-    /**
-     * Converts dp to px
-     *
-     * @param context Context
-     * @param dp dp to be converted
-     * @return Returns the px equivalent of the dp value given
-     */
-    public static int toPixels(Context context, int dp) {
-        float scale = context.getResources().getDisplayMetrics().density;
-
-        return (int) (dp * scale + 0.5f);
     }
 }

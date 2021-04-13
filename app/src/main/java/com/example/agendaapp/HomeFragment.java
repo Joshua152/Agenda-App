@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -26,16 +25,18 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.agendaapp.Utils.Assignment;
-import com.example.agendaapp.Utils.DateInfo;
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Utils.ItemMoveCallback;
-import com.example.agendaapp.Utils.ListModerator;
-import com.example.agendaapp.Utils.Serialize;
+import com.example.agendaapp.Data.ListModerator;
+import com.example.agendaapp.Data.SaveInfo;
+import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.MaterialElevationScale;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HomeFragment extends Fragment {
 
@@ -151,8 +152,8 @@ public class HomeFragment extends Fragment {
     private void update() {
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
-            if(Utility.inPriorityRange(upcoming.get(i).getDateInfo(), context))
-                addToPriority(upcoming.get(i));
+            if(Utility.inPriorityRange(context, upcoming.get(i).getDateInfo()))
+                addToList(priority, upcoming.get(i));
         }
     }
 
@@ -175,27 +176,29 @@ public class HomeFragment extends Fragment {
      * @param bundle The bundle to save from
      */
     private void save(Bundle bundle) {
-        Assignment assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
+//        Assignment assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
+//
+//        boolean isPriority = bundle.getBoolean(Utility.PRIORITY_KEY);
+//
+//        int originalPosition = bundle.getInt(Utility.POSITION_KEY, -1);
+//        boolean createNew = bundle.getBoolean(Utility.CREATE_NEW_KEY, true);
 
-        boolean isPriority = bundle.getBoolean(Utility.PRIORITY_KEY);
+        SaveInfo info = bundle.getParcelable(Utility.SAVE_INFO);
 
-        int originalPosition = bundle.getInt(Utility.POSITION_KEY, -1);
-        boolean createNew = bundle.getBoolean(Utility.CREATE_NEW_KEY, true);
-
-        System.out.println((assignmentModerator == null) + " " + assignmentModerator.getList(0).size() + " " + createNew + " " + originalPosition);
-
-        System.out.println(priority);
+//        System.out.println((assignmentModerator == null) + " " + assignmentModerator.getList(0).size() + " " + createNew + " " + originalPosition);
+//
+//        System.out.println(priority);
 
         // If do not need to create a new assignment (assignment is being moved)
-        if(!createNew)
-            assignmentModerator.removeOverall(originalPosition);
+        if(!info.getCreateNew())
+            assignmentModerator.removeOverall(info.getOriginalPosition());
 
-        System.out.println(priority);
+     //   System.out.println(priority);
 
-        if(isPriority)
-            addToPriority(assignment);
+        if(info.getIsPriority())
+            addToList(priority, info.getAssignment());
         else
-            addToUpcoming(assignment);
+            addToList(upcoming, info.getAssignment());
 
         Utility.serializeArrays(context, priority, upcoming);
 
@@ -203,54 +206,34 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * Adds to the priority array
-     * @param assignment The assignment to be added to the array
+     * Adds an assignment to a specified list
+     * @param list The list to be added to
+     * @param assignment The assignment to add
      */
-    private void addToPriority(Assignment assignment) {
-        for(int i = 0; i < priority.size(); i++) {
-            DateInfo fromArray = priority.get(i).getDateInfo();
+    public void addToList(List<Assignment> list, Assignment assignment) {
+        for(int i = 0; i < list.size(); i++) {
+            DateInfo fromArray = list.get(i).getDateInfo();
 
             boolean moved = false;
 
-            if(i != priority.size() - 1) {
-                moved = Utility.compareDates(fromArray, priority.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
-            }
+            if (i != list.size() - 1)
+                moved = Utility.compareDates(fromArray, list.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
 
-            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
-                priority.add(i, assignment);
-
-                recyclerView.scrollToPosition(i + 1);
+            if (!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
+                list.add(i, assignment);
 
                 return;
             }
         }
 
-        priority.add(assignment);
+        list.add(assignment);
     }
 
-    /**
-     * Adds to the upcoming array
-     * @param assignment The assignment to be added to the array
-     */
-    private void addToUpcoming(Assignment assignment) {
-        for(int i = 0; i < upcoming.size(); i++) {
-            DateInfo fromArray = upcoming.get(i).getDateInfo();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
-            boolean moved = false;
-
-            if(i != upcoming.size() - 1)
-                moved = Utility.compareDates(fromArray, upcoming.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
-
-            if(!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
-                upcoming.add(i, assignment);
-
-                recyclerView.scrollToPosition(i + priority.size() + 2);
-
-                return;
-            }
-        }
-
-        upcoming.add(assignment);
+        Utility.serializeArrays(context, priority, upcoming);
     }
 
     /*

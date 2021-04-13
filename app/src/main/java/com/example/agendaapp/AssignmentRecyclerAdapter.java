@@ -28,9 +28,9 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.agendaapp.Utils.Assignment;
+import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Utils.ItemMoveCallback;
-import com.example.agendaapp.Utils.ListModerator;
+import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.card.MaterialCardView;
 
@@ -43,6 +43,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     private final static int TYPE_ASSIGNMENT = 1;
     private final static int TYPE_SPACER = 2;
 
+    private RecyclerView recyclerView;
+
     // Context of the RecyclerView
     private Context context;
 
@@ -50,7 +52,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     private ListModerator<Assignment> moderator;
     // ArrayList of priority assignments
     private ArrayList<Assignment> priority;
-    // ArrayList of upcoming assignmnts
+    // ArrayList of upcoming assignments
     private ArrayList<Assignment> upcoming;
 
     /**
@@ -97,7 +99,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         }
 
         /**
-         * Initializes the listeners for the CardView and for the checkmark button
+         * Initializes the listeners for the CardView and for the check mark button
          */
         private void initListeners() {
             cardView.setOnClickListener(view -> {
@@ -105,12 +107,9 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
                 FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
 
-                int position = getAdapterPosition();
+                int position = getBindingAdapterPosition();
 
-                if(position <= priority.size())
-                    viewFragment = ViewFragment.newInstance(priority.get(moderator.getArrayPosFromOverall(position)), position, true);
-                else
-                    viewFragment = ViewFragment.newInstance(upcoming.get(moderator.getArrayPosFromOverall(position)), position, false);
+                viewFragment = ViewFragment.newInstance(moderator.getOverall(position), position, position <= priority.size());
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     ViewCompat.setTransitionName(cardView, context.getString(R.string.transition_background) + position);
@@ -125,7 +124,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             });
 
             ivDone.setOnClickListener(view -> {
-                int position = getAdapterPosition();
+                int position = getBindingAdapterPosition();
 
                 removeItem(position);
 
@@ -159,7 +158,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
      * Constructor for the adapter
      * @param context RecyclerView context
      * @param priority ArrayList of priority assignments
-     * @param upcoming ArrayList of upcmoing assignments
+     * @param upcoming ArrayList of upcoming assignments
      */
     public AssignmentRecyclerAdapter(Context context, ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
         this.context = context;
@@ -172,6 +171,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -196,21 +197,16 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         if(holder instanceof HeaderViewHolder ) {
             HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
 
-            switch(position) {
-                case 0 :
-                    headerHolder.tvHeader.setText(context.getString(R.string.priority));
+            if(position == 0) {
+                headerHolder.tvHeader.setText(context.getString(R.string.priority));
 
-                    if(priority.size() == 0)
-                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
+                if(priority.size() == 0)
+                    headerHolder.tvHeader.append(" " + context.getString(R.string.none));
+            } else {
+                headerHolder.tvHeader.setText(context.getString(R.string.upcoming_assignments));
 
-                    break;
-                default :
-                    headerHolder.tvHeader.setText(context.getString(R.string.upcoming_assignments));
-
-                    if(upcoming.size() == 0)
-                        headerHolder.tvHeader.append(" " + context.getString(R.string.none));
-
-                    break;
+                if(upcoming.size() == 0)
+                    headerHolder.tvHeader.append(" " + context.getString(R.string.none));
             }
         } else if(holder instanceof AssignmentViewHolder) {
             AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
@@ -239,44 +235,37 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     }
 
     @Override
-    public int getItemCount() {
-        return moderator.getItemCount() + 2; // added two extra for spacer
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if(position == 0 || position == priority.size() + 1)
-            return TYPE_HEADER;
-        else if(position == getItemCount() - 1)
-            return TYPE_SPACER;
-        else
-            return TYPE_ASSIGNMENT;
-    }
-
-    @Override
     public void onRowMoved(AssignmentViewHolder holder, int fromPosition, int toPosition) {
-        boolean priorityContainedItems = priority.size() > 0;
-        boolean upcomingContainedItems = upcoming.size() > 0;
-
+        // going down
         if(fromPosition < toPosition) {
-            for(int i = fromPosition; i < toPosition; i++) {
-                if(toPosition != priority.size() + 1)
-                    moderator.swap(i, i + 1);
-                else
-                    Toast.makeText(context, context.getString(R.string.already_in_range_toast), Toast.LENGTH_SHORT).show();
+            if(toPosition == priority.size() + 1 && Utility.inPriorityRange(context, priority.get(fromPosition - 1).getDateInfo())) {
+                Toast.makeText(context, context.getString(R.string.already_in_range_toast), Toast.LENGTH_SHORT).show();
+            } else if(toPosition < moderator.getItemCount() + 2) {
+                if(fromPosition != priority.size()) { // size is always at least 1
+                    moderator.swap(fromPosition, toPosition);
+                } else {
+                    upcoming.add(0, priority.get(fromPosition - 1));
+                    priority.remove(priority.size() - 1);
+                }
+            } else {
+                return;
             }
         } else {
-            for(int i = fromPosition; i > toPosition; i--)
-                moderator.swap(i, i - 1);
+          //  System.out.println("Going up!");
+            if(toPosition != 0 && fromPosition != priority.size() + 2) {
+            //    System.out.println("swap");
+                moderator.swap(fromPosition, toPosition);
+            } else if(toPosition > 0) {
+              //  System.out.print("Heyoo");
+                priority.add(upcoming.get(0));
+                upcoming.remove(0);
+            } else {
+                //System.out.println("top");
+                return;
+            }
         }
 
         notifyItemMoved(fromPosition, toPosition);
-
-        if(priorityContainedItems != priority.size() > 0)
-            notifyItemChanged(0);
-
-        if(upcomingContainedItems != upcoming.size() > 0)
-            notifyItemChanged(priority.size() + 1);
     }
 
     @Override
@@ -287,6 +276,27 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onRowClear(AssignmentViewHolder holder) {
         holder.cardView.setSelected(false);
+        System.out.println("clear");
+
+        recyclerView.post(() -> {
+            notifyItemChanged(0);
+            notifyItemChanged(priority.size() + 1);
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return moderator.getItemCount() + 3; // added three extra for spacer and titles
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(position == 0 || position == priority.size() + 1)
+            return TYPE_HEADER;
+        else if(position == getItemCount() - 1)
+            return TYPE_SPACER;
+        else
+            return TYPE_ASSIGNMENT;
     }
 
     /**

@@ -23,7 +23,6 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -32,15 +31,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
-import com.example.agendaapp.Utils.Assignment;
-import com.example.agendaapp.Utils.DateInfo;
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
 import com.example.agendaapp.Utils.Resize;
+import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -114,13 +112,14 @@ public class EditFragment extends Fragment {
 
         resize = new Resize(getActivity());
 
-        assignment = getArguments().getParcelable(Utility.ASSIGNMENT_KEY);
-        originalPosition = getArguments().getInt(Utility.POSITION_KEY);
+        SaveInfo info = getArguments().getParcelable(Utility.SAVE_INFO);
+        assignment = info.getAssignment();
+        originalPosition = info.getOriginalPosition();
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
 
-        priority = getArguments().getBoolean(Utility.PRIORITY_KEY);
+        priority = info.getIsPriority();
         pressedPriority = false;
     }
 
@@ -175,7 +174,7 @@ public class EditFragment extends Fragment {
                         toggleStar();
                     }
 
-                    star.setVisible(!Utility.inPriorityRange(assignment.getDateInfo(), context));
+                    star.setVisible(!Utility.inPriorityRange(context, assignment.getDateInfo()));
                 }
             });
 
@@ -231,13 +230,10 @@ public class EditFragment extends Fragment {
      */
     private void save() {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
-        bundle.putInt(Utility.POSITION_KEY, originalPosition);
-        bundle.putBoolean(Utility.CREATE_NEW_KEY, false);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
 
         // To ViewFragment
-        getParentFragmentManager().setFragmentResult(Utility.EDIT_RESULT_KEY, bundle);
+        getParentFragmentManager().setFragmentResult(Utility.VIEW_RESULT_KEY, bundle);
     }
 
     /**
@@ -294,7 +290,7 @@ public class EditFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if(Utility.inPriorityRange(assignment.getDateInfo(), context))
+        if(Utility.inPriorityRange(context, assignment.getDateInfo()))
             menu.getItem(0).setVisible(false);
     }
 
@@ -307,9 +303,10 @@ public class EditFragment extends Fragment {
      */
     public static EditFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-        bundle.putInt(Utility.POSITION_KEY, originalPosition);
-        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
+//        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
+//        bundle.putInt(Utility.POSITION_KEY, originalPosition);
+//        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
 
         EditFragment editFragment = new EditFragment();
         editFragment.setArguments(bundle);

@@ -27,11 +27,9 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.transition.Transition;
-import androidx.transition.TransitionInflater;
 
-import com.example.agendaapp.Utils.Assignment;
-import com.example.agendaapp.Utils.DateInfo;
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.transition.MaterialContainerTransform;
 
@@ -46,9 +44,7 @@ public class ViewFragment extends Fragment {
     private TextView tvDescription;
 
     private Assignment assignment;
-
     private int position;
-
     private boolean isPriority;
 
     @Override
@@ -64,7 +60,7 @@ public class ViewFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        getParentFragmentManager().setFragmentResultListener(Utility.EDIT_RESULT_KEY, this, new ResultListener());
+        getParentFragmentManager().setFragmentResultListener(Utility.VIEW_RESULT_KEY, this, new ResultListener());
 
         init(view);
 
@@ -88,11 +84,10 @@ public class ViewFragment extends Fragment {
         tvSubject = (TextView) view.findViewById(R.id.view_tv_subject);
         tvDescription = (TextView) view.findViewById(R.id.view_tv_description);
 
-        assignment = getArguments().getParcelable(Utility.ASSIGNMENT_KEY);
-
-        position = getArguments().getInt(Utility.POSITION_KEY);
-
-        isPriority = getArguments().getBoolean(Utility.PRIORITY_KEY);
+        SaveInfo info = getArguments().getParcelable(Utility.SAVE_INFO);
+        assignment = info.getAssignment();
+        position = info.getPosition();
+        isPriority = info.getIsPriority();
     }
 
     /**
@@ -173,10 +168,12 @@ public class ViewFragment extends Fragment {
      */
     public static ViewFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
-        bundle.putInt(Utility.POSITION_KEY, originalPosition);
-        bundle.putBoolean(Utility.CREATE_NEW_KEY, false);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
+//
+//        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
+//        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
+//        bundle.putInt(Utility.POSITION_KEY, originalPosition);
+//        bundle.putBoolean(Utility.CREATE_NEW_KEY, false);
 
         ViewFragment viewFragment = new ViewFragment();
         viewFragment.setArguments(bundle);
@@ -185,12 +182,12 @@ public class ViewFragment extends Fragment {
     }
 
     /**
-     * The FragmentResultListener class. The ViewFragment listens for results from the HomeFragment
+     * The FragmentResultListener class. The ViewFragment listens for results from the EditFragment
      */
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {
-            assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
+            assignment = ((SaveInfo) bundle.getParcelable(Utility.SAVE_INFO)).getAssignment();
 
             update();
 

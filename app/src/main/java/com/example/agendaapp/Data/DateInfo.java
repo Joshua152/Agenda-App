@@ -10,7 +10,7 @@
  * @since 11/26/2020
  */
 
-package com.example.agendaapp.Utils;
+package com.example.agendaapp.Data;
 
 import android.os.Parcel;
 import android.os.Parcelable;

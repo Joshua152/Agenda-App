@@ -1,6 +1,6 @@
 package com.example.agendaapp;
 
-import com.example.agendaapp.Utils.ListModerator;
+import com.example.agendaapp.Data.ListModerator;
 
 import org.junit.Test;
 

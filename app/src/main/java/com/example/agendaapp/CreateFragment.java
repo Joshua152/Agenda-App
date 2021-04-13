@@ -22,7 +22,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -34,12 +33,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
-import com.example.agendaapp.Utils.Assignment;
-import com.example.agendaapp.Utils.DateInfo;
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
 import com.example.agendaapp.Utils.Resize;
+import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -188,7 +187,7 @@ public class CreateFragment extends Fragment {
                     toggleStar();
                 }
 
-                star.setVisible(!Utility.inPriorityRange(currentDateInfo, context));
+                star.setVisible(!Utility.inPriorityRange(context, currentDateInfo));
             });
 
             Utility.hideSoftKeyboard(getActivity());
@@ -227,9 +226,7 @@ public class CreateFragment extends Fragment {
         assignment.setDescription(etDescription.getText().toString());
         assignment.setDateInfo(currentDateInfo);
 
-        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
-        bundle.putBoolean(Utility.CREATE_NEW_KEY, true);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, true, -1, -1));
 
         getParentFragmentManager().setFragmentResult(Utility.HOME_RESULT_KEY, bundle);
     }
@@ -256,7 +253,7 @@ public class CreateFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if(Utility.inPriorityRange(currentDateInfo, context)) {
+        if(Utility.inPriorityRange(context, currentDateInfo)) {
             menu.getItem(0).setVisible(false);
         }
     }
@@ -270,6 +267,7 @@ public class CreateFragment extends Fragment {
                 transaction.replace(R.id.fragment_container, MainActivity.homeFragment);
                 transaction.addToBackStack(Utility.HOME_FRAGMENT);
                 transaction.commit();
+
                 return true;
             case R.id.create_save :
                 save();
@@ -281,6 +279,7 @@ public class CreateFragment extends Fragment {
                 saveTransaction.replace(R.id.fragment_container, MainActivity.homeFragment);
                 saveTransaction.addToBackStack(Utility.HOME_FRAGMENT);
                 saveTransaction.commit();
+
                 return true;
             case R.id.create_star :
                 pressedPriority = true;
