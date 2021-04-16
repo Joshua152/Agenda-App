@@ -30,6 +30,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:contentDescription="@string/cd_subject_icon"
                 app:srcCompat="@drawable/ic_miscellaneous_services_black_24dp"/>
 
         </FrameLayout>
@@ -77,7 +78,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:padding="8dp"
-            app:srcCompat="@drawable/ic_done_black_24dp"/>
+            android:contentDescription="@string/cd_done"
+            app:srcCompat="@drawable/ic_done_black_24dp" />
 
     </LinearLayout>
 

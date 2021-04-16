@@ -100,7 +100,7 @@ public class ViewFragment extends Fragment {
         tvSubject.setText(getString(R.string.subject, assignment.getSubject()));
         tvDescription.setText(assignment.getDescription());
 
-        ViewCompat.setTransitionName(llRoot, context.getString(R.string.transition_background) + position);
+        ViewCompat.setTransitionName(llRoot, Utility.TRANSITION_BACKGROUND + position);
 
         setSharedElementEnterTransition(new MaterialContainerTransform());
 
@@ -168,12 +168,7 @@ public class ViewFragment extends Fragment {
      */
     public static ViewFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
-//
-//        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-//        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
-//        bundle.putInt(Utility.POSITION_KEY, originalPosition);
-//        bundle.putBoolean(Utility.CREATE_NEW_KEY, false);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
 
         ViewFragment viewFragment = new ViewFragment();
         viewFragment.setArguments(bundle);

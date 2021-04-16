@@ -33,6 +33,7 @@ import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class HomeFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
 
-        init(view);
+        init(view, onSavedInstance);
 
         initListeners();
 
@@ -76,7 +77,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle onSavedInstance) {
         ViewGroupCompat.setTransitionGroup(view.findViewById(R.id.home_ll_root), true);
 
-        setExitTransition(new MaterialElevationScale(false));
+        // setExitTransition(new MaterialElevationScale(false)); // can be laggy
+        setExitTransition(new Hold());
         setReenterTransition(new MaterialElevationScale(true));
 
         postponeEnterTransition();
@@ -96,10 +98,10 @@ public class HomeFragment extends Fragment {
      * Inits the views
      * @param view Inflated Fragment
      */
-    private void init(View view) {
+    private void init(View view, Bundle onSavedInstance) {
         context = getContext();
 
-        initArrays();
+        initArrays(onSavedInstance);
 
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
@@ -119,7 +121,7 @@ public class HomeFragment extends Fragment {
     /**
      * Inits the priority and upcoming arrays
      */
-    private void initArrays() {
+    private void initArrays(Bundle onSavedInstance) {
         ArrayList[] serialized = (ArrayList[]) Serialize.deserialize(context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
 
         if(serialized != null) {
@@ -176,24 +178,10 @@ public class HomeFragment extends Fragment {
      * @param bundle The bundle to save from
      */
     private void save(Bundle bundle) {
-//        Assignment assignment = bundle.getParcelable(Utility.ASSIGNMENT_KEY);
-//
-//        boolean isPriority = bundle.getBoolean(Utility.PRIORITY_KEY);
-//
-//        int originalPosition = bundle.getInt(Utility.POSITION_KEY, -1);
-//        boolean createNew = bundle.getBoolean(Utility.CREATE_NEW_KEY, true);
-
         SaveInfo info = bundle.getParcelable(Utility.SAVE_INFO);
 
-//        System.out.println((assignmentModerator == null) + " " + assignmentModerator.getList(0).size() + " " + createNew + " " + originalPosition);
-//
-//        System.out.println(priority);
-
-        // If do not need to create a new assignment (assignment is being moved)
         if(!info.getCreateNew())
-            assignmentModerator.removeOverall(info.getOriginalPosition());
-
-     //   System.out.println(priority);
+            assignmentModerator.removeOverall(info.getPosition());
 
         if(info.getIsPriority())
             addToList(priority, info.getAssignment());
@@ -229,16 +217,9 @@ public class HomeFragment extends Fragment {
         list.add(assignment);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Utility.serializeArrays(context, priority, upcoming);
-    }
-
     /*
       For Fragment communication
-     */
+    */
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {

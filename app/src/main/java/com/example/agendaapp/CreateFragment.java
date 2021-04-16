@@ -226,7 +226,7 @@ public class CreateFragment extends Fragment {
         assignment.setDescription(etDescription.getText().toString());
         assignment.setDateInfo(currentDateInfo);
 
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, true, -1, -1));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, true, -1));
 
         getParentFragmentManager().setFragmentResult(Utility.HOME_RESULT_KEY, bundle);
     }

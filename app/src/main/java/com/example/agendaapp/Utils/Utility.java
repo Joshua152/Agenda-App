@@ -35,14 +35,16 @@ public class Utility {
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
 
+    public final static int SERIALIZATION_PRIORITY = 0;
+    public final static int SERIALIZATION_UPCOMING = 1;
+
     // For FragmentResults
     public final static String HOME_RESULT_KEY = "Home Result Key";
     public final static String VIEW_RESULT_KEY = "View Result Key";
 
     public final static String SAVE_INFO = "Save Info";
 
-    public final static int SERIALIZATION_PRIORITY = 0;
-    public final static int SERIALIZATION_UPCOMING = 1;
+    public final static String TRANSITION_BACKGROUND = "Transition Background";
 
     public final static int POSITION_ART = 0; // TODO : hashmap instead?
     public final static int POSITION_HISTORY = 1;

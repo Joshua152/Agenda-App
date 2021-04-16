@@ -102,25 +102,30 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
          * Initializes the listeners for the CardView and for the check mark button
          */
         private void initListeners() {
-            cardView.setOnClickListener(view -> {
-                ViewFragment viewFragment;
+            // Don't use lambda, errors on getParentFragmentManager
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
+                    ViewFragment viewFragment;
 
-                int position = getBindingAdapterPosition();
+                    FragmentTransaction transaction = MainActivity.homeFragment.getParentFragmentManager().beginTransaction();
 
-                viewFragment = ViewFragment.newInstance(moderator.getOverall(position), position, position <= priority.size());
+                    int position = getBindingAdapterPosition();
 
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    ViewCompat.setTransitionName(cardView, context.getString(R.string.transition_background) + position);
+                    viewFragment = ViewFragment.newInstance(moderator.getOverall(position), position, position <= priority.size());
 
-                    transaction.setReorderingAllowed(true);
-                    transaction.addSharedElement(cardView, cardView.getTransitionName());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ViewCompat.setTransitionName(cardView, Utility.TRANSITION_BACKGROUND + position);
+
+                        transaction.setReorderingAllowed(true);
+                        transaction.addSharedElement(cardView, cardView.getTransitionName());
+                    }
+
+                    transaction.replace(R.id.fragment_container, viewFragment);
+                    transaction.addToBackStack(Utility.VIEW_FRAGMENT);
+                    transaction.commit();
                 }
-
-                transaction.replace(R.id.fragment_container, viewFragment);
-                transaction.addToBackStack(Utility.VIEW_FRAGMENT);
-                transaction.commit();
             });
 
             ivDone.setOnClickListener(view -> {
@@ -210,7 +215,6 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             }
         } else if(holder instanceof AssignmentViewHolder) {
             AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
-            ViewCompat.setTransitionName(assignmentHolder.tvTitle, context.getString(R.string.transition_title) + assignmentHolder.getAdapterPosition());
 
             Assignment assignment = position <= priority.size() ? priority.get(moderator.getArrayPosFromOverall(position)) :
                     upcoming.get(moderator.getArrayPosFromOverall(position));
@@ -251,16 +255,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 return;
             }
         } else {
-          //  System.out.println("Going up!");
             if(toPosition != 0 && fromPosition != priority.size() + 2) {
-            //    System.out.println("swap");
                 moderator.swap(fromPosition, toPosition);
             } else if(toPosition > 0) {
-              //  System.out.print("Heyoo");
                 priority.add(upcoming.get(0));
                 upcoming.remove(0);
             } else {
-                //System.out.println("top");
                 return;
             }
         }
@@ -276,7 +276,6 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public void onRowClear(AssignmentViewHolder holder) {
         holder.cardView.setSelected(false);
-        System.out.println("clear");
 
         recyclerView.post(() -> {
             notifyItemChanged(0);

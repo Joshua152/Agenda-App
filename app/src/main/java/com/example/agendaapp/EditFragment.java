@@ -114,7 +114,7 @@ public class EditFragment extends Fragment {
 
         SaveInfo info = getArguments().getParcelable(Utility.SAVE_INFO);
         assignment = info.getAssignment();
-        originalPosition = info.getOriginalPosition();
+        originalPosition = info.getPosition();
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
@@ -163,19 +163,16 @@ public class EditFragment extends Fragment {
         });
 
         ibDate.setOnClickListener(view -> {
-            DatePickerFragment fragment = new DatePickerFragment(new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                    assignment.setDateInfo(Utility.getLocalDateFormat(getActivity(), day, month + 1, year));
-                    tvDueDate.setText(assignment.getDateInfo().getDate());
+            DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
+                assignment.setDateInfo(Utility.getLocalDateFormat(getActivity(), day, month + 1, year));
+                tvDueDate.setText(assignment.getDateInfo().getDate());
 
-                    if(!pressedPriority) {
-                        priority = Utility.compareDates(Utility.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
-                        toggleStar();
-                    }
-
-                    star.setVisible(!Utility.inPriorityRange(context, assignment.getDateInfo()));
+                if(!pressedPriority) {
+                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
+                    toggleStar();
                 }
+
+                star.setVisible(!Utility.inPriorityRange(context, assignment.getDateInfo()));
             });
 
             Utility.hideSoftKeyboard(getActivity());
@@ -229,8 +226,13 @@ public class EditFragment extends Fragment {
      * Puts the data into a Bundle to a fragment result
      */
     private void save() {
+        // Due date is set in the listener
+        assignment.setTitle(etTitle.getText().toString());
+        assignment.setSubject(sSubjects.getSelectedItem().toString());
+        assignment.setDescription(etDescription.getText().toString());
+
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
 
         // To ViewFragment
         getParentFragmentManager().setFragmentResult(Utility.VIEW_RESULT_KEY, bundle);
@@ -262,27 +264,26 @@ public class EditFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case android.R.id.home :
-                getParentFragmentManager().popBackStack();
-                return true;
-            case R.id.edit_save :
-                save();
-                getParentFragmentManager().popBackStack();
-                return true;
-            case R.id.edit_star :
-                pressedPriority = true;
+        if(item.getItemId() == android.R.id.home) {
+            getParentFragmentManager().popBackStack();
+            return true;
+        } else if(item.getItemId() == R.id.edit_save) {
+            save();
+            getParentFragmentManager().popBackStack();
+            return true;
+        } else if(item.getItemId() == R.id.edit_star) {
+            pressedPriority = true;
 
-                if(priority)
-                    item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
-                else
-                    item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
+            if(priority)
+                item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
+            else
+                item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.star_anim));
 
-                ((AnimatedVectorDrawableCompat) item.getIcon()).start();
+            ((AnimatedVectorDrawableCompat) item.getIcon()).start();
 
-                priority = !priority;
+            priority = !priority;
 
-                return true;
+            return true;
         }
 
         return false;
@@ -303,10 +304,7 @@ public class EditFragment extends Fragment {
      */
     public static EditFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition, originalPosition));
-//        bundle.putParcelable(Utility.ASSIGNMENT_KEY, assignment);
-//        bundle.putInt(Utility.POSITION_KEY, originalPosition);
-//        bundle.putBoolean(Utility.PRIORITY_KEY, priority);
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
 
         EditFragment editFragment = new EditFragment();
         editFragment.setArguments(bundle);

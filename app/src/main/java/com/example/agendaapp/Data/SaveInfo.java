@@ -21,8 +21,6 @@ public class SaveInfo implements Parcelable {
     private boolean createNew;
     // The new position of the assignment
     private int position;
-    // The original position of the assignment
-    private int originalPosition;
 
     /**
      * Constructor
@@ -30,14 +28,12 @@ public class SaveInfo implements Parcelable {
      * @param isPriority If the assignment is a priority
      * @param createNew If a new assignment should be created
      * @param position The new position of the assignment
-     * @param originalPosition The original position of the assignment
      */
-    public SaveInfo(Assignment assignment, boolean isPriority, boolean createNew, int position, int originalPosition) {
+    public SaveInfo(Assignment assignment, boolean isPriority, boolean createNew, int position) {
         this.assignment = assignment;
         this.isPriority = isPriority;
         this.createNew = createNew;
         this.position = position;
-        this.originalPosition = originalPosition;
     }
 
     /**
@@ -49,7 +45,6 @@ public class SaveInfo implements Parcelable {
         isPriority = in.readInt() == 1;
         createNew = in.readInt() == 1;
         position = in.readInt();
-        originalPosition = in.readInt();
     }
 
     public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
@@ -73,7 +68,6 @@ public class SaveInfo implements Parcelable {
         out.writeInt(isPriority ? 1 : 0);
         out.writeInt(createNew ? 1 : 0);
         out.writeInt(position);
-        out.writeInt(originalPosition);
     }
 
     /**
@@ -106,13 +100,5 @@ public class SaveInfo implements Parcelable {
      */
     public int getPosition() {
         return position;
-    }
-
-    /**
-     * Gets the original position of the assignment
-     * @return Returns an int for the originalPosition
-     */
-    public int getOriginalPosition() {
-        return originalPosition;
     }
 }

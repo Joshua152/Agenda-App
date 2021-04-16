@@ -105,6 +105,7 @@
                             android:layout_height="wrap_content"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:layout_gravity="end|center_vertical"
+                            android:contentDescription="@string/cd_date_range"
                             app:srcCompat="@drawable/ic_date_range_black_24dp"/>
 
                     </LinearLayout>

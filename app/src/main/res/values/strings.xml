@@ -44,9 +44,10 @@
     <string name="due_date">Due Date: %s</string>
     <string name="subject">Subject: %s</string>
 
-    <!--Shared Element Transition Names-->
-    <string name="transition_background">transition_background</string>
-    <string name="transition_title">transition_title</string>
-    <string name="transition_due_date">transition_due_date</string>
+    <!--Content Descriptions-->
+    <string name="cd_fab">Create a new assignment</string>
+    <string name="cd_subject_icon">Subject icon</string>
+    <string name="cd_done">Done</string>
+    <string name="cd_date_range">Date range</string>
 
 </resources>
