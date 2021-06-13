@@ -36,6 +36,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
+import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Resize;
 import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
@@ -164,15 +165,15 @@ public class EditFragment extends Fragment {
 
         ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
-                assignment.setDateInfo(Utility.getLocalDateFormat(getActivity(), day, month + 1, year));
+                assignment.setDateInfo(DateUtils.getLocalDateFormat(getActivity(), day, month + 1, year));
                 tvDueDate.setText(assignment.getDateInfo().getDate());
 
                 if(!pressedPriority) {
-                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
+                    priority = DateUtils.compareDates(DateUtils.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
                     toggleStar();
                 }
 
-                star.setVisible(!Utility.inPriorityRange(context, assignment.getDateInfo()));
+                star.setVisible(!DateUtils.inPriorityRange(context, assignment.getDateInfo()));
             });
 
             Utility.hideSoftKeyboard(getActivity());
@@ -291,7 +292,7 @@ public class EditFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if(Utility.inPriorityRange(context, assignment.getDateInfo()))
+        if(DateUtils.inPriorityRange(context, assignment.getDateInfo()))
             menu.getItem(0).setVisible(false);
     }
 

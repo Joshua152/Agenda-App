@@ -36,6 +36,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Utils.DatePickerFragment;
+import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Resize;
 import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
@@ -107,7 +108,7 @@ public class CreateFragment extends Fragment {
         ibDate = (ImageButton) view.findViewById(R.id.create_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.create_s_subject);
 
-        currentDateInfo = Utility.getDay(getActivity(), 1);
+        currentDateInfo = DateUtils.getDay(getActivity(), 1);
         resize = new Resize(getActivity());
 
         descriptionMinHeight = 0;
@@ -130,7 +131,7 @@ public class CreateFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sSubjects.setAdapter(adapter);
 
-        tvDueDate.setText(Utility.getDay(getActivity(), 1).getDate());
+        tvDueDate.setText(DateUtils.getDay(getActivity(), 1).getDate());
     }
 
     /**
@@ -179,15 +180,15 @@ public class CreateFragment extends Fragment {
 
         ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
-                currentDateInfo = Utility.getLocalDateFormat(getActivity(), day, month + 1, year);
+                currentDateInfo = DateUtils.getLocalDateFormat(getActivity(), day, month + 1, year);
                 tvDueDate.setText(currentDateInfo.getDate());
 
                 if(!pressedPriority) {
-                    priority = Utility.compareDates(Utility.getDay(getActivity(), 2), currentDateInfo) == DateInfo.FURTHER;
+                    priority = DateUtils.compareDates(DateUtils.getDay(getActivity(), 2), currentDateInfo) == DateInfo.FURTHER;
                     toggleStar();
                 }
 
-                star.setVisible(!Utility.inPriorityRange(context, currentDateInfo));
+                star.setVisible(!DateUtils.inPriorityRange(context, currentDateInfo));
             });
 
             Utility.hideSoftKeyboard(getActivity());
@@ -253,7 +254,7 @@ public class CreateFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        if(Utility.inPriorityRange(context, currentDateInfo)) {
+        if(DateUtils.inPriorityRange(context, currentDateInfo)) {
             menu.getItem(0).setVisible(false);
         }
     }

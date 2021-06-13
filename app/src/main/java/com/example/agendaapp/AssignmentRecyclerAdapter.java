@@ -29,6 +29,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Utils.Utility;
@@ -224,7 +225,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             assignmentHolder.tvDescription.setText(assignment.getDescription());
             assignmentHolder.ivType.setImageResource(Utility.getSubjectDrawable(context, assignment.getSubject()));
 
-            if(position <= priority.size() && Utility.isLate(context, priority.get(moderator.getArrayPosFromOverall(position)).getDateInfo())) {
+            if(position <= priority.size() && DateUtils.isLate(context, priority.get(moderator.getArrayPosFromOverall(position)).getDateInfo())) {
                 assignmentHolder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.late));
                 assignmentHolder.tvDueDate.setTextColor(ContextCompat.getColor(context, R.color.late));
                 assignmentHolder.tvDescription.setTextColor(ContextCompat.getColor(context, R.color.late));
@@ -242,7 +243,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
     public void onRowMoved(AssignmentViewHolder holder, int fromPosition, int toPosition) {
         // going down
         if(fromPosition < toPosition) {
-            if(toPosition == priority.size() + 1 && Utility.inPriorityRange(context, priority.get(fromPosition - 1).getDateInfo())) {
+            if(toPosition == priority.size() + 1 && DateUtils.inPriorityRange(context, priority.get(fromPosition - 1).getDateInfo())) {
                 Toast.makeText(context, context.getString(R.string.already_in_range_toast), Toast.LENGTH_SHORT).show();
             } else if(toPosition < moderator.getItemCount() + 2) {
                 if(fromPosition != priority.size()) { // size is always at least 1

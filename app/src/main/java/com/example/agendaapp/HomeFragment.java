@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
+import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
@@ -154,7 +155,7 @@ public class HomeFragment extends Fragment {
     private void update() {
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
-            if(Utility.inPriorityRange(context, upcoming.get(i).getDateInfo()))
+            if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo()))
                 addToList(priority, upcoming.get(i));
         }
     }
@@ -205,9 +206,9 @@ public class HomeFragment extends Fragment {
             boolean moved = false;
 
             if (i != list.size() - 1)
-                moved = Utility.compareDates(fromArray, list.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
+                moved = DateUtils.compareDates(fromArray, list.get(i + 1).getDateInfo()) == DateInfo.FURTHER;
 
-            if (!moved && Utility.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
+            if (!moved && DateUtils.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
                 list.add(i, assignment);
 
                 return;
