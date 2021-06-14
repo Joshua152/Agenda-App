@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/cd_fab"
             app:srcCompat="@drawable/ic_add_white_24dp"
-            app:layout_anchor="@id/bottom_app_bar" />
+            app:layout_anchor="@id/bottom_app_bar"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

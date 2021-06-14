@@ -9,7 +9,7 @@
  * @since 6/24/2020
  */
 
-package com.example.agendaapp;
+package com.example.agendaapp.RecyclerAdapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -29,10 +29,13 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.MainActivity;
+import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Utils.Utility;
+import com.example.agendaapp.ViewFragment;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;

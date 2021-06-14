@@ -212,7 +212,6 @@ public class CreateFragment extends Fragment {
                 return false;
             }
         });
-
     }
 
     /**

@@ -14,7 +14,7 @@ import android.graphics.Canvas;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.agendaapp.AssignmentRecyclerAdapter;
+import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 
 public class ItemMoveCallback extends ItemTouchHelper.Callback {
 

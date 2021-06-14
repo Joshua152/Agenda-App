@@ -6,6 +6,7 @@
     <string name="create_title">Create Assignment</string>
     <string name="view_title">View Assignment</string>
     <string name="edit_title">Edit Assignment</string>
+    <string name="import_title">Import</string>
 
     <!--Home Fragment-->
     <string name="priority">Priority</string>
@@ -49,5 +50,9 @@
     <string name="cd_subject_icon">Subject icon</string>
     <string name="cd_done">Done</string>
     <string name="cd_date_range">Date range</string>
+    <string name="cd_platform_icon">Platform icon</string>
+    <string name="cd_view_platform">View platform</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

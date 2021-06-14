@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
+import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
@@ -141,6 +142,8 @@ public class HomeFragment extends Fragment {
      */
     private void initListeners() {
         fab.setOnClickListener(view -> {
+            setExitTransition(null);
+
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
             transaction.replace(R.id.fragment_container, new CreateFragment());
