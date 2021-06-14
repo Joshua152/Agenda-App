@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             app:hideOnScroll="true"
+            app:menu="@menu/menu_home"
             style="@style/Widget.MaterialComponents.BottomAppBar.Colored"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

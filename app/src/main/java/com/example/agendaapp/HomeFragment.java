@@ -11,6 +11,8 @@ package com.example.agendaapp;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -34,6 +36,7 @@ import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.Utils.Utility;
+import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
@@ -45,6 +48,7 @@ public class HomeFragment extends Fragment {
 
     private Context context;
 
+    private BottomAppBar bottomAppBar;
     private FloatingActionButton fab;
 
     private RecyclerView recyclerView;
@@ -63,7 +67,10 @@ public class HomeFragment extends Fragment {
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.home_toolbar);
         toolbar.setTitle(getString(R.string.home_title));
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        ((AppCompatActivity) getActivity()).setSupportActionBar((BottomAppBar) view.findViewById(R.id.bottom_app_bar));
+
+        setHasOptionsMenu(true);
 
         getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
@@ -105,7 +112,9 @@ public class HomeFragment extends Fragment {
 
         initArrays(onSavedInstance);
 
+        bottomAppBar = (BottomAppBar) view.findViewById(R.id.bottom_app_bar);
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
+
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
 
         setArrayAdapter();
@@ -141,6 +150,23 @@ public class HomeFragment extends Fragment {
      * Initializes the onClickListeners
      */
     private void initListeners() {
+        bottomAppBar.setOnMenuItemClickListener(item -> {
+            switch(item.getItemId()) {
+                case R.id.home_import :
+                    setExitTransition(null);
+
+                    FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                    transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+                    transaction.replace(R.id.fragment_container, new ImportFragment());
+                    transaction.addToBackStack(Utility.IMPORT_FRAGMENT);
+                    transaction.commit();
+
+                    return true;
+            }
+
+            return false;
+        });
+
         fab.setOnClickListener(view -> {
             setExitTransition(null);
 
@@ -150,6 +176,13 @@ public class HomeFragment extends Fragment {
             transaction.addToBackStack(Utility.CREATE_FRAGMENT);
             transaction.commit();
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_home, menu);
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     /**

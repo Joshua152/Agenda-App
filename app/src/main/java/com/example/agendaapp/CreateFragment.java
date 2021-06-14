@@ -262,6 +262,8 @@ public class CreateFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home :
+                Utility.hideSoftKeyboard(getActivity());
+
                 FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_right);
                 transaction.replace(R.id.fragment_container, MainActivity.homeFragment);

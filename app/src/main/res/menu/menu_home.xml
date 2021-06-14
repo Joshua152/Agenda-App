@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home_import"
+        android:icon="@drawable/ic_import_white_24dp"
+        android:title="@string/import_icon_title"
+        android:contentDescription="@string/cd_import_icon"
+        app:showAsAction="ifRoom"/>
+
+</menu>

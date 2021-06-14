@@ -32,6 +32,7 @@ public class Utility {
     public final static String CREATE_FRAGMENT = "Create Fragment";
     public final static String EDIT_FRAGMENT = "Edit Fragment";
     public final static String VIEW_FRAGMENT = "View Fragment";
+    public final static String IMPORT_FRAGMENT = "Import Fragment";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
 

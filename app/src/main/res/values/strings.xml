@@ -11,8 +11,9 @@
     <!--Home Fragment-->
     <string name="priority">Priority</string>
     <string name="upcoming_assignments">Upcoming</string>
-
     <string name="none">- None</string>
+
+    <string name="import_icon_title">Import</string>
 
     <string name="already_in_range_toast">Due date of assignment is in priority range</string>
 
@@ -52,7 +53,6 @@
     <string name="cd_date_range">Date range</string>
     <string name="cd_platform_icon">Platform icon</string>
     <string name="cd_view_platform">View platform</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="cd_import_icon">Import icon</string>
 
 </resources>
