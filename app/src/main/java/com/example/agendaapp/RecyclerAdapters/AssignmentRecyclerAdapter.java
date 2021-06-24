@@ -139,6 +139,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, moderator.getItemCount() + moderator.lists());
+
+                if(priority.size() == 0)
+                    notifyItemChanged(0);
+
+                if(upcoming.size() == 0)
+                    notifyItemChanged(priority.size() + 1);
             });
         }
 

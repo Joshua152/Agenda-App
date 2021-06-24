@@ -50,7 +50,8 @@
                 android:layout_height="wrap_content"
                 android:text="Title"
                 android:textAppearance="?attr/textAppearanceHeadline6"
-                android:maxLines="1"/>
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
             <TextView
                 android:id="@+id/assignment_tv_due_date"

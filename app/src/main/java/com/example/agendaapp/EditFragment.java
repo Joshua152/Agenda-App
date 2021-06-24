@@ -11,6 +11,8 @@ package com.example.agendaapp;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
@@ -60,7 +63,7 @@ public class EditFragment extends Fragment {
 
     private MenuItem star;
 
-    private Resize resize;
+    private Resize contentViewResize;
 
     private Assignment assignment;
 
@@ -111,14 +114,15 @@ public class EditFragment extends Fragment {
         ibDate = (ImageButton) view.findViewById(R.id.edit_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.edit_s_subject);
 
-        resize = new Resize(getActivity());
+        contentViewResize = new Resize((View) getActivity().getWindow().getDecorView(),
+                (View) getActivity().getWindow().getDecorView().findViewById(Window.ID_ANDROID_CONTENT));
 
         SaveInfo info = getArguments().getParcelable(Utility.SAVE_INFO);
         assignment = info.getAssignment();
         originalPosition = info.getPosition();
 
         descriptionMinHeight = 0;
-        originalContentHeight = resize.getContentHeight();
+        originalContentHeight = contentViewResize.getContentHeight();
 
         priority = info.getIsPriority();
         pressedPriority = false;
@@ -147,8 +151,9 @@ public class EditFragment extends Fragment {
      * Inits the listeners
      */
     private void initListeners() {
-        resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
+        contentViewResize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
             if(toHeight == originalContentHeight) {
+                // line height = height * multiplier + extra
                 etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
                         * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
                         + etDescription.getCompoundPaddingBottom());
@@ -161,6 +166,36 @@ public class EditFragment extends Fragment {
                 etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
                         tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
             }
+
+        });
+
+        etTitle.addTextChangedListener(new TextWatcher() {
+            int linesBefore;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                linesBefore = etTitle.getLineCount();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable e) {
+                int linesAfter = etTitle.getLineCount();
+
+                if(linesBefore != linesAfter) {
+                  if(linesAfter < etTitle.getMaxLines() || (linesBefore < linesAfter && linesAfter == etTitle.getMaxLines())) {
+                      etDescription.setHeight(etDescription.getHeight() - (int) ((linesAfter - linesBefore) * (etDescription.getLineHeight() * etDescription.getLineSpacingMultiplier()
+                              + etDescription.getLineSpacingExtra())));
+                  } else if(linesAfter == etTitle.getMaxLines() + 1 && linesBefore < linesAfter) {
+                      etDescription.setHeight(etDescription.getHeight() + 1);
+                  } else if(linesAfter == etTitle.getMaxLines() && linesAfter < linesBefore) {
+                      etDescription.setHeight(etDescription.getHeight() - 1);
+                  }
+                }
+            }
         });
 
         ibDate.setOnClickListener(view -> {
@@ -168,7 +203,7 @@ public class EditFragment extends Fragment {
                 assignment.setDateInfo(DateUtils.getLocalDateFormat(getActivity(), day, month + 1, year));
                 tvDueDate.setText(assignment.getDateInfo().getDate());
 
-                if(!pressedPriority) {
+                if (!pressedPriority) {
                     priority = DateUtils.compareDates(DateUtils.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
                     toggleStar();
                 }

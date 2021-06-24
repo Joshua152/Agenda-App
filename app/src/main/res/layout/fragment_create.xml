@@ -55,7 +55,7 @@
                     android:overScrollMode="always"
                     android:scrollbarStyle="insideInset"
                     android:scrollbars="vertical"
-                    android:inputType="textCapWords" />
+                    android:inputType="textCapWords|textMultiLine" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -155,7 +155,7 @@
                         android:overScrollMode="always"
                         android:scrollbarStyle="insideInset"
                         android:scrollbars="vertical"
-                        android:inputType="textCapSentences"/>
+                        android:inputType="textCapSentences|textMultiLine" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

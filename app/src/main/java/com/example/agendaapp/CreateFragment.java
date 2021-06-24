@@ -11,6 +11,8 @@ package com.example.agendaapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -109,7 +112,8 @@ public class CreateFragment extends Fragment {
         sSubjects = (Spinner) view.findViewById(R.id.create_s_subject);
 
         currentDateInfo = DateUtils.getDay(getActivity(), 1);
-        resize = new Resize(getActivity());
+        resize = new Resize((View) getActivity().getWindow().getDecorView(),
+                (View) getActivity().getWindow().getDecorView().findViewById(Window.ID_ANDROID_CONTENT));
 
         descriptionMinHeight = 0;
         originalContentHeight = resize.getContentHeight();
@@ -140,6 +144,7 @@ public class CreateFragment extends Fragment {
     private void initListeners() {
         resize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
             if(toHeight == originalContentHeight) {
+                // line height = height * multiplier + extra
                 etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
                         * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
                         + etDescription.getCompoundPaddingBottom());
@@ -151,6 +156,35 @@ public class CreateFragment extends Fragment {
             } else {
                 etDescription.setHeight(toHeight - (int)(toolbar.getHeight() + llDescription.getTop() + tiDescription.getPaddingTop() +
                         tiDescription.getPaddingBottom() + tiDescription.getPaddingBottom()));
+            }
+        });
+
+        etTitle.addTextChangedListener(new TextWatcher() {
+            int linesBefore;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                linesBefore = etTitle.getLineCount();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable e) {
+                int linesAfter = etTitle.getLineCount();
+
+                if(linesBefore != linesAfter) {
+                    if(linesAfter < etTitle.getMaxLines() || (linesBefore < linesAfter && linesAfter == etTitle.getMaxLines())) {
+                        etDescription.setHeight(etDescription.getHeight() - (int) ((linesAfter - linesBefore) * (etDescription.getLineHeight() * etDescription.getLineSpacingMultiplier()
+                                + etDescription.getLineSpacingExtra())));
+                    } else if(linesAfter == etTitle.getMaxLines() + 1 && linesBefore < linesAfter) {
+                        etDescription.setHeight(etDescription.getHeight() + 1);
+                    } else if(linesAfter == etTitle.getMaxLines() && linesAfter < linesBefore) {
+                        etDescription.setHeight(etDescription.getHeight() - 1);
+                    }
+                }
             }
         });
 

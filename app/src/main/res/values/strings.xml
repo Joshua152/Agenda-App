@@ -46,6 +46,14 @@
     <string name="due_date">Due Date: %s</string>
     <string name="subject">Subject: %s</string>
 
+    <!--Import Fragment-->
+    <string name="sign_in">Sign In</string>
+
+    <string name="google_classroom">Google Classroom</string>
+
+    <string name="import_error">Import error</string>
+    <string name="import_info_error">Error getting info</string>
+
     <!--Content Descriptions-->
     <string name="cd_fab">Create a new assignment</string>
     <string name="cd_subject_icon">Subject icon</string>
@@ -54,5 +62,7 @@
     <string name="cd_platform_icon">Platform icon</string>
     <string name="cd_view_platform">View platform</string>
     <string name="cd_import_icon">Import icon</string>
+    <string name="cd_account_icon">Account icon</string>
+    <string name="cd_sign_out">Sign out</string>
 
 </resources>

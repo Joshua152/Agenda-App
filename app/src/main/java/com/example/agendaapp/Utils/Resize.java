@@ -9,6 +9,7 @@
 package com.example.agendaapp.Utils;
 
 import android.app.Activity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
@@ -17,22 +18,22 @@ import java.util.List;
 
 public class Resize {
 
-    // The app's DecorView (encompasses the AppBar and ContentView)
-    private ViewGroup decorView;
-    // The app's ContentView
-    private ViewGroup contentView;
+    // The view the listener will be added to
+    private View listenerView;
+    // The view to listen for resize
+    private View contentView;
 
-    // All the listeners for when the ContentView has been resized
+    // All the listeners for when the content view has been resized
     private List<ResizeListener> listeners;
 
-    // The previous height of the ContentView
+    // The previous height of the content view
     private int previousHeight;
-    // The current height of the ContentView
+    // The current height of the content view
     private int currentHeight;
 
-    public Resize(Activity activity) {
-        decorView = (ViewGroup) activity.getWindow().getDecorView();
-        contentView = decorView.findViewById(Window.ID_ANDROID_CONTENT);
+    public Resize(View listenerView, View contentView) {
+        this.listenerView = listenerView;
+        this.contentView = contentView;
 
         listeners = new ArrayList<ResizeListener>();
 
@@ -47,11 +48,11 @@ public class Resize {
     }
 
     /**
-     * Listeners for if the ContentView has been resized
+     * Listeners for if the content view has been resized
      */
     private void listen() {
         // onPreDraw()
-        decorView.getViewTreeObserver().addOnPreDrawListener(() -> {
+        listenerView.getViewTreeObserver().addOnPreDrawListener(() -> {
             currentHeight = contentView.getHeight();
 
             if(currentHeight != previousHeight) {
@@ -67,8 +68,8 @@ public class Resize {
     }
 
     /**
-     * Gets the height of the ContentView
-     * @return Returns the pixel height of the ContentView
+     * Gets the height of the content view
+     * @return Returns the pixel height of the content view
      */
     public int getContentHeight() {
         return contentView.getHeight();
@@ -78,6 +79,6 @@ public class Resize {
      * Defines the ResizeListener interface
      */
     public interface ResizeListener {
-        void onResize(int fromHeight, int toHeight, ViewGroup contentView);
+        void onResize(int fromHeight, int toHeight, View contentView);
     }
 }
