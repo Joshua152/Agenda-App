@@ -6,7 +6,7 @@
  * @since 6/24/2020
  */
 
-package com.example.agendaapp.Utils;
+package com.example.agendaapp.Dialogs;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;

@@ -8,6 +8,9 @@
     <string name="edit_title">Edit Assignment</string>
     <string name="import_title">Import</string>
 
+    <!--Contextual App Bar Titles-->
+    <string name="import_delete_title">Delete Platforms</string>
+
     <!--Home Fragment-->
     <string name="priority">Priority</string>
     <string name="upcoming_assignments">Upcoming</string>
@@ -47,22 +50,39 @@
     <string name="subject">Subject: %s</string>
 
     <!--Import Fragment-->
+    <string name="add_import_platform">Add Import Platform</string>
+
     <string name="sign_in">Sign In</string>
 
     <string name="google_classroom">Google Classroom</string>
 
+    <string name="logged_out">You have been logged out of an account</string>
+
+    <string name="delete">Delete</string>
+
     <string name="import_error">Import error</string>
     <string name="import_info_error">Error getting info</string>
 
+    <!--Platform Select-->
+    <string name="done">Done</string>
+
     <!--Content Descriptions-->
     <string name="cd_fab">Create a new assignment</string>
+
     <string name="cd_subject_icon">Subject icon</string>
     <string name="cd_done">Done</string>
     <string name="cd_date_range">Date range</string>
+
     <string name="cd_platform_icon">Platform icon</string>
     <string name="cd_view_platform">View platform</string>
     <string name="cd_import_icon">Import icon</string>
     <string name="cd_account_icon">Account icon</string>
     <string name="cd_sign_out">Sign out</string>
+
+    <string name="cd_add_import">Add import platform</string>
+    <string name="cd_delete">Delete</string>
+
+    <string name="cd_add_platform">Add</string>
+    <string name="cd_remove_platform">Remove</string>
 
 </resources>

@@ -17,6 +17,8 @@ import java.io.Serializable;
 
 public class Assignment implements Parcelable, Serializable {
 
+    private static final long serialVersionUID = -1605429230305680146L;
+
     // Assignment due date
     private DateInfo dateInfo;
     // Title of the assignment
@@ -168,5 +170,14 @@ public class Assignment implements Parcelable, Serializable {
      */
     public DateInfo getDateInfo() {
         return dateInfo;
+    }
+
+    @Override
+    public String toString() {
+        return "\n{\n\tTitle: " + title + " " +
+                "\n\tDescription: " + description +
+                "\n\tSubject: " + subject +
+                "\n\tDue Date: " + dateInfo.getDate() +
+                "\n}\n";
     }
 }

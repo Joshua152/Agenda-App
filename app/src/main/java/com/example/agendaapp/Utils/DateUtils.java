@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Date;
 
 public class DateUtils {
@@ -24,11 +25,19 @@ public class DateUtils {
      * @param inDaysTime Days after the current day
      * @return Returns a DateInfo object which holds the requested date in the local date format
      */
-    public static DateInfo getDay (Context context, int inDaysTime) {
+    public static DateInfo getDay(Context context, int inDaysTime) {
         LocalDate localDate = LocalDate.now();
-        int day = localDate.getDayOfMonth() + inDaysTime;
+        int day = localDate.getDayOfMonth();
         int month = localDate.getMonthValue();
         int year = localDate.getYear();
+
+        YearMonth yearMonth = YearMonth.of(year, month);
+        int daysInMonth = yearMonth.lengthOfMonth();
+
+        month += (day + inDaysTime) / daysInMonth;
+        day = (day + inDaysTime) % daysInMonth;
+        year += month / 12;
+        month %= 12;
 
         return getLocalDateFormat(context, day, month, year);
     }
@@ -38,7 +47,7 @@ public class DateUtils {
      *
      * @param context Context
      * @param day Day of the month
-     * @param month Month (0 - 11)
+     * @param month Month (1 - 12)
      * @param year Year
      * @return Returns a DateInfo object localized for the user's area
      */

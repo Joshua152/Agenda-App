@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
+import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
@@ -41,6 +42,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,11 +191,41 @@ public class HomeFragment extends Fragment {
      * Updates the lists
      */
     private void update() {
+        // TODO: HOW DO THE ARRAYS SAVE AFTER UPDATE?
+
+        //TODO: DOESN'T ACTUALLY WORK? MAKE SURE TO REMOVE UPCOMING ASSIGNMENT AND SAVE???
+
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
-            if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo()))
-                addToList(priority, upcoming.get(i));
+            if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo())) {
+                int pos = addToList(priority, upcoming.remove(i));
+                recyclerViewAdapter.notifyItemMoved(i + 2 + priority.size(), pos);
+            }
         }
+
+        if(ImportFragment.platforms == null)
+            ImportFragment.platforms = ImportFragment.getSavedPlatforms(context, getActivity());
+
+        for(Platform p : ImportFragment.platforms) {
+            p.getNewAssignments(assignments -> {
+                System.out.println(assignments);
+
+                for(Assignment a : assignments) {
+                    int pos = 0;
+
+                    if(DateUtils.inPriorityRange(context, a.getDateInfo()))
+                        pos = addToList(priority, a);
+                    else
+                        pos = addToList(upcoming, a);
+
+                    recyclerViewAdapter.notifyItemInserted(pos);
+                }
+
+                Utility.serializeArrays(context, priority, upcoming);
+            });
+        }
+
+        Utility.serializeArrays(context, priority, upcoming);
     }
 
     /**
@@ -211,7 +243,7 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * SSerializes the arrays
+     * Serializes the arrays
      * @param bundle The bundle to save from
      */
     private void save(Bundle bundle) {
@@ -234,8 +266,9 @@ public class HomeFragment extends Fragment {
      * Adds an assignment to a specified list
      * @param list The list to be added to
      * @param assignment The assignment to add
+     * @return Returns the position of the assignment in the list
      */
-    public void addToList(List<Assignment> list, Assignment assignment) {
+    public int addToList(List<Assignment> list, Assignment assignment) {
         for(int i = 0; i < list.size(); i++) {
             DateInfo fromArray = list.get(i).getDateInfo();
 
@@ -247,11 +280,13 @@ public class HomeFragment extends Fragment {
             if (!moved && DateUtils.compareDates(fromArray, assignment.getDateInfo()) == DateInfo.FURTHER) {
                 list.add(i, assignment);
 
-                return;
+                return i;
             }
         }
 
         list.add(assignment);
+
+        return list.size() - 1;
     }
 
     /*

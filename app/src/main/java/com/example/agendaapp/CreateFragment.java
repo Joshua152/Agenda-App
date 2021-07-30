@@ -38,7 +38,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
-import com.example.agendaapp.Utils.DatePickerFragment;
+import com.example.agendaapp.Dialogs.DatePickerFragment;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Resize;
 import com.example.agendaapp.Data.SaveInfo;
@@ -177,7 +177,8 @@ public class CreateFragment extends Fragment {
 
                 if(linesBefore != linesAfter) {
                     if(linesAfter < etTitle.getMaxLines() || (linesBefore < linesAfter && linesAfter == etTitle.getMaxLines())) {
-                        etDescription.setHeight(etDescription.getHeight() - (int) ((linesAfter - linesBefore) * (etDescription.getLineHeight() * etDescription.getLineSpacingMultiplier()
+                        etDescription.setHeight(etDescription.getHeight() - (int) ((linesAfter - linesBefore)
+                                * (etDescription.getLineHeight() * etDescription.getLineSpacingMultiplier()
                                 + etDescription.getLineSpacingExtra())));
                     } else if(linesAfter == etTitle.getMaxLines() + 1 && linesBefore < linesAfter) {
                         etDescription.setHeight(etDescription.getHeight() + 1);

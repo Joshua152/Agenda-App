@@ -1,5 +1,7 @@
 /**
  * Defines the methods for the Google Classroom method.
+ *
+ * ASSUMES: LifecycleOwner is a Fragment
  */
 
 package com.example.agendaapp.Platform;
@@ -12,108 +14,98 @@ import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.R;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.SignInButton;
+import com.example.agendaapp.Utils.DateUtils;
+import com.example.agendaapp.Utils.Utility;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.api.client.util.DateTime;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GoogleClassroom extends Platform {
 
-    private final String ID;
+    public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
 
     private Activity activity;
     private Context context;
 
-    private ActivityResultRegistry registry;
+    private SharedPreferences preferences;
+
     private ActivityResultLauncher<Intent> launcher;
-    private ActivityResultLauncher<Intent> credentialsLauncher;
 
     private RequestQueue queue;
     private JsonObjectRequest photoRequest;
 
-    private String authToken;
-
-
     /**
-     * Constructor, pass in the activity or fragment's parent activity, and a registry by calling
-     * requireActivity().getActivityResultRegistry()
+     * Constructor, pass in the activity or fragment's parent activity
      * @param activity The activity or fragment's parent activity
-     * @param registry The registry to get the callback when the user signs in
      */
-    public GoogleClassroom(Activity activity, ActivityResultRegistry registry) {
+    public GoogleClassroom(Activity activity) {
         super(ResourcesCompat.getDrawable(activity.getBaseContext().getResources(), R.drawable.ic_google_classroom_32dp, null),
-                activity.getBaseContext().getString(R.string.google_classroom), new SignInButton(activity.getBaseContext()));
-
-        ID = UUID.randomUUID().toString();
+                activity.getBaseContext().getString(R.string.google_classroom),
+                Utility.getViewFromXML(activity, R.layout.button_google_classroom));
 
         this.activity = activity;
         this.context = activity.getBaseContext();
 
-        this.registry = registry;
+        preferences = context.getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
+
         launcher = null;
-        credentialsLauncher = null;
 
         queue = Volley.newRequestQueue(activity.getApplicationContext());
         photoRequest = null;
 
-        authToken = "";
-
-        initListeners();
+        initRequests();
     }
 
     @Override
     public void onCreate(LifecycleOwner owner) {
+        ActivityResultRegistry registry = ((Fragment) owner).requireActivity().getActivityResultRegistry();
+
         launcher = registry.register("Google Classroom" + ID, owner,
             new ActivityResultContracts.StartActivityForResult(),
             (uri) -> {
                 if(uri.getResultCode() == Activity.RESULT_OK)
                     getAuthToken(uri.getData());
             });
-
-        credentialsLauncher = registry.register("Google Classroom Credentials " + ID, owner,
-                new ActivityResultContracts.StartActivityForResult(),
-                (uri) -> {
-                    if(uri.getResultCode() == Activity.RESULT_OK)
-                        getAuthToken(uri.getData());
-                });
     }
 
     /*
-     * Inits listeners (onClick, etc.)
+     * Inits http requests
      */
-    public void initListeners() {
+    public void initRequests() {
         photoRequest = new JsonObjectRequest(Request.Method.GET,
                 "https://people.googleapis.com/v1/people/me?personFields=photos",
                 null,
@@ -122,7 +114,7 @@ public class GoogleClassroom extends Platform {
                     try {
                         String photoURL = response.getJSONArray("photos").getJSONObject(0).getString("url");
 
-                        setAccountIcon(photoURL);
+                        setAccountIconURL(photoURL);
 
                         callSignInListeners();
                     } catch(JSONException e) {
@@ -132,14 +124,33 @@ public class GoogleClassroom extends Platform {
                 },
                 error -> {
                     // 401 error = expired token; call AccountManager.invalidateAuthToken() and get auth again
+                    // 403 error = missing API key (make sure to override geHeaders and add in auth token)
                     try {
                         byte[] htmlBodyBytes = error.networkResponse.data;
                         Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
+
+                        try {
+                            JSONObject json = new JSONObject(new String(htmlBodyBytes));
+                            int errorCode = json.getJSONObject("error").getInt("code");
+
+                            switch(errorCode) {
+                                case 401 :
+                                    onClickSignOut();
+                                    callSignOutRequestListeners();
+
+                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+
+                                    break;
+                            }
+                        } catch(JSONException e) {
+                            Log.e("IMPORT ERROR", "Could not parse error JSON");
+                        }
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
 
-                    Toast.makeText(context, R.string.import_info_error, Toast.LENGTH_SHORT).show();
+                  //  Toast.makeText(context, R.string.import_info_error, Toast.LENGTH_SHORT).show();
                 }
         ) {
             @Override
@@ -158,13 +169,15 @@ public class GoogleClassroom extends Platform {
      * Makes the call to AccountManager.getAuthToken()
      * @param data Intent data for the account
      */
-    private void getAuthToken(Intent data) {
+    public void getAuthToken(Intent data) {
         AccountManager manager = AccountManager.get(context);
         Bundle options = new Bundle();
 
         manager.getAuthToken(
                 new Account(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME), data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)),
-                "oauth2:https://www.googleapis.com/auth/classroom.coursework.me.readonly https://www.googleapis.com/auth/userinfo.profile",
+                "oauth2:https://www.googleapis.com/auth/userinfo.profile " +
+                        "https://www.googleapis.com/auth/classroom.courses.readonly " +
+                        "https://www.googleapis.com/auth/classroom.coursework.me.readonly ",
                 options,
                 activity,
                 // on token acquired
@@ -177,12 +190,13 @@ public class GoogleClassroom extends Platform {
                         Intent launch = (Intent) bundle.get(AccountManager.KEY_INTENT);
 
                         if(launch != null)
-                            credentialsLauncher.launch(launch);
+                            launcher.launch(launch);
 
                         authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
 
                         queue.add(photoRequest);
                     } catch(AuthenticatorException | IOException | OperationCanceledException e) {
+                        System.err.println(e.toString());
                         Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
                     }
                 },
@@ -192,6 +206,237 @@ public class GoogleClassroom extends Platform {
                     return false;
                 })
         );
+    }
+
+    @Override
+    public void checkAuthTokenValid() {
+        if(authToken.equals(""))
+            return;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
+                "https://people.googleapis.com/v1/people/me?personFields=photos",
+                null,
+                null,
+                error -> {
+                    try {
+                        byte[] b = error.networkResponse.data;
+                        Log.e("IMPORT ERROR", new String(b), error);
+
+                        try {
+                            JSONObject json = new JSONObject(new String(b));
+                            int errorCode = json.getJSONObject("error").getInt("code");
+
+                            switch(errorCode) {
+                                case 401 :
+                                    onClickSignOut();
+                                    callSignOutRequestListeners();
+
+                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+
+                                    break;
+                            }
+                        } catch(JSONException e) {
+                            Log.e("IMPORT ERROR", "Could not parse error JSON");
+                        }
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("Content-Type", "application/json");
+                params.put("authorization", "Bearer " + authToken);
+
+                return params;
+            }
+        };
+
+        queue.add(request);
+    }
+
+    @Override
+    public void signInWithPrevAuth() {
+        if(!authToken.equals(""))
+            queue.add(photoRequest);
+    }
+
+    @Override
+    public void getNewAssignments(AssignmentReceivedListener listener) {
+        // TODO: DELETE LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if(authToken.equals(""))
+            return;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
+                "https://classroom.googleapis.com/v1/courses?studentId=me&courseStates=ACTIVE&pageSize=0",
+                null,
+                // response: JSONObject
+                response -> {
+                    try {
+                        List<Assignment> newAssignments = Collections.synchronizedList(new ArrayList<Assignment>());
+
+                        JSONArray courses = response.getJSONArray("courses");
+
+                        System.out.println("courses: " + courses.toString(4));
+
+                        AtomicInteger numDone = new AtomicInteger(0);
+
+                        for(int i = 0; i < courses.length(); i++) {
+                            JSONObject o = courses.getJSONObject(i);
+
+                            handleAssignmentsForCourse(o.getString("id"), new ArrayList<Assignment>(), (assignments -> {
+                                for(Assignment a : assignments)
+                                    a.setSubject("Other");
+
+                                newAssignments.addAll(assignments);
+
+                                numDone.getAndIncrement();
+
+                                if(numDone.get() == courses.length())
+                                    listener.onAssignmentReceived(newAssignments);
+                            }));
+                        }
+                    } catch(JSONException e) {
+                        Log.e("IMPORT ERROR", "Unable to parse JSON");
+                    }
+                },
+                error -> {
+                    try {
+                        byte[] b = error.networkResponse.data;
+                        Log.e("IMPORT ERROR", new String(b), error);
+
+                        try {
+                            JSONObject o = new JSONObject(new String(b));
+                            int errorCode = o.getJSONObject("error").getInt("code");
+
+                            switch (errorCode) {
+                                case 401 :
+                                    onClickSignOut();
+                                    callSignOutRequestListeners();
+
+                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+
+                                    break;
+                            }
+                        } catch (JSONException e) {
+                            Log.e("IMPORT ERROR", "Could not parse error JSON");
+                        }
+                    } catch(NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("Content-Type", "application/json");
+                params.put("authorization", "Bearer " + authToken);
+
+                return params;
+            }
+        };
+
+        queue.add(request);
+    }
+
+    // TOOO: FOR LAST IMPORTED MILLIS USE SHARED PREF SO IT'S NOT EXCLUSIVE TO ONE PLATFORM INSTANCE (<PLATFORM><COURSE ID>:<LAST IMPORTED MILLIS>)
+
+    /**
+     * Handles adding the assignments for a given course to the list. **The subject will not be set
+     * @param courseId The course to get the assignments from
+     * @param assignments The list to add the course's assignments to
+     */
+    private void handleAssignmentsForCourse(String courseId, List<Assignment> assignments, AssignmentReceivedListener listener) {
+        JsonObjectRequest request =  new JsonObjectRequest(Request.Method.GET,
+                "https://classroom.googleapis.com/v1/courses/" + courseId + "/courseWork?orderBy=updateTime desc",
+                null,
+                // response: JSONObject
+                response -> {
+                    try {
+                        JSONArray courseWork = response.getJSONArray("courseWork");
+
+                        long lastUpdateMillis = preferences.getLong(courseId, 0);
+
+                        for(int i = 0; i < courseWork.length(); i++) {
+                            JSONObject o = courseWork.getJSONObject(i);
+
+                            System.out.println("course work: " + o.toString(4));
+
+                            JSONObject date = o.optJSONObject("dueDate");
+                            DateInfo dateInfo = DateUtils.getDay(context, 1);
+
+                            if(date != null) {
+                                dateInfo = DateUtils.getLocalDateFormat(context, date.getInt("day"),
+                                        date.getInt("month"), date.getInt("year"));
+
+                            }
+
+                            if((lastUpdateMillis == 0 && DateUtils.compareDates(dateInfo, DateUtils.getDay(context, 0)) == DateInfo.FURTHER)
+                                    || (lastUpdateMillis != 0 && DateTime.parseRfc3339(o.getString("updateTime")).getValue() > lastUpdateMillis)) {
+
+                                Assignment a = new Assignment();
+
+                                a.setTitle(o.getString("title"));
+                                a.setDescription(o.optString("description"));
+                                a.setDateInfo(dateInfo);
+
+                                assignments.add(a);
+                            }
+                        }
+
+                        System.out.println("Set update millis: " + lastUpdateMillis + " " + assignments);
+
+                        setUpdateMillis(courseId, preferences.edit());
+
+                        listener.onAssignmentReceived(assignments);
+                    } catch(JSONException e) {
+                        Log.e("IMPORT ERROR", e.toString());
+                    }
+                },
+                error -> {
+                    try {
+                        byte[] htmlBodyBytes = error.networkResponse.data;
+                        Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
+
+                        try {
+                            JSONObject json = new JSONObject(new String(htmlBodyBytes));
+                            int errorCode = json.getJSONObject("error").getInt("code");
+
+                            switch(errorCode) {
+                                case 401 :
+                                    onClickSignOut();
+                                    callSignOutRequestListeners();
+
+                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+
+                                    break;
+                            }
+                        } catch(JSONException e) {
+                            Log.e("IMPORT ERROR", "Could not parse error JSON");
+                        }
+                    } catch(NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("Content-Type", "application/json");
+                params.put("authorization", "Bearer " + authToken);
+
+                return params;
+            }
+        };
+
+        queue.add(request);
     }
 
     @Override

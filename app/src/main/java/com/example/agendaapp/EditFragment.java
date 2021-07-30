@@ -8,7 +8,6 @@
 
 package com.example.agendaapp;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -23,7 +22,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -38,7 +36,7 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
-import com.example.agendaapp.Utils.DatePickerFragment;
+import com.example.agendaapp.Dialogs.DatePickerFragment;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Resize;
 import com.example.agendaapp.Data.SaveInfo;
@@ -197,6 +195,8 @@ public class EditFragment extends Fragment {
                 }
             }
         });
+
+        // TODO: Make it so that the date can be none (--/--/--)
 
         ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {

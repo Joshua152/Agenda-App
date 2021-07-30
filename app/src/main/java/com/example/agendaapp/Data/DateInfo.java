@@ -19,10 +19,12 @@ import java.io.Serializable;
 
 public class DateInfo implements Parcelable, Serializable {
 
+    private static final long serialVersionUID = 1116145860712571266L;
+
     // Constants for comparing Dates
-    public final static int FURTHER = 0;
-    public final static int SAME = 1;
-    public final static int CLOSER = 2;
+    public static final int FURTHER = 0;
+    public static final int SAME = 1;
+    public static final int CLOSER = 2;
 
     // Day of the month of the date
     protected int day;
@@ -64,7 +66,7 @@ public class DateInfo implements Parcelable, Serializable {
          * Creates a new DateInfo from the information contained in the
          * given Parcel
          * @param in Parcel from which to create a new DateInfo
-         * @return Return s anew DateInfo rom the givn Parcel
+         * @return Return s anew DateInfo rom the given Parcel
          */
         @Override
         public DateInfo createFromParcel(Parcel in) {

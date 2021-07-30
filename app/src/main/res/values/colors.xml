@@ -5,13 +5,14 @@
     <color name="colorPrimaryVariant">#222222</color>
     <color name="colorOnPrimary">#FFFFFF</color>
     <color name="colorSecondary">#222222</color>
+    <color name="colorSecondary_26a">#42222222</color>
     <color name="colorSecondaryVariant">#424242</color>
     <color name="colorOnSecondary">#FFFFFF</color>
     <color name="colorBackground">#FFFFFF</color>
     <color name="colorOnBackground">#000000</color>
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnSurface">#000000</color>
-    <color name="statusBarColor">#222222</color>
+    <color name="statusBarColor">#121212</color>
 
     <color name="red">#D84D6A</color>
     <color name="orange">#D8934D</color>

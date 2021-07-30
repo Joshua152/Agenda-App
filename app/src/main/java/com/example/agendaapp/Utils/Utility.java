@@ -10,6 +10,8 @@ package com.example.agendaapp.Utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.core.content.ContextCompat;
@@ -33,6 +35,7 @@ public class Utility {
     public final static String EDIT_FRAGMENT = "Edit Fragment";
     public final static String VIEW_FRAGMENT = "View Fragment";
     public final static String IMPORT_FRAGMENT = "Import Fragment";
+    public final static String PLATFORM_SELECT_FRAGMENT = "Platform Select Fragment";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
 
@@ -142,5 +145,10 @@ public class Utility {
         }
 
         return -1;
+    }
+
+    public static View getViewFromXML(Context context, int layoutId) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        return inflater.inflate(layoutId, null, false);
     }
 }
