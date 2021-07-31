@@ -280,8 +280,6 @@ public class GoogleClassroom extends Platform {
 
                         JSONArray courses = response.getJSONArray("courses");
 
-                        System.out.println("courses: " + courses.toString(4));
-
                         AtomicInteger numDone = new AtomicInteger(0);
 
                         for(int i = 0; i < courses.length(); i++) {
@@ -365,8 +363,6 @@ public class GoogleClassroom extends Platform {
                         for(int i = 0; i < courseWork.length(); i++) {
                             JSONObject o = courseWork.getJSONObject(i);
 
-                            System.out.println("course work: " + o.toString(4));
-
                             JSONObject date = o.optJSONObject("dueDate");
                             DateInfo dateInfo = DateUtils.getDay(context, 1);
 
@@ -388,8 +384,6 @@ public class GoogleClassroom extends Platform {
                                 assignments.add(a);
                             }
                         }
-
-                        System.out.println("Set update millis: " + lastUpdateMillis + " " + assignments);
 
                         setUpdateMillis(courseId, preferences.edit());
 

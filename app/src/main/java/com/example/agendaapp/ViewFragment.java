@@ -147,9 +147,10 @@ public class ViewFragment extends Fragment {
         switch(item.getItemId()) {
             case android.R.id.home :
                 getParentFragmentManager().popBackStack();
+
                 return true;
             case R.id.view_edit :
-                transaction.replace(R.id.fragment_container, EditFragment.newInstance(assignment, position, isPriority));
+                transaction.replace(R.id.fragment_container, EditFragment.newInstance(context, assignment, position, isPriority));
                 transaction.addToBackStack(Utility.EDIT_FRAGMENT);
                 transaction.commit();
 
@@ -162,13 +163,13 @@ public class ViewFragment extends Fragment {
     /**
      * Creates a new instance of a ViewFragment
      * @param assignment The assignment to be viewed
-     * @param originalPosition The original position of the assignment's CardView in the RecyclerView
+     * @param position The position of the assignment's CardView in the RecyclerView
      * @param priority Whether or not the assignment is priority
      * @return Returns a new ViewFragment instance
      */
-    public static ViewFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
+    public static ViewFragment newInstance(Assignment assignment, int position, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, position));
 
         ViewFragment viewFragment = new ViewFragment();
         viewFragment.setArguments(bundle);

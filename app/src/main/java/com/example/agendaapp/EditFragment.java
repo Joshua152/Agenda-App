@@ -44,7 +44,11 @@ import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+// TODO: LOOK AT HOW ANIM CODE DIFFERS FROM EDIT FRAGMENT AND CREATE FRAGMENT
+
 public class EditFragment extends Fragment {
+
+    public static final String TITLE = "Title";
 
     private Context context;
 
@@ -70,6 +74,8 @@ public class EditFragment extends Fragment {
     private int descriptionMinHeight;
     private int originalContentHeight;
 
+    private boolean createNew;
+
     private boolean priority;
     private boolean pressedPriority;
 
@@ -78,7 +84,7 @@ public class EditFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_edit, container, false);
 
         toolbar = (Toolbar) view.findViewById(R.id.edit_toolbar);
-        toolbar.setTitle(getString(R.string.edit_title));
+        toolbar.setTitle(getArguments().getString(TITLE));
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -122,8 +128,10 @@ public class EditFragment extends Fragment {
         descriptionMinHeight = 0;
         originalContentHeight = contentViewResize.getContentHeight();
 
+        createNew = info.getCreateNew();
+
         priority = info.getIsPriority();
-        pressedPriority = false;
+        pressedPriority = priority && !DateUtils.inPriorityRange(context, assignment.getDateInfo());
     }
 
     /**
@@ -203,7 +211,7 @@ public class EditFragment extends Fragment {
                 assignment.setDateInfo(DateUtils.getLocalDateFormat(getActivity(), day, month + 1, year));
                 tvDueDate.setText(assignment.getDateInfo().getDate());
 
-                if (!pressedPriority) {
+                if(!pressedPriority) {
                     priority = DateUtils.compareDates(DateUtils.getDay(getActivity(), 2), assignment.getDateInfo()) == DateInfo.FURTHER;
                     toggleStar();
                 }
@@ -267,11 +275,14 @@ public class EditFragment extends Fragment {
         assignment.setSubject(sSubjects.getSelectedItem().toString());
         assignment.setDescription(etDescription.getText().toString());
 
+        if(assignment.getTitle().equals(""))
+            assignment.setTitle(getString(R.string.untitled));
+
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, createNew, originalPosition));
 
         // To ViewFragment
-        getParentFragmentManager().setFragmentResult(Utility.VIEW_RESULT_KEY, bundle);
+        getParentFragmentManager().setFragmentResult(createNew ? Utility.HOME_RESULT_KEY : Utility.VIEW_RESULT_KEY, bundle);
     }
 
     /**
@@ -301,14 +312,21 @@ public class EditFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == android.R.id.home) {
+            Utility.hideSoftKeyboard(getActivity());
+
             getParentFragmentManager().popBackStack();
+
             return true;
         } else if(item.getItemId() == R.id.edit_save) {
             save();
+
+            Utility.hideSoftKeyboard(getActivity());
+
             getParentFragmentManager().popBackStack();
+
             return true;
         } else if(item.getItemId() == R.id.edit_star) {
-            pressedPriority = true;
+            pressedPriority = !pressedPriority;
 
             if(priority)
                 item.setIcon(AnimatedVectorDrawableCompat.create(context, R.drawable.unstar_anim));
@@ -332,15 +350,38 @@ public class EditFragment extends Fragment {
     }
 
     /**
-     * Creates a new instance of the EditFragment
+     * Creates a new instance of the EditFragment (creating a new assignment)
+     * @param context Context used to instantiate the DateInfo object for the new Assignment
+     * @return Returns a new instance of EditFragment
+     */
+    public static EditFragment newInstance(Context context) {
+
+        Bundle bundle = new Bundle();
+
+        Assignment assignment = new Assignment();
+        assignment.setDateInfo(DateUtils.getDay(context, 1));
+
+        bundle.putString(TITLE, context.getString(R.string.create_title));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, true, true, -1));
+
+        EditFragment editFragment = new EditFragment();
+        editFragment.setArguments(bundle);
+
+        return editFragment;
+    }
+
+    /**
+     * Creates a new instance of the EditFragment (not creating a new assignment; editing)
      * @param assignment The assignment to be shown
-     * @param originalPosition The original position of the fragment
+     * @param position The original position of the fragment (only needed if createNew is false)
      * @param priority If the assignment is a priority assignment
      * @return Returns a new instance of EditFragment
      */
-    public static EditFragment newInstance(Assignment assignment, int originalPosition, boolean priority) {
+    public static EditFragment newInstance(Context context, Assignment assignment, int position, boolean priority) {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, originalPosition));
+
+        bundle.putString(TITLE, context.getString(R.string.edit_title));
+        bundle.putParcelable(Utility.SAVE_INFO, new SaveInfo(assignment, priority, false, position));
 
         EditFragment editFragment = new EditFragment();
         editFragment.setArguments(bundle);

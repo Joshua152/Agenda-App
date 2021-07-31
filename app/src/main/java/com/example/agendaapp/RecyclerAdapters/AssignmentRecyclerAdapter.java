@@ -277,6 +277,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         }
 
         notifyItemMoved(fromPosition, toPosition);
+
+        Utility.serializeArrays(context, priority, upcoming);
     }
 
     @Override

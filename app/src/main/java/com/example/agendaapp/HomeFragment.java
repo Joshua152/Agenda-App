@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
+import com.example.agendaapp.Platform.GoogleClassroom;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
@@ -174,8 +175,8 @@ public class HomeFragment extends Fragment {
 
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-            transaction.replace(R.id.fragment_container, new CreateFragment());
-            transaction.addToBackStack(Utility.CREATE_FRAGMENT);
+            transaction.replace(R.id.fragment_container, EditFragment.newInstance(context));
+            transaction.addToBackStack(Utility.EDIT_FRAGMENT);
             transaction.commit();
         });
     }
@@ -208,8 +209,6 @@ public class HomeFragment extends Fragment {
 
         for(Platform p : ImportFragment.platforms) {
             p.getNewAssignments(assignments -> {
-                System.out.println(assignments);
-
                 for(Assignment a : assignments) {
                     int pos = 0;
 
