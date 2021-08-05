@@ -12,8 +12,11 @@
 
 package com.example.agendaapp.Data;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.example.agendaapp.Utils.DateUtils;
 
 import java.io.Serializable;
 
@@ -115,6 +118,14 @@ public class DateInfo implements Parcelable, Serializable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Sets the date String to the given String
+     * @param date The date string
+     */
+    public void setDate(String date) {
+        this.date = date;
     }
 
     /**

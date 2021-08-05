@@ -56,6 +56,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GoogleClassroom extends Platform {
 
+    public static final String GOOGLE_CLASSROOM = "Google Classroom";
+
     public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
 
     private Activity activity;
@@ -138,7 +140,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                    Snackbar.make(activity.findViewById(R.id.import_ll_recycler),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;
@@ -231,7 +233,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                    Snackbar.make(activity.findViewById(R.id.import_ll_recycler),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;
@@ -266,7 +268,6 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void getNewAssignments(AssignmentReceivedListener listener) {
-        // TODO: DELETE LATER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if(authToken.equals(""))
             return;
 
@@ -315,7 +316,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                    Snackbar.make(activity.findViewById(android.R.id.content),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;
@@ -351,7 +352,7 @@ public class GoogleClassroom extends Platform {
      */
     private void handleAssignmentsForCourse(String courseId, List<Assignment> assignments, AssignmentReceivedListener listener) {
         JsonObjectRequest request =  new JsonObjectRequest(Request.Method.GET,
-                "https://classroom.googleapis.com/v1/courses/" + courseId + "/courseWork?orderBy=updateTime desc",
+                "https://classroom.googleapis.com/v1/courses/" + courseId + "/courseWork?pageSize=0&orderBy=updateTime desc",
                 null,
                 // response: JSONObject
                 response -> {
@@ -364,12 +365,11 @@ public class GoogleClassroom extends Platform {
                             JSONObject o = courseWork.getJSONObject(i);
 
                             JSONObject date = o.optJSONObject("dueDate");
-                            DateInfo dateInfo = DateUtils.getDay(context, 1);
+                            DateInfo dateInfo = DateUtils.getNoneInstance(context);
 
                             if(date != null) {
                                 dateInfo = DateUtils.getLocalDateFormat(context, date.getInt("day"),
                                         date.getInt("month"), date.getInt("year"));
-
                             }
 
                             if((lastUpdateMillis == 0 && DateUtils.compareDates(dateInfo, DateUtils.getDay(context, 0)) == DateInfo.FURTHER)
@@ -377,6 +377,7 @@ public class GoogleClassroom extends Platform {
 
                                 Assignment a = new Assignment();
 
+                                a.setId(GOOGLE_CLASSROOM + "|" + courseId + "|" + o.getString("id"));
                                 a.setTitle(o.getString("title"));
                                 a.setDescription(o.optString("description"));
                                 a.setDateInfo(dateInfo);
@@ -406,7 +407,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.fragment_import),
+                                    Snackbar.make(activity.findViewById(android.R.id.content),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;

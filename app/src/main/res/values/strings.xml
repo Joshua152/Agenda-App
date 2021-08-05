@@ -16,6 +16,7 @@
     <string name="upcoming_assignments">Upcoming</string>
     <string name="none">- None</string>
 
+    <string name="classes_icon_title">Classes</string>
     <string name="import_icon_title">Import</string>
 
     <string name="already_in_range_toast">Due date of assignment is in priority range</string>
@@ -75,8 +76,11 @@
 
     <string name="cd_platform_icon">Platform icon</string>
     <string name="cd_view_platform">View platform</string>
+
+    <string name="cd_classes_icon">Classes icon</string>
     <string name="cd_import_icon">Import icon</string>
     <string name="cd_account_icon">Account icon</string>
+
     <string name="cd_sign_out">Sign out</string>
 
     <string name="cd_add_import">Add import platform</string>

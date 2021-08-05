@@ -61,6 +61,22 @@ public class ListModerator<T> {
     }
 
     /**
+     * Gets an item at the overall index (not counting headers(
+     * @param index The item index
+     * @return Returns the item at the specified index
+     */
+    public T get(int index) {
+        int list = 0;
+
+        while(index >= lists[list].size()) {
+            index -= lists[list].size();
+            list++;
+        }
+
+        return lists[list].get(index);
+    }
+
+    /**
      * Gets an item given the overall index
      * @param index Overall item index
      * @return Returns item at the given index
@@ -74,6 +90,22 @@ public class ListModerator<T> {
         }
 
         return lists[list].get(index - 1); // - 1 to account for the header for the list at which the index is
+    }
+
+    /**
+     * Removes an item at the overall index (not counting headers(
+     * @param index The item index
+     * @return Returns the removed item
+     */
+    public T remove(int index) {
+        int list = 0;
+
+        while(index >= lists[list].size()) {
+            index -= lists[list].size();
+            list++;
+        }
+
+        return lists[list].remove(index);
     }
 
     /**
@@ -105,6 +137,23 @@ public class ListModerator<T> {
         }
 
         return index - 1; // - 1 to account for the header for the list at which the index is
+    }
+
+    /**
+     * Gets the item's position in the adapter from the position found from
+     * just combining the arrays
+     * @param index The combined array index
+     * @return Returns the array adapter position
+     */
+    public int getPosFromNoHeader(int index) {
+        int list = 0;
+
+        while(index > lists[list].size()) {
+            index -= lists[list].size();
+            list++;
+        }
+
+        return index + list + 1;
     }
 
     /**

@@ -10,6 +10,7 @@ package com.example.agendaapp.Dialogs;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.fragment.app.DialogFragment;
@@ -22,6 +23,8 @@ public class DatePickerFragment extends DialogFragment{
 
     // The listener for what to do when the date has been set
     private DatePickerDialog.OnDateSetListener listener;
+    // The listener for when the neutral button is clicked
+    private DatePickerDialog.OnClickListener onClickListener;
 
     // DateInfo to be displayed
     private DateInfo dateInfo;
@@ -33,6 +36,7 @@ public class DatePickerFragment extends DialogFragment{
      */
     public DatePickerFragment(DatePickerDialog.OnDateSetListener listener) {
         this.listener = listener;
+        onClickListener = null;
 
         dateInfo = null;
     }
@@ -40,7 +44,7 @@ public class DatePickerFragment extends DialogFragment{
     /**
      * Sets the day, month, and year of the dialog when it is created
      * @param savedInstanceState The saved state
-     * @return
+     * @return Returns a new instance of the DatePickerDialog
      */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -61,7 +65,10 @@ public class DatePickerFragment extends DialogFragment{
             day = dateInfo.getDay();
         }
 
-        return new DatePickerDialog(getActivity(), listener, year, month, day);
+        DatePickerDialog dialog = new DatePickerDialog(getActivity(), listener, year, month, day);
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "None", onClickListener);
+
+        return dialog;
     }
 
     /**
@@ -70,5 +77,13 @@ public class DatePickerFragment extends DialogFragment{
      */
     public void setDateInfo(DateInfo dateInfo) {
         this.dateInfo = dateInfo;
+    }
+
+    /**
+     * Sets the on click listener for the neutral button
+     * @param onClickListener The listener instance
+     */
+    public void setOnClickListener(DialogInterface.OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
     }
 }

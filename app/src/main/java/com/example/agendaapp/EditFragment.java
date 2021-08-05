@@ -8,7 +8,9 @@
 
 package com.example.agendaapp;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +33,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
@@ -43,8 +46,6 @@ import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-
-// TODO: LOOK AT HOW ANIM CODE DIFFERS FROM EDIT FRAGMENT AND CREATE FRAGMENT
 
 public class EditFragment extends Fragment {
 
@@ -204,8 +205,6 @@ public class EditFragment extends Fragment {
             }
         });
 
-        // TODO: Make it so that the date can be none (--/--/--)
-
         ibDate.setOnClickListener(view -> {
             DatePickerFragment fragment = new DatePickerFragment((datePicker, year, month, day) -> {
                 assignment.setDateInfo(DateUtils.getLocalDateFormat(getActivity(), day, month + 1, year));
@@ -217,6 +216,11 @@ public class EditFragment extends Fragment {
                 }
 
                 star.setVisible(!DateUtils.inPriorityRange(context, assignment.getDateInfo()));
+            });
+
+            fragment.setOnClickListener((dialogInterface, button) -> {
+                assignment.setDateInfo(DateUtils.getNoneInstance(context));
+                tvDueDate.setText(assignment.getDateInfo().getDate());
             });
 
             Utility.hideSoftKeyboard(getActivity());

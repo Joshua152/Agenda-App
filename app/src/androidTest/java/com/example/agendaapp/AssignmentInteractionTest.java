@@ -74,13 +74,13 @@ public class AssignmentInteractionTest {
         onView(withId(R.id.fab))
                 .perform(click());
 
-        onView(withId(R.id.create_et_title))
+        onView(withId(R.id.edit_et_title))
                 .perform(typeText(a.getTitle()));
 
-        onView(withId(R.id.create_et_description))
+        onView(withId(R.id.edit_et_description))
                 .perform(typeText(a.getDescription()));
 
-        onView(withId(R.id.create_ib_date))
+        onView(withId(R.id.edit_ib_date))
                 .perform(click());
 
         onView(is(instanceOf(DatePicker.class)))
@@ -90,7 +90,7 @@ public class AssignmentInteractionTest {
         onView(withText("OK"))
                 .perform(click());
 
-        onView(withId(R.id.create_s_subject))
+        onView(withId(R.id.edit_s_subject))
                 .perform(click());
 
         onData(allOf(is(instanceOf(String.class)), is(a.getSubject())))

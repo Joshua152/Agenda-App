@@ -155,14 +155,24 @@ public class HomeFragment extends Fragment {
     private void initListeners() {
         bottomAppBar.setOnMenuItemClickListener(item -> {
             switch(item.getItemId()) {
+                case R.id.home_classes :
+                    setExitTransition(null);
+                    
+                    FragmentTransaction classTransaction = getParentFragmentManager().beginTransaction();
+                    classTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+                    classTransaction.replace(R.id.fragment_container, new ClassFragment());
+                    classTransaction.addToBackStack(Utility.CLASSES_FRAGMENT);
+                    classTransaction.commit();
+
+                    return true;
                 case R.id.home_import :
                     setExitTransition(null);
 
-                    FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-                    transaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-                    transaction.replace(R.id.fragment_container, new ImportFragment());
-                    transaction.addToBackStack(Utility.IMPORT_FRAGMENT);
-                    transaction.commit();
+                    FragmentTransaction homeTransaction = getParentFragmentManager().beginTransaction();
+                    homeTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+                    homeTransaction.replace(R.id.fragment_container, new ImportFragment());
+                    homeTransaction.addToBackStack(Utility.IMPORT_FRAGMENT);
+                    homeTransaction.commit();
 
                     return true;
             }
@@ -192,10 +202,6 @@ public class HomeFragment extends Fragment {
      * Updates the lists
      */
     private void update() {
-        // TODO: HOW DO THE ARRAYS SAVE AFTER UPDATE?
-
-        //TODO: DOESN'T ACTUALLY WORK? MAKE SURE TO REMOVE UPCOMING ASSIGNMENT AND SAVE???
-
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
             if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo())) {
@@ -210,12 +216,21 @@ public class HomeFragment extends Fragment {
         for(Platform p : ImportFragment.platforms) {
             p.getNewAssignments(assignments -> {
                 for(Assignment a : assignments) {
+                    for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
+                        if(a.getId().equals(assignmentModerator.get(i).getId())) {
+                            assignmentModerator.remove(i);
+                            recyclerViewAdapter.notifyItemRemoved(assignmentModerator.getPosFromNoHeader(i));
+
+                            i = assignmentModerator.getItemCount();
+                        }
+                    }
+
                     int pos = 0;
 
                     if(DateUtils.inPriorityRange(context, a.getDateInfo()))
-                        pos = addToList(priority, a);
+                        pos = addToList(priority, a) + 1;
                     else
-                        pos = addToList(upcoming, a);
+                        pos = addToList(upcoming, a) + priority.size() + 2;
 
                     recyclerViewAdapter.notifyItemInserted(pos);
                 }
@@ -268,6 +283,12 @@ public class HomeFragment extends Fragment {
      * @return Returns the position of the assignment in the list
      */
     public int addToList(List<Assignment> list, Assignment assignment) {
+        if(assignment.getDateInfo().getDate().equals(DateUtils.NO_DATE)) {
+            list.add(assignment);
+
+            return list.size() - 1;
+        }
+
         for(int i = 0; i < list.size(); i++) {
             DateInfo fromArray = list.get(i).getDateInfo();
 
@@ -286,6 +307,13 @@ public class HomeFragment extends Fragment {
         list.add(assignment);
 
         return list.size() - 1;
+    }
+
+    @Override
+    public void onPause() {
+        ImportFragment.savePlatforms(context);
+
+        super.onPause();
     }
 
     /*

@@ -18,6 +18,8 @@ import java.util.Date;
 
 public class DateUtils {
 
+    public static final String NO_DATE = "--/--/--";
+
     /**
      * Gets the DateInfo for the current day + inDaysTime.
      *
@@ -40,6 +42,18 @@ public class DateUtils {
         month %= 12;
 
         return getLocalDateFormat(context, day, month, year);
+    }
+
+    /**
+     * Gets an instance of a DateInfo with the date string as --/--/-- but the ints as the next day
+     * @param context The context
+     * @return An instance of the DateInfo with "no" date
+     */
+    public static DateInfo getNoneInstance(Context context) {
+        DateInfo dateInfo = DateUtils.getDay(context, 1);
+        dateInfo.setDate(NO_DATE);
+
+        return dateInfo;
     }
 
     /**
@@ -106,6 +120,9 @@ public class DateUtils {
      * @return Returns true or false whether or not the date given is in the priority range
      */
     public static boolean inPriorityRange(Context context, DateInfo dateInfo) {
+        if(dateInfo.getDate().equals(DateUtils.NO_DATE))
+            return false;
+
         return compareDates(dateInfo, getDay(context, 2)) == DateInfo.CLOSER;
     }
 

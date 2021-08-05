@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home_classes"
+        android:icon="@drawable/circle_drawable"
+        android:title="@string/classes_icon_title"
+        android:contentDescription="@string/cd_classes_icon"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/home_import"

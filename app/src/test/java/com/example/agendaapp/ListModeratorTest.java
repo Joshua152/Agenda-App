@@ -28,6 +28,39 @@ public class ListModeratorTest {
                 Arrays.asList("07", "08", "09", "99", "11"))));
     }
 
+    @Test
+    public void test_remove() {
+        ListModerator<String> moderator = getSampleModerator();
+
+        moderator.remove(0);
+        assertEquals(new ListModerator<String>(
+                new ArrayList<String>(Arrays.asList("02", "03", "04", "05")),
+                new ArrayList<String>(Arrays.asList("07", "08", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16", "17"))
+        ), moderator);
+
+        moderator.remove(3);
+        assertEquals(new ListModerator<String>(
+                new ArrayList<String>(Arrays.asList("02", "03", "04")),
+                new ArrayList<String>(Arrays.asList("07", "08", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16", "17"))
+        ), moderator);
+
+        moderator.remove(3);
+        assertEquals(new ListModerator<String>(
+                new ArrayList<String>(Arrays.asList("02", "03", "04")),
+                new ArrayList<String>(Arrays.asList("08", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16", "17"))
+        ), moderator);
+
+        moderator.remove(11);
+        assertEquals(new ListModerator<String>(
+                new ArrayList<String>(Arrays.asList("02", "03", "04")),
+                new ArrayList<String>(Arrays.asList("08", "09", "10", "11")),
+                new ArrayList<String>(Arrays.asList("13", "14", "15", "16"))
+        ), moderator);
+    }
+
     /**
      * Test for removeOverall()
      */
@@ -38,6 +71,16 @@ public class ListModeratorTest {
         listModerator.removeOverall(8);
         assertTrue(listModerator.getList(1).equals(new ArrayList<String>(
                 Arrays.asList("07", "09", "10", "11"))));
+    }
+
+    @Test
+    public void test_get() {
+        ListModerator<String> moderator = getSampleModerator();
+
+        assertEquals("01", moderator.get(0));
+        assertEquals("05", moderator.get(4));
+        assertEquals("07", moderator.get(5));
+        assertEquals("17", moderator.get(14));
     }
 
     /**

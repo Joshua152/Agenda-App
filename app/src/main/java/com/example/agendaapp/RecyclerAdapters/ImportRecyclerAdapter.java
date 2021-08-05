@@ -245,10 +245,10 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         Platform platform = platforms.get(position);
 
-        if (platform.getSignInButton() != null)
+        if(platform.getSignInButton() != null)
             platformHolder.replaceSignInButton(platform.getSignInButton());
 
-        if (platform.isSignedIn())
+        if(platform.isSignedIn())
             platformHolder.setSignedInUI();
 
         platformHolder.ivPlatformIcon.setImageDrawable(platform.getPlatformIcon());
