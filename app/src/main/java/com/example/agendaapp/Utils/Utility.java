@@ -17,16 +17,10 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.core.content.ContextCompat;
 
 import com.example.agendaapp.Data.Assignment;
-import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.R;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Utility {
 
@@ -72,6 +66,12 @@ public class Utility {
         } catch(Exception e) {}
     }
 
+    /**
+     * Serializes the arrays to the file
+     * @param context The context
+     * @param priority The priority assignments list
+     * @param upcoming The upcoming assignments list
+     */
     public static void serializeArrays(Context context, ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
         ArrayList[] serialize = new ArrayList[2];
 
@@ -81,6 +81,22 @@ public class Utility {
         Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
     }
 
+    /**
+     * Returns the subject name from the array
+     * @param context The context
+     * @param pos The position of the subject in the spinner
+     * @return Returns the subject name
+     */
+    public static String getSubject(Context context, int pos) {
+        return context.getResources().getStringArray(R.array.subject_array)[pos];
+    }
+
+    /**
+     * Returns the subject drawable id given the subject name
+     * @param context The context
+     * @param subject The subject name
+     * @return Returns the drawable id of the subject icon
+     */
     public static int getSubjectDrawable(Context context, String subject) {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 
@@ -132,11 +148,11 @@ public class Utility {
     /**
      * Gets the subject's spinner index based on the subject title (ex. Math, Other)
      *
-     * @param subject The subject title
      * @param context Context
+     * @param subject The subject title
      * @return Returns the subject's spinner index
      */
-    public static int getSubjectPositionFromTitle(String subject, Context context) {
+    public static int getSubjectPositionFromTitle(Context context, String subject) {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 
         for(int i = 0; i < array.length; i++) {
@@ -147,6 +163,12 @@ public class Utility {
         return -1;
     }
 
+    /**
+     * Inflates a view from the given xml file id
+     * @param context The context
+     * @param layoutId The layout id
+     * @return Returns the inflated view
+     */
     public static View getViewFromXML(Context context, int layoutId) {
         LayoutInflater inflater = LayoutInflater.from(context);
         return inflater.inflate(layoutId, null, false);

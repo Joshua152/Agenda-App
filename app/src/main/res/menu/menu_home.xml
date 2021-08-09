@@ -4,10 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/home_classes"
-        android:icon="@drawable/circle_drawable"
+        android:id="@+id/home_courses"
+        android:icon="@drawable/ic_courses_white_24dp"
         android:title="@string/classes_icon_title"
-        android:contentDescription="@string/cd_classes_icon"
+        android:contentDescription="@string/cd_courses_icon"
         app:showAsAction="ifRoom" />
 
     <item

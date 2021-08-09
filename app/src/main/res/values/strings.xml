@@ -3,9 +3,10 @@
 
     <!--Fragment Titles-->
     <string name="home_title">Agenda</string>
-    <string name="create_title">Create Assignment</string>
     <string name="view_title">View Assignment</string>
+    <string name="create_title">Create Assignment</string>
     <string name="edit_title">Edit Assignment</string>
+    <string name="courses_title">Courses</string>
     <string name="import_title">Import</string>
 
     <!--Contextual App Bar Titles-->
@@ -77,7 +78,7 @@
     <string name="cd_platform_icon">Platform icon</string>
     <string name="cd_view_platform">View platform</string>
 
-    <string name="cd_classes_icon">Classes icon</string>
+    <string name="cd_courses_icon">Courses icon</string>
     <string name="cd_import_icon">Import icon</string>
     <string name="cd_account_icon">Account icon</string>
 

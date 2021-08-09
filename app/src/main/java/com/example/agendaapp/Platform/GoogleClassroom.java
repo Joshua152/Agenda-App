@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
@@ -34,6 +35,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.agendaapp.Data.Assignment;
+import com.example.agendaapp.Data.Course;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.R;
@@ -267,7 +269,7 @@ public class GoogleClassroom extends Platform {
     }
 
     @Override
-    public void getNewAssignments(AssignmentReceivedListener listener) {
+    public void getCourses(CoursesReceivedListener listener) {
         if(authToken.equals(""))
             return;
 
@@ -277,27 +279,23 @@ public class GoogleClassroom extends Platform {
                 // response: JSONObject
                 response -> {
                     try {
-                        List<Assignment> newAssignments = Collections.synchronizedList(new ArrayList<Assignment>());
-
                         JSONArray courses = response.getJSONArray("courses");
 
-                        AtomicInteger numDone = new AtomicInteger(0);
+                        List<Course> list = new ArrayList<Course>();
+
+                        String other = Utility.getSubject(context, Utility.POSITION_OTHER);
 
                         for(int i = 0; i < courses.length(); i++) {
                             JSONObject o = courses.getJSONObject(i);
 
-                            handleAssignmentsForCourse(o.getString("id"), new ArrayList<Assignment>(), (assignments -> {
-                                for(Assignment a : assignments)
-                                    a.setSubject("Other");
-
-                                newAssignments.addAll(assignments);
-
-                                numDone.getAndIncrement();
-
-                                if(numDone.get() == courses.length())
-                                    listener.onAssignmentReceived(newAssignments);
-                            }));
+                            list.add(new Course(o.getString("id"),
+                                    GOOGLE_CLASSROOM,
+                                    o.getString("name"),
+                                    other,
+                                    AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, other))));
                         }
+
+                        listener.onCoursesReceived(list);
                     } catch(JSONException e) {
                         Log.e("IMPORT ERROR", "Unable to parse JSON");
                     }
@@ -343,14 +341,39 @@ public class GoogleClassroom extends Platform {
         queue.add(request);
     }
 
-    // TOOO: FOR LAST IMPORTED MILLIS USE SHARED PREF SO IT'S NOT EXCLUSIVE TO ONE PLATFORM INSTANCE (<PLATFORM><COURSE ID>:<LAST IMPORTED MILLIS>)
+    @Override
+    public void getNewAssignments(AssignmentReceivedListener listener) {
+        if(authToken.equals(""))
+            return;
+
+        getCourses(courses ->  {
+            List<Assignment> newAssignments = Collections.synchronizedList(new ArrayList<Assignment>());
+
+            AtomicInteger numDone = new AtomicInteger(0);
+
+            for(int i = 0; i < courses.size(); i++) {
+                handleAssignmentsForCourse(courses.get(i).getCourseId(), (assignments -> {
+                    for(Assignment a : assignments)
+                        a.setSubject(Utility.getSubject(context, Utility.POSITION_OTHER));
+
+                    newAssignments.addAll(assignments);
+
+                    numDone.getAndIncrement();
+
+                    if(numDone.get() == courses.size())
+                        listener.onAssignmentReceived(newAssignments);
+                }));
+            }
+        });
+    }
 
     /**
      * Handles adding the assignments for a given course to the list. **The subject will not be set
      * @param courseId The course to get the assignments from
-     * @param assignments The list to add the course's assignments to
      */
-    private void handleAssignmentsForCourse(String courseId, List<Assignment> assignments, AssignmentReceivedListener listener) {
+    private void handleAssignmentsForCourse(String courseId, AssignmentReceivedListener listener) {
+        List<Assignment> assignments = new ArrayList<Assignment>();
+
         JsonObjectRequest request =  new JsonObjectRequest(Request.Method.GET,
                 "https://classroom.googleapis.com/v1/courses/" + courseId + "/courseWork?pageSize=0&orderBy=updateTime desc",
                 null,

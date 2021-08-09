@@ -29,7 +29,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Assignment;
-import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.MainActivity;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.DateUtils;
@@ -95,7 +94,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             tvTitle = (TextView) itemView.findViewById(R.id.assignment_tv_title);
             tvDueDate = (TextView) itemView.findViewById(R.id.assignment_tv_due_date);
             tvDescription = (TextView) itemView.findViewById(R.id.assignment_tv_description);
-            ivType = (ImageView) itemView.findViewById(R.id.assignment_iv_title);
+            ivType = (ImageView) itemView.findViewById(R.id.assignment_iv_course);
             ivDone = (ImageView) itemView.findViewById(R.id.assignment_iv_done);
 
             cardView = (MaterialCardView) itemView;

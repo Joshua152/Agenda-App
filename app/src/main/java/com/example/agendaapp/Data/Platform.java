@@ -12,6 +12,8 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 
 import com.google.api.client.util.DateTime;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -175,6 +177,12 @@ public abstract class Platform implements DefaultLifecycleObserver {
     public abstract void onClickSignOut();
 
     /**
+     * Gets valid (active) courses from the platform
+     * @param listener Listener for when the course list has been retrieved
+     */
+    public abstract void getCourses(CoursesReceivedListener listener);
+
+    /**
      * Gets the assignments which haven't been added to the list yet
      * @param listener Listener for when the new assignment List has finished filling
      */
@@ -198,6 +206,13 @@ public abstract class Platform implements DefaultLifecycleObserver {
          * Gets called when the platform has requested for a sign out UI update
          */
         public void onSignOutRequest();
+    }
+
+    /**
+     * An interface for the onCoursesReceived() method
+     */
+    public interface CoursesReceivedListener {
+        public void onCoursesReceived(List<Course> courses);
     }
 
     /**

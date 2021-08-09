@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
-import com.example.agendaapp.Platform.GoogleClassroom;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
@@ -43,7 +42,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -155,14 +153,14 @@ public class HomeFragment extends Fragment {
     private void initListeners() {
         bottomAppBar.setOnMenuItemClickListener(item -> {
             switch(item.getItemId()) {
-                case R.id.home_classes :
+                case R.id.home_courses :
                     setExitTransition(null);
                     
-                    FragmentTransaction classTransaction = getParentFragmentManager().beginTransaction();
-                    classTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-                    classTransaction.replace(R.id.fragment_container, new ClassFragment());
-                    classTransaction.addToBackStack(Utility.CLASSES_FRAGMENT);
-                    classTransaction.commit();
+                    FragmentTransaction coursesTransaction = getParentFragmentManager().beginTransaction();
+                    coursesTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+                    coursesTransaction.replace(R.id.fragment_container, new CoursesFragment());
+                    coursesTransaction.addToBackStack(Utility.CLASSES_FRAGMENT);
+                    coursesTransaction.commit();
 
                     return true;
                 case R.id.home_import :

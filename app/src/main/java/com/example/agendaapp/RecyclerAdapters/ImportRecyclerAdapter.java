@@ -236,6 +236,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View platformHolder = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_import, parent, false);
+
         return new PlatformViewHolder(platformHolder);
     }
 

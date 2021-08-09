@@ -8,9 +8,7 @@
 
 package com.example.agendaapp;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,7 +31,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
@@ -151,7 +148,7 @@ public class EditFragment extends Fragment {
         etTitle.setText(assignment.getTitle());
         tvDueDate.setText(assignment.getDateInfo().getDate());
         etDescription.setText(assignment.getDescription());
-        sSubjects.setSelection(Utility.getSubjectPositionFromTitle(assignment.getSubject(), context), true);
+        sSubjects.setSelection(Utility.getSubjectPositionFromTitle(context, assignment.getSubject()), true);
     }
 
     /**
