@@ -26,6 +26,7 @@ import com.example.agendaapp.Data.Course;
 import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.Utility;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -35,6 +36,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CoursesFragment extends Fragment {
@@ -60,7 +64,8 @@ public class CoursesFragment extends Fragment {
     private RecyclerView recyclerView;
     private CoursesRecyclerAdapter recyclerAdapter;
 
-    private List<Course> courseList;
+    public static List<Course> courseList;
+    public static JSONObject jsonCourseList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
@@ -98,8 +103,8 @@ public class CoursesFragment extends Fragment {
      * Inits the recycler view adapter
      */
     private void initRecyclerAdapter() {
-        getCourseList(courseList -> {
-            this.courseList = courseList;
+        getCourseList(context, courseList -> {
+            CoursesFragment.courseList = courseList;
 
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(new CoursesRecyclerAdapter(context, courseList));
@@ -126,9 +131,8 @@ public class CoursesFragment extends Fragment {
      * Gets and updates the course JSON and adds to a List<Course>
      * @param listener The listener for when the list has finished being processed
      */
-    public void getCourseList(CoursesProcessedListener listener) {
+    public static void getCourseList(Context context, CoursesProcessedListener listener) {
         SharedPreferences pref = context.getSharedPreferences(COURSES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
 
         JSONObject old = null;
 
@@ -138,13 +142,10 @@ public class CoursesFragment extends Fragment {
             old = new JSONObject();
         }
 
-        JSONObject newList = new JSONObject();
         List<Course> newCourseList = new ArrayList<Course>();
+        jsonCourseList = new JSONObject();
 
-        List<Platform> platforms = ImportFragment.platforms;
-
-        if(platforms == null)
-            ImportFragment.getSavedPlatforms(context, getActivity());
+        List<Platform> platforms = ImportFragment.getSignedInPlatforms();
 
         AtomicInteger n = new AtomicInteger(0);
 
@@ -162,20 +163,67 @@ public class CoursesFragment extends Fragment {
                         if(jsonCourse != null)
                             subject = jsonCourse.optString(JSON_SUBJECT_NAME);
 
-                        newList.put(c.getCourseId(), subject);
+                        jsonCourseList.put(c.getCourseId(), subject);
                         newCourseList.add(new Course(c.getCourseId(), p.getPlatformName(), c.getCourseName(),
                                 subject, AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject))));
                     } catch(JSONException e) {
                         Log.e("Error at course JSON", e.toString());
 
-                        Snackbar.make(getActivity().findViewById(android.R.id.content), getString(R.string.import_error), Snackbar.LENGTH_SHORT).show();
+//                        Snackbar.make(getActivity().findViewById(android.R.id.content), context.getString(R.string.import_error), Snackbar.LENGTH_SHORT).show();
                     }
                 }
 
-                if(n.getAndIncrement() >= platforms.size() - 1)
+                if(n.incrementAndGet() >= platforms.size())
                     listener.onCoursesProcessed(newCourseList);
             });
         }
+    }
+
+    /**
+     * Saves the selection to the shared pref in the form of a JSON
+     *
+     */
+    private void saveCoursesList() {
+        JSONObject o = new JSONObject();
+
+        for(Course c : courseList) {
+            try {
+                o.put(c.getCourseId(), new JSONObject().put(JSON_SUBJECT_NAME, c.getCourseSubject()));
+            } catch(JSONException e) {
+                Log.e("Error saving courseList", e.toString());
+
+                Snackbar.make(getActivity().findViewById(android.R.id.content), getString(R.string.save_error), Snackbar.LENGTH_SHORT).show();
+            }
+        }
+
+        SharedPreferences pref = context.getSharedPreferences(COURSES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putString(COURSE_LIST, o.toString());
+        editor.apply();
+    }
+
+    /**
+     * Gets the subject of the imported course from the save JSON
+     * @param context The context
+     * @param courseId The course id of the imported assignment
+     * @return The subject
+     */
+    public static String getSubject(Context context, String courseId) {
+        JSONObject o = jsonCourseList.optJSONObject(courseId);
+
+        if(o == null)
+            return Utility.getSubject(context, Utility.POSITION_OTHER);
+
+        return o.optString(JSON_SUBJECT_NAME);
+    }
+
+    @Override
+    public void onPause() {
+        saveCoursesList();
+        Utility.serializeArrays(context, HomeFragment.priority, HomeFragment.upcoming);
+
+        super.onPause();
     }
 
     /**

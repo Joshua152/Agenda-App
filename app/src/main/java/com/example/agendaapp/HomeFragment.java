@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment {
     public static ArrayList<Assignment> priority;
     // ArrayList of upcoming assignments
     public static ArrayList<Assignment> upcoming;
-    // ListModerator for the priority and upcoming array s
+    // ListModerator for the priority and upcoming arrays
     public static ListModerator<Assignment> assignmentModerator;
 
     @Override
@@ -75,6 +75,8 @@ public class HomeFragment extends Fragment {
 
         getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
+
+        getSaved();
 
         init(view, onSavedInstance);
 
@@ -102,6 +104,20 @@ public class HomeFragment extends Fragment {
                 return true;
             }
         });
+    }
+
+    /**
+     * Gets the saved instances (platformList, courseList)
+     */
+    private void getSaved() {
+        if(ImportFragment.platforms == null)
+            ImportFragment.platforms = ImportFragment.getSavedPlatforms(getContext(), getActivity());
+
+        if(CoursesFragment.courseList == null) {
+            CoursesFragment.getCourseList(getContext(), courseList -> {
+                CoursesFragment.courseList = courseList;
+            });
+        }
     }
 
     /**
@@ -208,8 +224,11 @@ public class HomeFragment extends Fragment {
             }
         }
 
+        // Get imported assignments
         if(ImportFragment.platforms == null)
             ImportFragment.platforms = ImportFragment.getSavedPlatforms(context, getActivity());
+
+        // TODO: MERGE CHANGES INSTEAD?
 
         for(Platform p : ImportFragment.platforms) {
             p.getNewAssignments(assignments -> {
@@ -225,10 +244,21 @@ public class HomeFragment extends Fragment {
 
                     int pos = 0;
 
-                    if(DateUtils.inPriorityRange(context, a.getDateInfo()))
+                    if(DateUtils.inPriorityRange(context, a.getDateInfo())) {
+                        boolean empty = priority.size() == 0;
+
                         pos = addToList(priority, a) + 1;
-                    else
+
+                        if(empty)
+                            recyclerViewAdapter.notifyItemChanged(0);
+                    } else {
+                        boolean empty = upcoming.size() == 0;
+
                         pos = addToList(upcoming, a) + priority.size() + 2;
+
+                        if(empty)
+                            recyclerViewAdapter.notifyItemChanged(priority.size() + 1);
+                    }
 
                     recyclerViewAdapter.notifyItemInserted(pos);
                 }

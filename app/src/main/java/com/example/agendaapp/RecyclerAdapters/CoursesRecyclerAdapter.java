@@ -21,7 +21,9 @@ import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.Course;
+import com.example.agendaapp.HomeFragment;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.Utility;
 
@@ -92,6 +94,15 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     notifyItemChanged(getBindingAdapterPosition());
 
                     DrawableCompat.setTint(DrawableCompat.wrap(flCourseIcon.getBackground()), Utility.getSubjectColor(context, subject));
+
+                    // update assignments
+
+                    for(int i = 0; i < HomeFragment.assignmentModerator.getItemCount(); i++) {
+                        Assignment a = HomeFragment.assignmentModerator.get(i);
+
+                        if(a.getCourseId().equals(courses.get(getBindingAdapterPosition()).getCourseId()))
+                            a.setSubject(subject);
+                    }
                 }
 
                 @Override

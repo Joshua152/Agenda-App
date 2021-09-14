@@ -19,6 +19,8 @@ public class Assignment implements Parcelable, Serializable {
 
     private static final long serialVersionUID = -1605429230305680146L;
 
+    // The assignment's course id (if imported)
+    private String courseId;
     // Assignment specific id (<Platform name>:<id>)
     private String id;
 
@@ -38,6 +40,7 @@ public class Assignment implements Parcelable, Serializable {
         title = "";
         subject = "";
         description = "";
+        dateInfo = null;
     }
 
     /**
@@ -112,8 +115,16 @@ public class Assignment implements Parcelable, Serializable {
     }
 
     /**
-     * Sets the course id (platformName:id)
-     * @param id The course id
+     * Sets the course id (platform name|courseId)
+     * @param courseId The course id
+     */
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    /**
+     * Sets the assignment id (platformName|courseId|assignmentId)
+     * @param id The assignment id
      */
     public void setId(String id) {
         this.id = id;
@@ -152,8 +163,16 @@ public class Assignment implements Parcelable, Serializable {
     }
 
     /**
-     * Gets the course id in the form of (platformName:id)
-     * @return Returns a string containing the id
+     * Gets the course id in the form of (platformName|courseId)
+     * @return Returns the course id String
+     */
+    public String getCourseId() {
+        return courseId;
+    }
+
+    /**
+     * Gets the assignment id in the form of (platformName|courseId|assignmentId)
+     * @return Returns a string containing the assignment id
      */
     public String getId() {
         return id;

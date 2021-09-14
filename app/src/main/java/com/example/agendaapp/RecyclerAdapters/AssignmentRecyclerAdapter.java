@@ -226,8 +226,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         } else if(holder instanceof AssignmentViewHolder) {
             AssignmentViewHolder assignmentHolder = (AssignmentViewHolder) holder;
 
-            Assignment assignment = position <= priority.size() ? priority.get(moderator.getArrayPosFromOverall(position)) :
-                    upcoming.get(moderator.getArrayPosFromOverall(position));
+            Assignment assignment = moderator.getOverall(position);
 
             assignmentHolder.tvTitle.setText(assignment.getTitle());
             assignmentHolder.tvDueDate.setText(assignment.getDateInfo().getDate());

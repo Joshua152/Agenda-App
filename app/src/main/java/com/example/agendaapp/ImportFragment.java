@@ -203,6 +203,35 @@ public class ImportFragment extends Fragment {
     }
 
     /**
+     * Saves the platforms to SharedPreferences
+     * @param context The fragment context
+     */
+    public static void savePlatforms(Context context) {
+        JSONArray save = new JSONArray();
+
+        for(Platform p : platforms) {
+            JSONObject object = new JSONObject();
+
+            try {
+                object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
+                object.put(JSON_SAVE_AUTH_TOKEN, p.getToken());
+
+                object.put(JSON_SAVE_PROFILE_PIC_URL, p.getAccountIconURL());
+            } catch(JSONException e) {
+                Log.e("SAVE ERROR", "Unable to write to JSON");
+            }
+
+            save.put(object);
+        }
+
+        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString(SP_PLATFORM_JSON, save.toString());
+        editor.apply();
+    }
+
+    /**
      * Gets the platform list from shared preferences
      * @param context The context
      * @param activity The activity to be passed in to potentially use to init a Platform
@@ -240,32 +269,18 @@ public class ImportFragment extends Fragment {
     }
 
     /**
-     * Saves the platforms to SharedPreferences
-     * @param context The fragment context
+     * Gets the list of platforms in the list that are actually signed into
+     * @return The list of platforms signed into
      */
-    public static void savePlatforms(Context context) {
-        JSONArray save = new JSONArray();
+    public static List<Platform> getSignedInPlatforms() {
+        List<Platform> signedIn = platforms;
 
-        for(Platform p : platforms) {
-            JSONObject object = new JSONObject();
-
-            try {
-                object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
-                object.put(JSON_SAVE_AUTH_TOKEN, p.getToken());
-
-                object.put(JSON_SAVE_PROFILE_PIC_URL, p.getAccountIconURL());
-            } catch(JSONException e) {
-                Log.e("SAVE ERROR", "Unable to write to JSON");
-            }
-
-            save.put(object);
+        for(int i = signedIn.size() - 1; i >= 0; i--) {
+            if(signedIn.get(i).getToken().equals(""))
+                signedIn.remove(i);
         }
 
-        SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        editor.putString(SP_PLATFORM_JSON, save.toString());
-        editor.apply();
+        return signedIn;
     }
 
     /**

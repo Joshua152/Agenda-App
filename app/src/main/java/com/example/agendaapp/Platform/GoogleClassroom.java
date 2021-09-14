@@ -30,10 +30,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.agendaapp.CoursesFragment;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.Course;
 import com.example.agendaapp.Data.DateInfo;
@@ -41,6 +43,7 @@ import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Utility;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.api.client.util.DateTime;
 
@@ -200,7 +203,7 @@ public class GoogleClassroom extends Platform {
 
                         queue.add(photoRequest);
                     } catch(AuthenticatorException | IOException | OperationCanceledException e) {
-                        System.err.println(e.toString());
+                        System.err.println("GC getAuthToken: " + e.toString());
                         Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
                     }
                 },
@@ -235,7 +238,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.import_ll_recycler),
+                                    Snackbar.make(activity.findViewById(android.R.id.content),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;
@@ -258,6 +261,10 @@ public class GoogleClassroom extends Platform {
                 return params;
             }
         };
+
+        request.setRetryPolicy(new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         queue.add(request);
     }
@@ -288,7 +295,7 @@ public class GoogleClassroom extends Platform {
                         for(int i = 0; i < courses.length(); i++) {
                             JSONObject o = courses.getJSONObject(i);
 
-                            list.add(new Course(o.getString("id"),
+                            list.add(new Course(Course.generateCourseId(GOOGLE_CLASSROOM, o.getString("id")),
                                     GOOGLE_CLASSROOM,
                                     o.getString("name"),
                                     other,
@@ -323,6 +330,9 @@ public class GoogleClassroom extends Platform {
                             Log.e("IMPORT ERROR", "Could not parse error JSON");
                         }
                     } catch(NullPointerException e) {
+                        Snackbar.make(activity.findViewById(android.R.id.content), R.string.import_error, Snackbar.LENGTH_LONG).show();
+
+                        System.out.println("stack trace");
                         e.printStackTrace();
                     }
                 }
@@ -338,6 +348,10 @@ public class GoogleClassroom extends Platform {
             }
         };
 
+        request.setRetryPolicy(new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
         queue.add(request);
     }
 
@@ -352,9 +366,11 @@ public class GoogleClassroom extends Platform {
             AtomicInteger numDone = new AtomicInteger(0);
 
             for(int i = 0; i < courses.size(); i++) {
-                handleAssignmentsForCourse(courses.get(i).getCourseId(), (assignments -> {
+                int finalI = i;
+
+                handleAssignmentsForCourse(courses.get(i).getBaseCourseId(), (assignments -> {
                     for(Assignment a : assignments)
-                        a.setSubject(Utility.getSubject(context, Utility.POSITION_OTHER));
+                        a.setSubject(CoursesFragment.getSubject(context, courses.get(finalI).getCourseId()));
 
                     newAssignments.addAll(assignments);
 
@@ -400,6 +416,7 @@ public class GoogleClassroom extends Platform {
 
                                 Assignment a = new Assignment();
 
+                                a.setCourseId(GOOGLE_CLASSROOM + "|" + courseId);
                                 a.setId(GOOGLE_CLASSROOM + "|" + courseId + "|" + o.getString("id"));
                                 a.setTitle(o.getString("title"));
                                 a.setDescription(o.optString("description"));
@@ -453,6 +470,10 @@ public class GoogleClassroom extends Platform {
                 return params;
             }
         };
+
+        request.setRetryPolicy(new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         queue.add(request);
     }
