@@ -4,7 +4,7 @@
  * ASSUMES: LifecycleOwner is a Fragment
  */
 
-package com.example.agendaapp.Platform;
+package com.example.agendaapp.Platforms;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -43,7 +43,6 @@ import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.Utility;
-import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.api.client.util.DateTime;
 
@@ -334,6 +333,8 @@ public class GoogleClassroom extends Platform {
 
                         System.out.println("stack trace");
                         e.printStackTrace();
+                    } finally {
+                        listener.onCoursesReceived(new ArrayList<Course>());
                     }
                 }
         ) {
@@ -458,6 +459,8 @@ public class GoogleClassroom extends Platform {
                     } catch(NullPointerException e) {
                         e.printStackTrace();
                     }
+
+                    // TODO: CALL LISTENER WITH EMPTY ASSIGNMENT LIST?
                 }
         ) {
             @Override

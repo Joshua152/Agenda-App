@@ -37,6 +37,9 @@ public class Assignment implements Parcelable, Serializable {
      * No arg constructor
      */
     public Assignment() {
+        courseId = "";
+        id = "";
+
         title = "";
         subject = "";
         description = "";
@@ -51,6 +54,9 @@ public class Assignment implements Parcelable, Serializable {
      * @param dateInfo Assignment due date
      */
     public Assignment(String title, String subject, String description, DateInfo dateInfo) {
+        courseId = "";
+        id = "";
+
         this.title = title;
         this.subject = subject;
         this.description = description;

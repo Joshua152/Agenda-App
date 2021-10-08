@@ -9,6 +9,7 @@
 package com.example.agendaapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,6 +38,8 @@ import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
 import com.example.agendaapp.Data.Serialize;
 import com.example.agendaapp.Utils.Utility;
+import com.google.android.gms.oss.licenses.OssLicensesActivity;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.transition.Hold;
@@ -44,6 +47,8 @@ import com.google.android.material.transition.MaterialElevationScale;
 
 import java.util.ArrayList;
 import java.util.List;
+
+// TODO: CRASH WHEN CREATING NEW ASSIGNMENT THEN CHANGING PLATFORM SUBJECT
 
 public class HomeFragment extends Fragment {
 
@@ -187,6 +192,13 @@ public class HomeFragment extends Fragment {
                     homeTransaction.replace(R.id.fragment_container, new ImportFragment());
                     homeTransaction.addToBackStack(Utility.IMPORT_FRAGMENT);
                     homeTransaction.commit();
+
+                    return true;
+                case R.id.home_settings :
+                    setExitTransition(null);
+
+                    startActivity(new Intent(context, OssLicensesMenuActivity.class));
+                    OssLicensesMenuActivity.setActivityTitle(getString(R.string.licenses_title));
 
                     return true;
             }

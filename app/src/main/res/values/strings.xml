@@ -8,6 +8,7 @@
     <string name="edit_title">Edit Assignment</string>
     <string name="courses_title">Courses</string>
     <string name="import_title">Import</string>
+    <string name="licenses_title">Open Source Licenses</string>
 
     <!--Contextual App Bar Titles-->
     <string name="import_delete_title">Delete Platforms</string>
@@ -19,6 +20,7 @@
 
     <string name="classes_icon_title">Classes</string>
     <string name="import_icon_title">Import</string>
+    <string name="settings_icon_title">Settings</string>
 
     <string name="already_in_range_toast">Due date of assignment is in priority range</string>
 
@@ -84,6 +86,7 @@
 
     <string name="cd_courses_icon">Courses icon</string>
     <string name="cd_import_icon">Import icon</string>
+    <string name="cd_settings_icon">Settings icon</string>
     <string name="cd_account_icon">Account icon</string>
 
     <string name="cd_sign_out">Sign out</string>
