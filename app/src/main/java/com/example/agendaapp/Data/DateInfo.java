@@ -5,7 +5,7 @@
  * year components. The full date is also
  * represented in a String.
  *
- * @author Joshua Au
+ * @author George Gino
  * @version 1.0
  * @since 11/26/2020
  */
