@@ -151,7 +151,7 @@ public class CoursesFragment extends Fragment {
                             Course course = CoursesFragment.courseMap.get(courseId);
 
                             e.getValue().setCourseSubject(course.getCourseSubject());
-                            e.getValue().setCourseIcon(course.getCourseIcon());
+                            e.getValue().setCourseIconId(course.getCourseIconId());
                         } else {
                             CoursesFragment.courseMap.put(e.getKey(), e.getValue());
                         }
@@ -196,6 +196,8 @@ public class CoursesFragment extends Fragment {
 
     @Override
     public void onPause() {
+        System.out.println("on pause");
+
         Utility.serializeCourses(context, courseMap);
         Utility.serializeAssignments(context, HomeFragment.priority, HomeFragment.upcoming);
 

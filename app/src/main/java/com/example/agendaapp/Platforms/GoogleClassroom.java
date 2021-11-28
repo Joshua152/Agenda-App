@@ -304,7 +304,8 @@ public class GoogleClassroom extends Platform {
                                     GOOGLE_CLASSROOM,
                                     o.getString("name"),
                                     other,
-                                    AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, other))));
+                                    Utility.getSubjectDrawable(context, other)));
+//                                    AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, other))));
                         }
 
                         listener.onCoursesReceived(map);

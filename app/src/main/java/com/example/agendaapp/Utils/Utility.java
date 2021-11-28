@@ -116,7 +116,7 @@ public class Utility {
      * @param courses The course HashMap
      */
     public static void serializeCourses(Context context, Map<String, Course> courses) {
-        Serialize.serialize(courses, context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE);
+        Serialize.serialize(courses, context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE); // TODO: CAN'T SERIALIZE DRAWABLE
     }
 
     /**

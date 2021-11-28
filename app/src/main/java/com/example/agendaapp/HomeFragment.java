@@ -152,7 +152,7 @@ public class HomeFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
 
-        setArrayAdapter();
+        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
 
         ItemTouchHelper.Callback callback = new ItemMoveCallback((ItemMoveCallback.ItemTouchHelperContract) recyclerViewAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
@@ -311,24 +311,10 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * Sets the array adapter for the RecyclerView
-     */
-    private void setArrayAdapter() {
-        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
-    }
-
-    /**
-     * Updates the array adapter with new arrays
-     */
-    private void updateArrayAdapter() {
-        recyclerViewAdapter.setArrays(priority, upcoming);
-    }
-
-    /**
-     * Serializes the arrays
+     * Updates the assignment arrays from the fragment result and serializes them
      * @param bundle The bundle to save from
      */
-    private void save(Bundle bundle) {
+    private void updateAssignments(Bundle bundle) {
         SaveInfo info = bundle.getParcelable(Utility.SAVE_INFO);
 
         if(!info.getCreateNew())
@@ -341,7 +327,7 @@ public class HomeFragment extends Fragment {
 
         Utility.serializeAssignments(context, priority, upcoming);
 
-        updateArrayAdapter();
+        recyclerViewAdapter.setArrays(priority, upcoming);
     }
 
     /**
@@ -390,7 +376,7 @@ public class HomeFragment extends Fragment {
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {
-            save(bundle);
+            updateAssignments(bundle);
         }
     }
 }

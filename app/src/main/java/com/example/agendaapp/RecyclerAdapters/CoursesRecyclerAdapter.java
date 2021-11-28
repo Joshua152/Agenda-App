@@ -92,7 +92,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     Course course = (Course) courses.values().toArray()[getBindingAdapterPosition()];
 
                     course.setCourseSubject(subject);
-                    course.setCourseIcon(AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject)));
+                    course.setCourseIconId(Utility.getSubjectDrawable(context, subject));
 
                     notifyItemChanged(getBindingAdapterPosition());
 
@@ -136,7 +136,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         courseHolder.tvCourseName.setText(course.getCourseName());
         courseHolder.sCourseSubject.setSelection(Utility.getSubjectPositionFromTitle(context, course.getCourseSubject()));
-        courseHolder.ivCourseIcon.setImageDrawable(course.getCourseIcon());
+        courseHolder.ivCourseIcon.setImageDrawable(AppCompatResources.getDrawable(context, course.getCourseIconId()));
     }
 
     @Override
