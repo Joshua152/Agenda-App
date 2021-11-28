@@ -15,7 +15,9 @@ import com.google.api.client.util.DateTime;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class Platform implements DefaultLifecycleObserver {
@@ -212,7 +214,7 @@ public abstract class Platform implements DefaultLifecycleObserver {
      * An interface for the onCoursesReceived() method
      */
     public interface CoursesReceivedListener {
-        public void onCoursesReceived(List<Course> courses);
+        public void onCoursesReceived(Map<String, Course> courses);
     }
 
     /**

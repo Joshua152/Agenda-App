@@ -10,6 +10,8 @@ package com.example.agendaapp.Utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -17,10 +19,13 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.core.content.ContextCompat;
 
 import com.example.agendaapp.Data.Assignment;
-import com.example.agendaapp.Data.Serialize;
+import com.example.agendaapp.Data.Course;
 import com.example.agendaapp.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Utility {
 
@@ -32,6 +37,7 @@ public class Utility {
     public final static String PLATFORM_SELECT_FRAGMENT = "Platform Select Fragment";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
+    public final static String SERIALIZATION_COURSES_FILE = "courses.txt";
 
     public final static int SERIALIZATION_PRIORITY = 0;
     public final static int SERIALIZATION_UPCOMING = 1;
@@ -54,6 +60,29 @@ public class Utility {
     public final static int POSITION_OTHER = 7;
 
     /**
+     * Checks if the device is connected to the internet
+     * @param context The context
+     * @return Returns true if connected to the internet and false otherwise
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = manager.getActiveNetworkInfo();
+
+        return info != null && info.isConnected(); // change to info.isConnectedOrConnecting()?
+    }
+
+    /**
+     * Inflates a view from the given xml file id
+     * @param context The context
+     * @param layoutId The layout id
+     * @return Returns the inflated view
+     */
+    public static View getViewFromXML(Context context, int layoutId) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        return inflater.inflate(layoutId, null, false);
+    }
+
+    /**
      * Hide keyboard from phone
      *
      * @param activity Activity which holds the keyboard
@@ -72,13 +101,31 @@ public class Utility {
      * @param priority The priority assignments list
      * @param upcoming The upcoming assignments list
      */
-    public static void serializeArrays(Context context, ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
+    public static void serializeAssignments(Context context, ArrayList<Assignment> priority, ArrayList<Assignment> upcoming) {
         ArrayList[] serialize = new ArrayList[2];
 
-        serialize[Utility.SERIALIZATION_PRIORITY] = priority;
-        serialize[Utility.SERIALIZATION_UPCOMING] = upcoming;
+        serialize[SERIALIZATION_PRIORITY] = priority;
+        serialize[SERIALIZATION_UPCOMING] = upcoming;
 
-        Serialize.serialize(serialize, context.getFilesDir() + "/" + Utility.SERIALIZATION_ASSIGNMENT_FILE);
+        Serialize.serialize(serialize, context.getFilesDir() + "/" + SERIALIZATION_ASSIGNMENT_FILE);
+    }
+
+    /**
+     * Serializes the courses Map
+     * @param context The context
+     * @param courses The course HashMap
+     */
+    public static void serializeCourses(Context context, Map<String, Course> courses) {
+        Serialize.serialize(courses, context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE);
+    }
+
+    /**
+     * Deserializes the courses Map
+     * @param context The context
+     * @return Returns the saved map
+     */
+    public static Map<String, Course> deserializeCourses(Context context) {
+        return (Map<String, Course>) Serialize.deserialize(context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE);
     }
 
     /**
@@ -161,16 +208,5 @@ public class Utility {
         }
 
         return -1;
-    }
-
-    /**
-     * Inflates a view from the given xml file id
-     * @param context The context
-     * @param layoutId The layout id
-     * @return Returns the inflated view
-     */
-    public static View getViewFromXML(Context context, int layoutId) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        return inflater.inflate(layoutId, null, false);
     }
 }

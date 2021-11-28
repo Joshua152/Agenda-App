@@ -112,6 +112,9 @@ public class GoogleClassroom extends Platform {
      * Inits http requests
      */
     public void initRequests() {
+        if(!Utility.isNetworkAvailable(context))
+            return;
+
         photoRequest = new JsonObjectRequest(Request.Method.GET,
                 "https://people.googleapis.com/v1/people/me?personFields=photos",
                 null,
@@ -144,7 +147,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(R.id.import_ll_recycler),
+                                    Snackbar.make(activity.findViewById(android.R.id.content),
                                             context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
 
                                     break;
@@ -216,7 +219,7 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void checkAuthTokenValid() {
-        if(authToken.equals(""))
+        if(authToken.equals("") || !Utility.isNetworkAvailable(context))
             return;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
@@ -276,7 +279,7 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void getCourses(CoursesReceivedListener listener) {
-        if(authToken.equals(""))
+        if(authToken.equals("") || !Utility.isNetworkAvailable(context))
             return;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
@@ -287,21 +290,24 @@ public class GoogleClassroom extends Platform {
                     try {
                         JSONArray courses = response.getJSONArray("courses");
 
-                        List<Course> list = new ArrayList<Course>();
+                        Map<String, Course> map = new HashMap<String, Course>();
 
                         String other = Utility.getSubject(context, Utility.POSITION_OTHER);
 
                         for(int i = 0; i < courses.length(); i++) {
                             JSONObject o = courses.getJSONObject(i);
 
-                            list.add(new Course(Course.generateCourseId(GOOGLE_CLASSROOM, o.getString("id")),
+                            String courseId = Course.generateCourseId(GOOGLE_CLASSROOM, o.getString("id"));
+
+                            map.put(courseId, new Course(
+                                    courseId,
                                     GOOGLE_CLASSROOM,
                                     o.getString("name"),
                                     other,
                                     AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, other))));
                         }
 
-                        listener.onCoursesReceived(list);
+                        listener.onCoursesReceived(map);
                     } catch(JSONException e) {
                         Log.e("IMPORT ERROR", "Unable to parse JSON");
                     }
@@ -314,6 +320,8 @@ public class GoogleClassroom extends Platform {
                         try {
                             JSONObject o = new JSONObject(new String(b));
                             int errorCode = o.getJSONObject("error").getInt("code");
+
+                            System.out.println("error code: " + errorCode);
 
                             switch (errorCode) {
                                 case 401 :
@@ -331,10 +339,11 @@ public class GoogleClassroom extends Platform {
                     } catch(NullPointerException e) {
                         Snackbar.make(activity.findViewById(android.R.id.content), R.string.import_error, Snackbar.LENGTH_LONG).show();
 
-                        System.out.println("stack trace");
+                        listener.onCoursesReceived(new HashMap<String, Course>()); //TODO
+
                         e.printStackTrace();
                     } finally {
-                        listener.onCoursesReceived(new ArrayList<Course>());
+                        listener.onCoursesReceived(null);
                     }
                 }
         ) {
@@ -362,16 +371,21 @@ public class GoogleClassroom extends Platform {
             return;
 
         getCourses(courses ->  {
+            if(courses == null)
+                return;
+
             List<Assignment> newAssignments = Collections.synchronizedList(new ArrayList<Assignment>());
 
             AtomicInteger numDone = new AtomicInteger(0);
 
-            for(int i = 0; i < courses.size(); i++) {
-                int finalI = i;
+            courses.entrySet().stream().forEach(e -> {
+                String courseId = e.getKey();
 
-                handleAssignmentsForCourse(courses.get(i).getBaseCourseId(), (assignments -> {
+                System.out.println("CourseId: " + courseId);
+
+                handleAssignmentsForCourse(courseId, assignments -> {
                     for(Assignment a : assignments)
-                        a.setSubject(CoursesFragment.getSubject(context, courses.get(finalI).getCourseId()));
+                        a.setSubject(CoursesFragment.courseMap.get(courseId).getCourseSubject());
 
                     newAssignments.addAll(assignments);
 
@@ -379,20 +393,39 @@ public class GoogleClassroom extends Platform {
 
                     if(numDone.get() == courses.size())
                         listener.onAssignmentReceived(newAssignments);
-                }));
-            }
+                });
+            });
+
+//            for(int i = 0; i < courses.size(); i++) {
+//                handleAssignmentsForCourse(courses.get(i).getBaseCourseId(), (assignments -> {
+//                    for(Assignment a : assignments)
+//                        a.setSubject(CoursesFragment.courseList.get(a.getCourseId()).getCourseSubject());
+//
+//                    newAssignments.addAll(assignments);
+//
+//                    numDone.getAndIncrement();
+//
+//                    if(numDone.get() == courses.size())
+//                        listener.onAssignmentReceived(newAssignments);
+//                }));
+//            }
         });
     }
 
     /**
-     * Handles adding the assignments for a given course to the list. **The subject will not be set
+     * Handles adding the assignments for a given course to the list. **The subject will not be set**
      * @param courseId The course to get the assignments from
      */
     private void handleAssignmentsForCourse(String courseId, AssignmentReceivedListener listener) {
+        if(!Utility.isNetworkAvailable(context))
+            return;
+
+        System.out.println("handle assignments for course");
+
         List<Assignment> assignments = new ArrayList<Assignment>();
 
-        JsonObjectRequest request =  new JsonObjectRequest(Request.Method.GET,
-                "https://classroom.googleapis.com/v1/courses/" + courseId + "/courseWork?pageSize=0&orderBy=updateTime desc",
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
+                "https://classroom.googleapis.com/v1/courses/" + courseId.substring(courseId.indexOf("|") + 1) + "/courseWork?pageSize=0&orderBy=updateTime desc",
                 null,
                 // response: JSONObject
                 response -> {
@@ -417,8 +450,8 @@ public class GoogleClassroom extends Platform {
 
                                 Assignment a = new Assignment();
 
-                                a.setCourseId(GOOGLE_CLASSROOM + "|" + courseId);
-                                a.setId(GOOGLE_CLASSROOM + "|" + courseId + "|" + o.getString("id"));
+                                a.setCourseId(courseId); // HASN'T THE PLATFORM AND PIPE ALREADY BEEN SET?
+                                a.setId(courseId + "|" + o.getString("id"));
                                 a.setTitle(o.getString("title"));
                                 a.setDescription(o.optString("description"));
                                 a.setDateInfo(dateInfo);

@@ -6,7 +6,7 @@
  * @since 6/24/2020
  */
 
-package com.example.agendaapp.Data;
+package com.example.agendaapp.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -11,6 +11,7 @@ package com.example.agendaapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,16 +33,17 @@ import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
+import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
-import com.example.agendaapp.Data.Serialize;
+import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
-import com.google.android.gms.oss.licenses.OssLicensesActivity;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
@@ -118,11 +120,22 @@ public class HomeFragment extends Fragment {
         if(ImportFragment.platforms == null)
             ImportFragment.platforms = ImportFragment.getSavedPlatforms(getContext(), getActivity());
 
-        if(CoursesFragment.courseList == null) {
-            CoursesFragment.getCourseList(getContext(), courseList -> {
-                CoursesFragment.courseList = courseList;
-            });
-        }
+//        if(CoursesFragment.courseMap == null) {
+//            CoursesFragment.getCourseList(getContext(), (courseList, error) -> {
+//                if(courseList != null)
+//                    CoursesFragment.courseMap = courseList;
+//
+//                if(error != null)
+//                    Log.e("[AGENDA] Home getSaved", error);
+//            });
+//        }
+
+        System.out.println("set course map");
+
+        if(CoursesFragment.courseMap == null)
+            CoursesFragment.courseMap = CoursesFragment.getSavedCourseList(getContext());
+
+        System.out.println("set to: " + CoursesFragment.courseMap);
     }
 
     /**
@@ -242,6 +255,21 @@ public class HomeFragment extends Fragment {
 
         // TODO: MERGE CHANGES INSTEAD?
 
+        CoursesFragment.getCourseList(context, (courseMap, error) -> {
+            if(courseMap != null)
+                CoursesFragment.courseMap = courseMap;
+
+            if(error != null) {
+                switch(error) {
+                    case CoursesFragment.ERROR_NO_CONNECTION :
+                        Snackbar.make(context, getActivity().findViewById(android.R.id.content),
+                                getString(R.string.error_no_connection), Snackbar.LENGTH_LONG)
+                                .setAction(R.string.ok, view -> {})
+                                .show();
+                }
+            }
+        });
+
         for(Platform p : ImportFragment.platforms) {
             p.getNewAssignments(assignments -> {
                 for(Assignment a : assignments) {
@@ -275,11 +303,11 @@ public class HomeFragment extends Fragment {
                     recyclerViewAdapter.notifyItemInserted(pos);
                 }
 
-                Utility.serializeArrays(context, priority, upcoming);
+                Utility.serializeAssignments(context, priority, upcoming);
             });
         }
 
-        Utility.serializeArrays(context, priority, upcoming);
+        Utility.serializeAssignments(context, priority, upcoming);
     }
 
     /**
@@ -311,7 +339,7 @@ public class HomeFragment extends Fragment {
         else
             addToList(upcoming, info.getAssignment());
 
-        Utility.serializeArrays(context, priority, upcoming);
+        Utility.serializeAssignments(context, priority, upcoming);
 
         updateArrayAdapter();
     }

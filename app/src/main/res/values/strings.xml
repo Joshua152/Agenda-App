@@ -74,6 +74,8 @@
     <string name="save_error">Save error</string>
     <string name="save_get_error">Unable to retrieve subject</string>
 
+    <string name="ok">Ok</string>
+
     <!--Content Descriptions-->
     <string name="cd_fab">Create a new assignment</string>
 
@@ -96,5 +98,8 @@
 
     <string name="cd_add_platform">Add</string>
     <string name="cd_remove_platform">Remove</string>
+
+    <!--General Errors-->
+    <string name="error_no_connection">No internet connection</string>
 
 </resources>

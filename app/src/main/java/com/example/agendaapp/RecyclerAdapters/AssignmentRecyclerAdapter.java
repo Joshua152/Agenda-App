@@ -155,7 +155,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
         private void removeItem(int position) {
             moderator.removeOverall(position);
 
-            Utility.serializeArrays(context, priority, upcoming);
+            Utility.serializeAssignments(context, priority, upcoming);
         }
     }
 
@@ -276,7 +276,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
         notifyItemMoved(fromPosition, toPosition);
 
-        Utility.serializeArrays(context, priority, upcoming);
+        Utility.serializeAssignments(context, priority, upcoming);
     }
 
     @Override

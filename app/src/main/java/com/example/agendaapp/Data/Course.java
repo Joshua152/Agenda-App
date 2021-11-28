@@ -6,7 +6,13 @@ package com.example.agendaapp.Data;
 
 import android.graphics.drawable.Drawable;
 
-public class Course {
+import com.example.agendaapp.Utils.Serialize;
+
+import java.io.Serializable;
+
+public class Course implements Serializable {
+
+    private static final long serialVersionUID = -7339613603991095953L;
 
     private String courseId;
 
@@ -17,7 +23,7 @@ public class Course {
 
     /**
      * 5 arg constructor to set all fields
-     * @param courseId The course id **GENERATE USING generateCourseId() method
+     * @param courseId The course id **GENERATE USING generateCourseId() METHOD
      * @param coursePlatform The course platform String
      * @param courseName The course name
      * @param courseSubject The course subject

@@ -29,12 +29,13 @@ import com.example.agendaapp.Utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
 
-    private List<Course> courses;
+    private Map<String, Course> courses;
 
     /**
      * Class to represent a single course in the recycler view
@@ -88,8 +89,10 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
                     String subject = sCourseSubject.getSelectedItem().toString();
 
-                    courses.get(getBindingAdapterPosition()).setCourseSubject(subject);
-                    courses.get(getBindingAdapterPosition()).setCourseIcon(AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject)));
+                    Course course = (Course) courses.values().toArray()[getBindingAdapterPosition()];
+
+                    course.setCourseSubject(subject);
+                    course.setCourseIcon(AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject)));
 
                     notifyItemChanged(getBindingAdapterPosition());
 
@@ -100,7 +103,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     for(int i = 0; i < HomeFragment.assignmentModerator.getItemCount(); i++) {
                         Assignment a = HomeFragment.assignmentModerator.get(i);
 
-                        if(a.getCourseId().equals(courses.get(getBindingAdapterPosition()).getCourseId()))
+                        if(a.getCourseId().equals(course.getCourseId()))
                             a.setSubject(subject);
                     }
                 }
@@ -111,7 +114,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
-    public CoursesRecyclerAdapter(Context context, List<Course> courses) {
+    public CoursesRecyclerAdapter(Context context, Map<String, Course> courses) {
         this.context = context;
 
         this.courses = courses;
@@ -127,12 +130,12 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         CourseHolder courseHolder = (CourseHolder) holder;
-        Course course = courses.get(position);
+        Course course = (Course) courses.values().toArray()[position];
 
         courseHolder.tvCoursePlatform.setText(course.getCoursePlatform());
 
         courseHolder.tvCourseName.setText(course.getCourseName());
-        courseHolder.sCourseSubject.setSelection(Utility.getSubjectPositionFromTitle(context, courses.get(position).getCourseSubject()));
+        courseHolder.sCourseSubject.setSelection(Utility.getSubjectPositionFromTitle(context, course.getCourseSubject()));
         courseHolder.ivCourseIcon.setImageDrawable(course.getCourseIcon());
     }
 
