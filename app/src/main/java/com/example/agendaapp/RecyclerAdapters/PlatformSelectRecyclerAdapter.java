@@ -88,7 +88,8 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
 
                 numPlatforms.setText((num + 1) + "");
 
-                changeSelectedPlatformsMap(platformName.getText().toString(), 1);
+                if(num + 1 <= 9)
+                    changeSelectedPlatformsMap(platformName.getText().toString(), 1);
             });
 
             removePlatform.setOnClickListener((view) -> {
@@ -96,7 +97,8 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
 
                 numPlatforms.setText((num - 1) + "");
 
-                changeSelectedPlatformsMap(platformName.getText().toString(), -1);
+                if(num - 1 >= 0)
+                    changeSelectedPlatformsMap(platformName.getText().toString(), -1);
             });
         }
     }
@@ -128,6 +130,11 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
         viewHolder.platformName.setText(platforms[position].getPlatformName());
     }
 
+    /**
+     * Changes the number of platforms to add with the given key (platform name)
+     * @param key The platform name
+     * @param change How many of that platform to add or remove
+     */
     public void changeSelectedPlatformsMap(String key, int change) {
         Integer n = selectedPlatforms.get(key);
 

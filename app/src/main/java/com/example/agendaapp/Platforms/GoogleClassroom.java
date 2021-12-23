@@ -67,7 +67,7 @@ public class GoogleClassroom extends Platform {
     private Activity activity;
     private Context context;
 
-    private SharedPreferences preferences;
+    private SharedPreferences preferences; // todo: do all instances use the same file to set refresh time?
 
     private ActivityResultLauncher<Intent> launcher;
 

@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private void addHomeFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.fragment_container, homeFragment);
+        transaction.replace(R.id.fragment_container, new TestFragment());
         transaction.addToBackStack("Home Fragment");
         transaction.commit();
     }

@@ -17,7 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="adjustResize|adjustPan">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,10 +28,13 @@
         </activity>
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            android:exported="false"
             android:theme="@style/DarkActionBar" />
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:theme="@style/DarkActionBar" />
+            android:exported="true"
+            android:theme="@style/DarkActionBar">
+        </activity>
     </application>
 
 </manifest>

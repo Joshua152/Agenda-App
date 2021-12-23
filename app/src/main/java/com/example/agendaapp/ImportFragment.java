@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -196,7 +197,7 @@ public class ImportFragment extends Fragment {
      * Saves the platforms to SharedPreferences
      * @param context The fragment context
      */
-    public static void savePlatforms(Context context) {
+    public static void savePlatforms(Context context) { // TODO: PLATFORMS DISAPPEARING, SIGNING OUT TOO QUICKLY (CHECK FOR LOG ON OPENING IMPORT FRAGMENT)
         JSONArray save = new JSONArray();
 
         for(Platform p : platforms) {
@@ -252,7 +253,7 @@ public class ImportFragment extends Fragment {
                 platforms.add(p);
             }
         } catch(JSONException e) {
-            Log.e("SAVE ERROR", "Unable to parse save json");
+            Log.e("SAVE ERROR", "Unable to parse save json: " + e);
         }
 
         return platforms;
@@ -263,7 +264,7 @@ public class ImportFragment extends Fragment {
      * @return The list of platforms signed into
      */
     public static List<Platform> getSignedInPlatforms() {
-        List<Platform> signedIn = platforms;
+        List<Platform> signedIn = new ArrayList<Platform>(platforms);
 
         for(int i = signedIn.size() - 1; i >= 0; i--) {
             if(signedIn.get(i).getToken().equals(""))
