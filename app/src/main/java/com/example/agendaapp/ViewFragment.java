@@ -100,7 +100,7 @@ public class ViewFragment extends Fragment {
         tvSubject.setText(getString(R.string.subject, assignment.getSubject()));
         tvDescription.setText(assignment.getDescription());
 
-        ViewCompat.setTransitionName(llRoot, Utility.TRANSITION_BACKGROUND + position);
+         ViewCompat.setTransitionName(llRoot, Utility.TRANSITION_BACKGROUND + position);
 
         setSharedElementEnterTransition(new MaterialContainerTransform());
 

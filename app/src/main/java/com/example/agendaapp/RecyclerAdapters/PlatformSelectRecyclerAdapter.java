@@ -47,7 +47,6 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
         private ImageView platformIcon;
         private TextView platformName;
 
-//        private TextInputEditText numPlatforms;
         private EditText numPlatforms;
         private ImageView addPlatform;
         private ImageView removePlatform;

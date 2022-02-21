@@ -19,8 +19,7 @@ public class Course implements Serializable {
     private String coursePlatform;
     private String courseName;
     private String courseSubject;
-    private int courseIconId;
-//    private Drawable courseIcon;
+    private transient Drawable courseIcon;
 
     /**
      * 5 arg constructor to set all fields
@@ -28,15 +27,15 @@ public class Course implements Serializable {
      * @param coursePlatform The course platform String
      * @param courseName The course name
      * @param courseSubject The course subject
-     * @param courseIconId The id of the course icon drawable
+     * @param courseIcon The course icon in the form of a drawable
      */
-    public Course(String courseId, String coursePlatform, String courseName, String courseSubject, int courseIconId) {
+    public Course(String courseId, String coursePlatform, String courseName, String courseSubject, Drawable courseIcon) {
         this.courseId = courseId;
 
         this.coursePlatform = coursePlatform;
         this.courseName = courseName;
         this.courseSubject = courseSubject;
-        this.courseIconId = courseIconId;
+        this.courseIcon = courseIcon;
     }
 
     /**
@@ -56,8 +55,8 @@ public class Course implements Serializable {
         this.courseSubject = courseSubject;
     }
 
-    public void setCourseIconId(int courseIconId) {
-        this.courseIconId = courseIconId;
+    public void setCourseIcon(Drawable courseIcon) {
+        this.courseIcon = courseIcon;
     }
 
     public String getCourseId() {
@@ -84,7 +83,7 @@ public class Course implements Serializable {
         return courseSubject;
     }
 
-    public int getCourseIconId() {
-        return courseIconId;
+    public Drawable getCourseIcon() {
+        return courseIcon;
     }
 }

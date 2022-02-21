@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
+import com.example.agendaapp.Platforms.GoogleClassroom;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
 import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
@@ -120,22 +121,8 @@ public class HomeFragment extends Fragment {
         if(ImportFragment.platforms == null)
             ImportFragment.platforms = ImportFragment.getSavedPlatforms(getContext(), getActivity());
 
-//        if(CoursesFragment.courseMap == null) {
-//            CoursesFragment.getCourseList(getContext(), (courseList, error) -> {
-//                if(courseList != null)
-//                    CoursesFragment.courseMap = courseList;
-//
-//                if(error != null)
-//                    Log.e("[AGENDA] Home getSaved", error);
-//            });
-//        }
-
-        System.out.println("set course map");
-
         if(CoursesFragment.courseMap == null)
             CoursesFragment.courseMap = CoursesFragment.getSavedCourseList(getContext());
-
-        System.out.println("set to: " + CoursesFragment.courseMap);
     }
 
     /**
@@ -152,7 +139,7 @@ public class HomeFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
 
-        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
+        setArrayAdapter();
 
         ItemTouchHelper.Callback callback = new ItemMoveCallback((ItemMoveCallback.ItemTouchHelperContract) recyclerViewAdapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
@@ -161,7 +148,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(recyclerViewAdapter);
 
-        update();
+        updateAssignmentPositions();
     }
 
     /**
@@ -240,7 +227,7 @@ public class HomeFragment extends Fragment {
     /**
      * Updates the lists
      */
-    private void update() {
+    private void updateAssignmentPositions() { // TODO: UPDATE NAME TO UPDATEASSIGNMENTPOSITIONS
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
             if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo())) {
@@ -248,73 +235,71 @@ public class HomeFragment extends Fragment {
                 recyclerViewAdapter.notifyItemMoved(i + 2 + priority.size(), pos);
             }
         }
-
-        // Get imported assignments
-        if(ImportFragment.platforms == null)
-            ImportFragment.platforms = ImportFragment.getSavedPlatforms(context, getActivity());
-
-        // TODO: MERGE CHANGES INSTEAD?
-
-        CoursesFragment.getCourseList(context, (courseMap, error) -> {
-            if(courseMap != null)
-                CoursesFragment.courseMap = courseMap;
-
-            if(error != null) {
-                switch(error) {
-                    case CoursesFragment.ERROR_NO_CONNECTION :
-                        Snackbar.make(context, getActivity().findViewById(android.R.id.content),
-                                getString(R.string.error_no_connection), Snackbar.LENGTH_LONG)
-                                .setAction(R.string.ok, view -> {})
-                                .show();
-                }
-            }
-        });
-
-        for(Platform p : ImportFragment.platforms) {
-            p.getNewAssignments(assignments -> {
-                for(Assignment a : assignments) {
-                    for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
-                        if(a.getId().equals(assignmentModerator.get(i).getId())) {
-                            assignmentModerator.remove(i);
-                            recyclerViewAdapter.notifyItemRemoved(assignmentModerator.getPosFromNoHeader(i));
-
-                            i = assignmentModerator.getItemCount();
-                        }
-                    }
-
-                    int pos = 0;
-
-                    if(DateUtils.inPriorityRange(context, a.getDateInfo())) {
-                        boolean empty = priority.size() == 0;
-
-                        pos = addToList(priority, a) + 1;
-
-                        if(empty)
-                            recyclerViewAdapter.notifyItemChanged(0);
-                    } else {
-                        boolean empty = upcoming.size() == 0;
-
-                        pos = addToList(upcoming, a) + priority.size() + 2;
-
-                        if(empty)
-                            recyclerViewAdapter.notifyItemChanged(priority.size() + 1);
-                    }
-
-                    recyclerViewAdapter.notifyItemInserted(pos);
-                }
-
-                Utility.serializeAssignments(context, priority, upcoming);
-            });
-        }
-
-        Utility.serializeAssignments(context, priority, upcoming);
     }
 
     /**
-     * Updates the assignment arrays from the fragment result and serializes them
+     * Checks for new or updated assignments from the platform
+     * @param p The platform
+     */
+    public void updateAssignments(Platform p) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
+        p.getNewAssignments(assignments -> {
+            for(Assignment a : assignments) {
+                for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
+                    if(a.getId().equals(assignmentModerator.get(i).getId())) {
+                        int removePos = assignmentModerator.getPosFromNoHeader(i);
+                        System.out.println(i + " asdf: " + removePos);
+
+                        assignmentModerator.remove(i);
+                        recyclerViewAdapter.notifyItemRemoved(removePos);
+
+                        i = assignmentModerator.getItemCount();
+                    }
+                }
+
+                int pos = 0;
+
+                if(DateUtils.inPriorityRange(context, a.getDateInfo())) {
+                    boolean empty = priority.size() == 0;
+
+                    pos = addToList(priority, a) + 1;
+
+                    if(empty)
+                        recyclerViewAdapter.notifyItemChanged(0);
+                } else {
+                    boolean empty = upcoming.size() == 0;
+
+                    pos = addToList(upcoming, a) + priority.size() + 2;
+
+                    if(empty)
+                        recyclerViewAdapter.notifyItemChanged(priority.size() + 1);
+                }
+
+                recyclerViewAdapter.notifyItemInserted(pos);
+            }
+
+            Utility.serializeAssignments(context, priority, upcoming);
+        });
+    }
+
+    /**
+     * Sets the array adapter for the RecyclerView
+     */
+    private void setArrayAdapter() {
+        recyclerViewAdapter = new AssignmentRecyclerAdapter(context, priority, upcoming);
+    }
+
+    /**
+     * Updates the array adapter with new arrays
+     */
+    private void updateArrayAdapter() {
+        recyclerViewAdapter.setArrays(priority, upcoming);
+    }
+
+    /**
+     * Serializes the arrays
      * @param bundle The bundle to save from
      */
-    private void updateAssignments(Bundle bundle) {
+    private void save(Bundle bundle) {
         SaveInfo info = bundle.getParcelable(Utility.SAVE_INFO);
 
         if(!info.getCreateNew())
@@ -327,7 +312,7 @@ public class HomeFragment extends Fragment {
 
         Utility.serializeAssignments(context, priority, upcoming);
 
-        recyclerViewAdapter.setArrays(priority, upcoming);
+        updateArrayAdapter();
     }
 
     /**
@@ -365,7 +350,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onPause() {
-        ImportFragment.savePlatforms(context);
+        ImportFragment.savePlatforms(context); // TODO: WHY?
 
         super.onPause();
     }
@@ -376,7 +361,7 @@ public class HomeFragment extends Fragment {
     class ResultListener implements FragmentResultListener {
         @Override
         public void onFragmentResult(String key, Bundle bundle) {
-            updateAssignments(bundle);
+            save(bundle);
         }
     }
 }

@@ -61,7 +61,7 @@ public class ListModerator<T> {
     }
 
     /**
-     * Gets an item at the overall index (not counting headers(
+     * Gets an item at the overall index (not counting headers)
      * @param index The item index
      * @return Returns the item at the specified index
      */
@@ -93,7 +93,7 @@ public class ListModerator<T> {
     }
 
     /**
-     * Removes an item at the overall index (not counting headers(
+     * Removes an item at the overall index (not counting headers)
      * @param index The item index
      * @return Returns the removed item
      */
@@ -146,12 +146,16 @@ public class ListModerator<T> {
      * @return Returns the array adapter position
      */
     public int getPosFromNoHeader(int index) {
+        int indexCopy = index;
+
         int list = 0;
 
-        while(index > lists[list].size()) {
-            index -= lists[list].size();
+        while(indexCopy > lists[list].size()) {
+            indexCopy -= lists[list].size();
             list++;
         }
+
+        System.out.println(index + " " + list + " " + 1);
 
         return index + list + 1;
     }

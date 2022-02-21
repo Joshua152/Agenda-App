@@ -32,7 +32,7 @@
             android:theme="@style/DarkActionBar" />
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/DarkActionBar">
         </activity>
     </application>

@@ -25,9 +25,6 @@ import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -85,7 +82,7 @@ public class CoursesFragment extends Fragment {
      * Inits the recycler view adapter
      */
     private void initRecyclerAdapter() {
-        getCourseList(context, (courseMap, error) -> {
+        updateCourseMap(context, (courseMap, error) -> {
             if(courseMap != null)
                 CoursesFragment.courseMap = courseMap;
 
@@ -125,59 +122,44 @@ public class CoursesFragment extends Fragment {
      * @param context The context
      * @param listener The listener for when the list has finished being processed
      */
-    public static void getCourseList(Context context, CoursesProcessedListener listener) {
+    public static void updateCourseMap(Context context, CoursesProcessedListener listener) {
         if(!Utility.isNetworkAvailable(context)) {
             listener.onCoursesProcessed(null, ERROR_NO_CONNECTION);
 
             return;
         }
 
-        Map<String, Course> newCourseMap = new TreeMap<String, Course>();
-
         List<Platform> platforms = ImportFragment.getSignedInPlatforms();
 
-        AtomicInteger n = new AtomicInteger(0);
+        AtomicInteger i = new AtomicInteger(0);
 
-        for(int i = 0; i < platforms.size(); i++) {
-            Platform p = platforms.get(i);
-
+        for(Platform p : platforms) {
             p.getCourses(courseMap -> {
-                if (courseMap != null) {
+                processCourses(courseMap);
 
-                    courseMap.entrySet().stream().forEach(e -> {
-                        String courseId = e.getKey();
-
-                        if(CoursesFragment.courseMap.containsKey(courseId)) {
-                            Course course = CoursesFragment.courseMap.get(courseId);
-
-                            e.getValue().setCourseSubject(course.getCourseSubject());
-                            e.getValue().setCourseIconId(course.getCourseIconId());
-                        } else {
-                            CoursesFragment.courseMap.put(e.getKey(), e.getValue());
-                        }
-                    });
-
-//                    for(Course c : courseList) {
-//                        String subject = Utility.getSubject(context, Utility.POSITION_OTHER);
-//
-//                        try {
-//                            if(courseList.get != null)
-//                                subject = jsonCourse.optString(JSON_SUBJECT_NAME);
-//
-//                            newCourseList.add(new Course(c.getCourseId(), p.getPlatformName(), c.getCourseName(),
-//                                    subject, AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject))));
-//                        } catch(JSONException e) {
-//                            Log.e("Error at course JSON", e.toString());
-//
-////                        Snackbar.make(getActivity().findViewById(android.R.id.content), context.getString(R.string.import_error), Snackbar.LENGTH_SHORT).show();
-//                        }
-//                    }
-                }
-
-                if(n.incrementAndGet() >= platforms.size())
+                if(i.incrementAndGet() >= platforms.size())
                     listener.onCoursesProcessed(courseMap, null);
             });
         }
+    }
+
+    /**
+     * Adds the given courses to the map **CALL METHOD IN THE PLATFORM'S {@link com.example.agendaapp.Data.Platform#getCourses(Platform.CoursesReceivedListener)} METHOD
+     * @param courseMap The courses to add
+     */
+    public static void processCourses(Map<String, Course> courseMap) {
+        courseMap.entrySet().stream().forEach(e -> {
+            String courseId = e.getKey();
+
+            if(CoursesFragment.courseMap.containsKey(courseId)) {
+                Course course = CoursesFragment.courseMap.get(courseId);
+
+                e.getValue().setCourseSubject(course.getCourseSubject());
+                e.getValue().setCourseIcon(course.getCourseIcon());
+            } else {
+                CoursesFragment.courseMap.put(e.getKey(), e.getValue());
+            }
+        });
     }
 
     /**
@@ -196,8 +178,6 @@ public class CoursesFragment extends Fragment {
 
     @Override
     public void onPause() {
-        System.out.println("on pause");
-
         Utility.serializeCourses(context, courseMap);
         Utility.serializeAssignments(context, HomeFragment.priority, HomeFragment.upcoming);
 

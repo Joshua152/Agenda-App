@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -116,7 +117,7 @@ public class Utility {
      * @param courses The course HashMap
      */
     public static void serializeCourses(Context context, Map<String, Course> courses) {
-        Serialize.serialize(courses, context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE); // TODO: CAN'T SERIALIZE DRAWABLE
+        Serialize.serialize(courses, context.getFilesDir() + "/" + SERIALIZATION_COURSES_FILE);
     }
 
     /**

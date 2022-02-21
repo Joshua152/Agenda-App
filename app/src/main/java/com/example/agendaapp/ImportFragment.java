@@ -26,6 +26,8 @@ import com.example.agendaapp.Platforms.GoogleClassroom;
 import com.example.agendaapp.RecyclerAdapters.ImportRecyclerAdapter;
 import com.example.agendaapp.Utils.Utility;
 
+import net.openid.appauth.AuthState;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,9 +45,10 @@ public class ImportFragment extends Fragment {
     public static final String SHARED_PREFERENCES_KEY = "Import Shared Preferences";
     public static final String SP_PLATFORM_JSON = "Shared Preferences Platform JSON";
 
+    public static final String JSON_SAVE_UID = "JSON Save UID";
     public static final String JSON_SAVE_PLATFORM_NAME = "JSON Save Platform Name";
-    public static final String JSON_SAVE_AUTH_TOKEN = "JSON Save Auth Token";
     public static final String JSON_SAVE_PROFILE_PIC_URL = "JSON Save Profile Pic URL";
+    public static final String JSON_SAVE_SIGNED_IN = "JSON Save Signed In";
 
     private Context context;
 
@@ -88,7 +91,8 @@ public class ImportFragment extends Fragment {
         actionMode = null;
         actionModeCallback = null;
 
-        platforms = getSavedPlatforms(context, getActivity());
+        if(platforms == null)
+            platforms = getSavedPlatforms(context, getActivity());
 
         for(Platform p : platforms)
             getLifecycle().addObserver(p);
@@ -197,17 +201,19 @@ public class ImportFragment extends Fragment {
      * Saves the platforms to SharedPreferences
      * @param context The fragment context
      */
-    public static void savePlatforms(Context context) { // TODO: PLATFORMS DISAPPEARING, SIGNING OUT TOO QUICKLY (CHECK FOR LOG ON OPENING IMPORT FRAGMENT)
+    public static void savePlatforms(Context context) {
         JSONArray save = new JSONArray();
 
         for(Platform p : platforms) {
             JSONObject object = new JSONObject();
 
             try {
-                object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
-                object.put(JSON_SAVE_AUTH_TOKEN, p.getToken());
+                System.out.println("saving id: " + p.getID());
 
+                object.put(JSON_SAVE_UID, p.getID());
+                object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
                 object.put(JSON_SAVE_PROFILE_PIC_URL, p.getAccountIconURL());
+                object.put(JSON_SAVE_SIGNED_IN, p.getSignedIn());
             } catch(JSONException e) {
                 Log.e("SAVE ERROR", "Unable to write to JSON");
             }
@@ -240,15 +246,17 @@ public class ImportFragment extends Fragment {
             for(int i = 0; i < array.length(); i++) {
                 JSONObject o = (JSONObject) array.get(i);
 
+                String uid = o.getString(JSON_SAVE_UID);
                 String name = o.getString(JSON_SAVE_PLATFORM_NAME);
-                String authToken = o.getString(JSON_SAVE_AUTH_TOKEN);
                 String profilePicURL = o.getString(JSON_SAVE_PROFILE_PIC_URL);
+                boolean signedIn = o.getBoolean(JSON_SAVE_SIGNED_IN);
 
-                Platform p = getPlatformFromName(context, name, activity);
-                p.setAuthToken(authToken);
+                Platform p = getPlatformFromName(context, name, uid, activity);
+                p.setAuthState(p.readAuthState());
                 p.setAccountIconURL(profilePicURL);
+                p.setSignedIn(signedIn);
 
-                p.checkAuthTokenValid();
+//                System.out.println("get saved auth refresh: " + p.getOAuthHelper().getAuthState().getRefreshToken());
 
                 platforms.add(p);
             }
@@ -267,7 +275,7 @@ public class ImportFragment extends Fragment {
         List<Platform> signedIn = new ArrayList<Platform>(platforms);
 
         for(int i = signedIn.size() - 1; i >= 0; i--) {
-            if(signedIn.get(i).getToken().equals(""))
+            if(!signedIn.get(i).getSignedIn())
                 signedIn.remove(i);
         }
 
@@ -278,12 +286,13 @@ public class ImportFragment extends Fragment {
      * Get Platform from the platform name
      * @param context The fragment context
      * @param name The platform name
+     * @param id The id to use; if you want to use the auto generated one, pass in AUTO_ID
      * @param activity The fragment's parent activity
      * @return The correct Platform object
      */
-    public static Platform getPlatformFromName(Context context, String name, Activity activity) {
+    public static Platform getPlatformFromName(Context context, String name, String id, Activity activity) {
         if(name.equals(context.getString(R.string.google_classroom)))
-            return new GoogleClassroom(activity);
+            return new GoogleClassroom(id, activity);
 
         return null;
     }

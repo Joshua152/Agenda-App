@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.SelectionPredicates;
@@ -26,6 +27,7 @@ import com.example.agendaapp.Data.Platform;
 import com.example.agendaapp.ImportFragment;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.ImageTransformations.CircleCropTransform;
+import com.example.agendaapp.Utils.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -86,7 +88,10 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             signin.setOnClickListener(view -> {
                 Platform platform = platforms.get(getBindingAdapterPosition());
 
-                platform.onClickSignIn();
+                if(Utility.isNetworkAvailable(context))
+                    platform.onClickSignIn();
+                else
+                    Toast.makeText(context, context.getString(R.string.error_no_connection), Toast.LENGTH_SHORT);
             });
 
             signOut.setOnClickListener(view -> {
@@ -249,7 +254,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if(platform.getSignInButton() != null)
             platformHolder.replaceSignInButton(platform.getSignInButton());
 
-        if(platform.isSignedIn())
+        if(platform.getSignedIn())
             platformHolder.setSignedInUI();
 
         platformHolder.ivPlatformIcon.setImageDrawable(platform.getPlatformIcon());

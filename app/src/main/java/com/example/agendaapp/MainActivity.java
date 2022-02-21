@@ -12,8 +12,9 @@ package com.example.agendaapp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Intent;
 import android.os.Bundle;
+
+// TODO: REDUCE NUM OF SHARED PREF FILES PER PLATFORM INSTANCE
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private void addHomeFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.fragment_container, new TestFragment());
+        transaction.replace(R.id.fragment_container, homeFragment);
         transaction.addToBackStack("Home Fragment");
         transaction.commit();
     }

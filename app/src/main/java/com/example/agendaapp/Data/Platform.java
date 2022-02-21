@@ -4,13 +4,19 @@
 
 package com.example.agendaapp.Data;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.lifecycle.DefaultLifecycleObserver;
 
+import com.example.agendaapp.R;
+import com.example.agendaapp.Utils.OAuthHelper;
 import com.google.api.client.util.DateTime;
+
+import net.openid.appauth.AuthState;
 
 import org.json.JSONArray;
 
@@ -22,7 +28,9 @@ import java.util.UUID;
 
 public abstract class Platform implements DefaultLifecycleObserver {
 
-    public final String ID;
+    public static final String AUTO_ID = "Auto ID";
+
+    public String ID;
 
     private Drawable platformIcon;
     private String platformName;
@@ -33,7 +41,9 @@ public abstract class Platform implements DefaultLifecycleObserver {
     private List<SignedInListener> signedInListeners;
     private List<SignOutRequestListener> signOutRequestListeners;
 
-    protected String authToken;
+    protected OAuthHelper oAuthHelper;
+
+    private boolean signedIn;
 
     /**
      * Constructor to set the platform icon and name with the default sign in icon (not signed in yet)
@@ -52,7 +62,9 @@ public abstract class Platform implements DefaultLifecycleObserver {
         signedInListeners = new ArrayList<SignedInListener>();
         signOutRequestListeners = new ArrayList<SignOutRequestListener>();
 
-        authToken = "";
+        oAuthHelper = null;
+
+        signedIn = false;
     }
 
     /**
@@ -100,19 +112,28 @@ public abstract class Platform implements DefaultLifecycleObserver {
     }
 
     /**
-     * Returns if the user is currently signed in to the platform
-     * @return Returns if the auth token is an empty String
+     * Updates the auth state and signs out if an exception occurs
+     * @param context The context
      */
-    public boolean isSignedIn() {
-        return !authToken.equals("");
+    public void updateAndCheckAuthState(Context context) {
+        oAuthHelper.useAuthToken(authState -> {
+            if(authState == null) {
+                onClickSignOut();
+                callSignOutRequestListeners();
+
+                Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
-     * Sets all fields holding user data to null
+     * Sets all fields holding user data to null and sets isSignedIn to false
      */
-    public void clearData() {
+    public void signOut() {
         accountIconURL = "";
-        authToken = "";
+        signedIn = false;
+
+        oAuthHelper.signOut();
     }
 
     /**
@@ -130,8 +151,18 @@ public abstract class Platform implements DefaultLifecycleObserver {
         this.accountIconURL = accountIconURL;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public void setAuthState(AuthState authState) {
+        System.out.println(oAuthHelper);
+
+        oAuthHelper.setAuthState(authState);
+    }
+
+    public void setSignedIn(boolean signedIn) {
+        this.signedIn = signedIn;
+    }
+
+    public String getID() {
+        return ID;
     }
 
     public Drawable getPlatformIcon() {
@@ -150,23 +181,23 @@ public abstract class Platform implements DefaultLifecycleObserver {
         return signInButton;
     }
     
-    public String getToken() {
-        return authToken;
+    public OAuthHelper getOAuthHelper() {
+        return oAuthHelper;
     }
 
-    public String getID() {
-        return ID;
+    public boolean getSignedIn() {
+        return signedIn;
     }
 
     /**
      * Checks to make sure the auth token hasn't expired yet and handles the result if it has
      */
-    public abstract void checkAuthTokenValid();
+//    public abstract void checkAuthTokenValid();
 
     /**
-     * Sign in to platform (get photo) with previous auth token
+     * Configs the platform (get photo) with previous auth token
      */
-    public abstract void signInWithPrevAuth();
+//    public abstract void configWithPrevAuth();
 
     /**
      * Callback method when the sign in button gets pressed
@@ -189,6 +220,12 @@ public abstract class Platform implements DefaultLifecycleObserver {
      * @param listener Listener for when the new assignment List has finished filling
      */
     public abstract void getNewAssignments(AssignmentReceivedListener listener);
+
+    /**
+     * Reads in the saved auth state from storage
+     * @return Returns the auth state or null if one was not found
+     */
+    public abstract AuthState readAuthState();
 
     /**
      * An interface for the onSignedIn() method

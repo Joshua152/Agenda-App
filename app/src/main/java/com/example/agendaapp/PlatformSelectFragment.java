@@ -112,7 +112,7 @@ public class PlatformSelectFragment extends Fragment {
                 index++;
 
             for(int i = 0; i < platformMap.get(key); i++) {
-                Platform p = ImportFragment.getPlatformFromName(context, key, getActivity());
+                Platform p = ImportFragment.getPlatformFromName(context, key, Platform.AUTO_ID, getActivity());
 
                 ImportFragment.platforms.add(index, p);
             }

@@ -66,6 +66,8 @@
 
     <string name="import_error">Import error</string>
     <string name="import_info_error">Error getting info</string>
+    <string name="log_out_error">Error logging out</string>
+    <string name="gc_not_allowed_error">Not permitted into Google Classroom</string>
 
     <!--Platform Select Fragment-->
     <string name="done">Done</string>

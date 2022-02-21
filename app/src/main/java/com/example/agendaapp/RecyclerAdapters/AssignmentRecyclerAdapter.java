@@ -119,12 +119,12 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
                     viewFragment = ViewFragment.newInstance(moderator.getOverall(position), position, position <= priority.size());
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        ViewCompat.setTransitionName(cardView, Utility.TRANSITION_BACKGROUND + position);
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    ViewCompat.setTransitionName(cardView, Utility.TRANSITION_BACKGROUND + position);
 
-                        transaction.setReorderingAllowed(true);
-                        transaction.addSharedElement(cardView, cardView.getTransitionName());
-                    }
+                    transaction.setReorderingAllowed(true);
+                    transaction.addSharedElement(cardView, cardView.getTransitionName());
+//                    }
 
                     transaction.replace(R.id.fragment_container, viewFragment);
                     transaction.addToBackStack(Utility.VIEW_FRAGMENT);
