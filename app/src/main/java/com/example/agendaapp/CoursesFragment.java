@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CoursesFragment extends Fragment {
 
+    // TODO: ADD TEXT FOR 'NO COURSES'
+
     public static final String ERROR_NO_CONNECTION = "Error No Connection";
 
     private Context context;

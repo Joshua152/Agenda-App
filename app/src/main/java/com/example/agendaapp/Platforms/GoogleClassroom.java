@@ -152,9 +152,9 @@ public class GoogleClassroom extends Platform {
 
                         // TODO: SIGNING OUT BECAUSE 401 BUT ACTUALLY JUST HAS TO TRY AGAIN
 
-                        System.out.println("error right here");
+                        System.out.println("error right here: " + retryPolicy.getCurrentRetryCount() + " " + DefaultRetryPolicy.DEFAULT_MAX_RETRIES);
 
-                        if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                        if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                             return;
 
                         try {
@@ -171,6 +171,11 @@ public class GoogleClassroom extends Platform {
 
                                     break;
                                 case 403 :
+                                    System.out.println("403 ERROR");
+
+                                    onClickSignOut();
+                                    callSignOutRequestListeners();
+
                                     Snackbar.make(activity.findViewById(android.R.id.content),
                                             context.getString(R.string.gc_not_allowed_error), Snackbar.LENGTH_LONG).show();
 
@@ -307,7 +312,7 @@ public class GoogleClassroom extends Platform {
                         byte[] htmlBodyBytes = error.networkResponse.data;
                         Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
 
-                        if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                        if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                             return;
 
                         try {
@@ -394,7 +399,7 @@ public class GoogleClassroom extends Platform {
                             byte[] htmlBodyBytes = error.networkResponse.data;
                             Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
 
-                            if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                            if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                                 return;
 
                             try {

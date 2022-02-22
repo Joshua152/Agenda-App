@@ -60,7 +60,7 @@
 
     <string name="google_classroom">Google Classroom</string>
 
-    <string name="logged_out">You have been logged out of an account</string>
+    <string name="logged_out">You have been logged out of an account. Logging out.</string>
 
     <string name="delete">Delete</string>
 

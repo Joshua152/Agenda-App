@@ -128,7 +128,6 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
         viewHolder.platformIcon.setImageDrawable(platforms[position].getPlatformIcon());
         viewHolder.platformName.setText(platforms[position].getPlatformName());
 
-        System.out.println(viewHolder.numPlatforms.getText());
         if(selectedPlatforms.containsKey(platforms[position].getPlatformName()))
             viewHolder.numPlatforms.setText(selectedPlatforms.get(platforms[position].getPlatformName()).toString());
     }

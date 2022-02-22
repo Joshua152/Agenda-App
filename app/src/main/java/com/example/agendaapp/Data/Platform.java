@@ -190,16 +190,6 @@ public abstract class Platform implements DefaultLifecycleObserver {
     }
 
     /**
-     * Checks to make sure the auth token hasn't expired yet and handles the result if it has
-     */
-//    public abstract void checkAuthTokenValid();
-
-    /**
-     * Configs the platform (get photo) with previous auth token
-     */
-//    public abstract void configWithPrevAuth();
-
-    /**
      * Callback method when the sign in button gets pressed
      */
     public abstract void onClickSignIn();
