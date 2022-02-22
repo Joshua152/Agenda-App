@@ -163,7 +163,6 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
      * ViewHolder for a spacer (separation view)
      */
     private class SpacerViewHolder extends RecyclerView.ViewHolder {
-
         public SpacerViewHolder(View itemView) {
             super(itemView);
         }

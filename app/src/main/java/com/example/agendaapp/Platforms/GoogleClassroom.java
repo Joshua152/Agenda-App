@@ -54,6 +54,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import kotlin.random.Random;
+
 public class GoogleClassroom extends Platform {
 
     public static final String GOOGLE_CLASSROOM = "Google Classroom";
@@ -93,86 +95,23 @@ public class GoogleClassroom extends Platform {
                 "https://www.googleapis.com/auth/userinfo.profile " +
                         "https://www.googleapis.com/auth/classroom.courses.readonly " +
                         "https://www.googleapis.com/auth/classroom.coursework.me.readonly",
-                () -> MainActivity.homeFragment.updateAssignments(this));
+                () -> MainActivity.homeFragment.updateAssignments(this, () -> {}));
     }
 
     @Override
     public void onCreate(LifecycleOwner owner) {
         oAuthHelper.setRegistry(((Fragment) owner).requireActivity().getActivityResultRegistry());
         oAuthHelper.setLifecycleOwner(owner);
-
-//        launcher = registry.register("Google Classroom" + ID, owner,
-//            new ActivityResultContracts.StartActivityForResult(),
-//            (uri) -> {
-//                if(uri.getResultCode() == Activity.RESULT_OK)
-//                    getAuthToken(uri.getData());
-//            });
     }
-
-//    @Override
-//    public void checkAuthTokenValid() {
-//        if(authToken.equals("") || !Utility.isNetworkAvailable(context))
-//            return;
-//
-//        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
-//                "https://people.googleapis.com/v1/people/me?personFields=photos",
-//                null,
-//                null,
-//                error -> {
-//                    try {
-//                        byte[] b = error.networkResponse.data;
-//                        Log.e("IMPORT ERROR", new String(b), error);
-//
-//                        try {
-//                            JSONObject json = new JSONObject(new String(b));
-//                            int errorCode = json.getJSONObject("error").getInt("code");
-//
-//                            switch(errorCode) {
-//                                case 401 :
-//                                    onClickSignOut();
-//                                    callSignOutRequestListeners();
-//
-//                                    Snackbar.make(activity.findViewById(android.R.id.content),
-//                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
-//
-//                                    break;
-//                            }
-//                        } catch(JSONException e) {
-//                            Log.e("IMPORT ERROR", "Could not parse error JSON");
-//                        }
-//                    } catch (NullPointerException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//        ) {
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                Map<String, String> params = new HashMap<String, String>();
-//
-//                params.put("Content-Type", "application/json");
-//                params.put("authorization", "Bearer " + authToken);
-//
-//                return params;
-//            }
-//        };
-//
-//        request.setRetryPolicy(new DefaultRetryPolicy(5000,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-//
-//        queue.add(request);
-//    }
-
-//    @Override
-//    public void configWithPrevAuth() {
-//        if(!authToken.equals(""))
-//            queue.add(photoRequest);
-//    }
 
     @Override
     public void getCourses(CoursesReceivedListener listener) {
         if(!getSignedIn() || !Utility.isNetworkAvailable(context))
             return;
+
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
                 "https://classroom.googleapis.com/v1/courses?studentId=me&courseStates=ACTIVE&pageSize=0",
@@ -211,7 +150,12 @@ public class GoogleClassroom extends Platform {
                         byte[] b = error.networkResponse.data;
                         Log.e("IMPORT ERROR", new String(b), error);
 
+                        // TODO: SIGNING OUT BECAUSE 401 BUT ACTUALLY JUST HAS TO TRY AGAIN
+
                         System.out.println("error right here");
+
+                        if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                            return;
 
                         try {
                             JSONObject o = new JSONObject(new String(b));
@@ -258,17 +202,18 @@ public class GoogleClassroom extends Platform {
         if(oAuthHelper.getAuthState().getNeedsTokenRefresh())
             updateAndCheckAuthState(context);
 
-        request.setRetryPolicy(new DefaultRetryPolicy(5000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(retryPolicy);
 
         queue.add(request);
     }
 
     @Override
     public void getNewAssignments(AssignmentReceivedListener listener) {
-        if(!getSignedIn() || !Utility.isNetworkAvailable(context))
+        if(!getSignedIn() || !Utility.isNetworkAvailable(context)) {
+            listener.onAssignmentReceived(new ArrayList<>());
+
             return;
+        }
 
         getCourses(courses ->  {
             if(courses == null)
@@ -302,10 +247,17 @@ public class GoogleClassroom extends Platform {
      * @param courseId The course to get the assignments from
      */
     private void handleAssignmentsForCourse(String courseId, AssignmentReceivedListener listener) {
-        if(!getSignedIn() || !Utility.isNetworkAvailable(context))
+        if(!getSignedIn() || !Utility.isNetworkAvailable(context)) {
+            listener.onAssignmentReceived(new ArrayList<>());
+
             return;
+        }
 
         List<Assignment> assignments = new ArrayList<Assignment>();
+
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
                 "https://classroom.googleapis.com/v1/courses/" + courseId.substring(courseId.indexOf("|") + 1) + "/courseWork?pageSize=0&orderBy=updateTime desc",
@@ -355,6 +307,9 @@ public class GoogleClassroom extends Platform {
                         byte[] htmlBodyBytes = error.networkResponse.data;
                         Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
 
+                        if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                            return;
+
                         try {
                             JSONObject json = new JSONObject(new String(htmlBodyBytes));
                             int errorCode = json.getJSONObject("error").getInt("code");
@@ -397,9 +352,7 @@ public class GoogleClassroom extends Platform {
         if(oAuthHelper.getAuthState().getNeedsTokenRefresh())
             updateAndCheckAuthState(context);
 
-        request.setRetryPolicy(new DefaultRetryPolicy(5000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(retryPolicy);
 
         queue.add(request);
     }
@@ -411,22 +364,11 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void onClickSignIn() {
-//        Intent signInIntent = AccountManager.newChooseAccountIntent(
-//                null,
-//                null,
-//                new String[] {"com.google"},
-//                false,
-//                null,
-//                null,
-//                null,
-//                null
-//        );
-//
-//        launcher.launch(signInIntent);
-
         setSignedIn(true);
 
-        System.out.println("asdfasdfasdfa");
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(5000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
 
         oAuthHelper.launchOAuth(authState -> {
             JsonObjectRequest photoRequest = new JsonObjectRequest(Request.Method.GET,
@@ -439,7 +381,6 @@ public class GoogleClassroom extends Platform {
 
                             setAccountIconURL(photoURL);
 
-                            System.out.println("response??");
                             callSignInListeners();
                         } catch(JSONException e) {
                             Log.e("IMPORT ERROR", e.toString());
@@ -452,6 +393,9 @@ public class GoogleClassroom extends Platform {
                         try {
                             byte[] htmlBodyBytes = error.networkResponse.data;
                             Log.e("IMPORT ERROR", new String(htmlBodyBytes), error);
+
+                            if(retryPolicy.getCurrentRetryCount() != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
+                                return;
 
                             try {
                                 JSONObject json = new JSONObject(new String(htmlBodyBytes));
@@ -473,9 +417,7 @@ public class GoogleClassroom extends Platform {
                         } catch (NullPointerException e) {
                             e.printStackTrace();
                         }
-
-                        //  Toast.makeText(context, R.string.import_info_error, Toast.LENGTH_SHORT).show();
-                    }
+             }
             ) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
@@ -491,9 +433,7 @@ public class GoogleClassroom extends Platform {
             if(authState.getNeedsTokenRefresh()) // TODO: MOVE ELSEWHERE -> RETRIEVE AUTH TOKEN MIGHT NOT FINISH IN TIME BEFORE GETACCESSTOKEN()
                 updateAndCheckAuthState(context);
 
-            photoRequest.setRetryPolicy(new DefaultRetryPolicy(5000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            photoRequest.setRetryPolicy(retryPolicy);
 
             queue.add(photoRequest);
         });
@@ -501,7 +441,6 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void onClickSignOut() {
-//        AccountManager.get(context).invalidateAuthToken("com.google", authToken);
         signOut();
     }
 }

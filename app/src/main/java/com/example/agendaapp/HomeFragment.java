@@ -28,6 +28,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
@@ -50,6 +51,7 @@ import com.google.android.material.transition.MaterialElevationScale;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO: CRASH WHEN CREATING NEW ASSIGNMENT THEN CHANGING PLATFORM SUBJECT
 
@@ -61,6 +63,7 @@ public class HomeFragment extends Fragment {
     private FloatingActionButton fab;
 
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private AssignmentRecyclerAdapter recyclerViewAdapter;
 
     // ArrayList of priority assignments
@@ -138,6 +141,7 @@ public class HomeFragment extends Fragment {
         fab = (FloatingActionButton) view.findViewById(R.id.fab);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.home_recycler_view);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
 
         setArrayAdapter();
 
@@ -215,6 +219,23 @@ public class HomeFragment extends Fragment {
             transaction.addToBackStack(Utility.EDIT_FRAGMENT);
             transaction.commit();
         });
+
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            AtomicInteger done = new AtomicInteger(0);
+
+            for(Platform p : ImportFragment.platforms) {
+                System.out.println("update platform: " + p.getPlatformName());
+
+                updateAssignments(p, () -> {
+                    if(done.incrementAndGet() == ImportFragment.platforms.size())
+                        swipeRefreshLayout.setRefreshing(false);
+
+                    System.out.println(done.get() + "|" + ImportFragment.platforms.size());
+                });
+            }
+
+            updateAssignmentPositions();
+        });
     }
 
     @Override
@@ -227,7 +248,7 @@ public class HomeFragment extends Fragment {
     /**
      * Updates the lists
      */
-    private void updateAssignmentPositions() { // TODO: UPDATE NAME TO UPDATEASSIGNMENTPOSITIONS
+    private void updateAssignmentPositions() {
         // Move from upcoming to priority if necessary
         for(int i = 0; i < upcoming.size(); i++) {
             if(DateUtils.inPriorityRange(context, upcoming.get(i).getDateInfo())) {
@@ -241,7 +262,7 @@ public class HomeFragment extends Fragment {
      * Checks for new or updated assignments from the platform
      * @param p The platform
      */
-    public void updateAssignments(Platform p) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
+    public void updateAssignments(Platform p, CoursesUpdated coursesUpdated) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
         p.getNewAssignments(assignments -> {
             for(Assignment a : assignments) {
                 for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
@@ -278,6 +299,8 @@ public class HomeFragment extends Fragment {
             }
 
             Utility.serializeAssignments(context, priority, upcoming);
+
+            coursesUpdated.onCoursesUpdated();
         });
     }
 
@@ -363,5 +386,15 @@ public class HomeFragment extends Fragment {
         public void onFragmentResult(String key, Bundle bundle) {
             save(bundle);
         }
+    }
+
+    /**
+     * Interface for when the courses for a platform have been updated
+     */
+    public interface CoursesUpdated {
+        /**
+         * Callback for when courses have been updated
+         */
+        void onCoursesUpdated();
     }
 }

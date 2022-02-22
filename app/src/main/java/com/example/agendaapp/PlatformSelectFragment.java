@@ -31,9 +31,12 @@ import java.util.HashMap;
 
 public class PlatformSelectFragment extends Fragment {
 
+    private final String SELECTED_PLATFORMS_BUNDLE_KEY = "Selected Platforms Bundle Key";
+
     private Context context;
 
     private RecyclerView recyclerView;
+    private PlatformSelectRecyclerAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
@@ -48,7 +51,7 @@ public class PlatformSelectFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        init(view);
+        init(view, onSavedInstance);
 
         return view;
     }
@@ -57,14 +60,22 @@ public class PlatformSelectFragment extends Fragment {
      * Inits the views (constructs)
      * @param view The inflated fragment
      */
-    public void init(View view) {
+    public void init(View view, Bundle onSavedInstance) {
         context = getContext();
 
         recyclerView = (RecyclerView) view.findViewById(R.id.select_recycler_view);
+        adapter = new PlatformSelectRecyclerAdapter(context,
+                new PlatformInfo(getResources().getDrawable(R.drawable.ic_google_classroom_32dp),
+                getString(R.string.google_classroom)));
+
+        if(onSavedInstance != null) {
+            adapter.setSelectedPlatforms((HashMap<String, Integer>) onSavedInstance.getSerializable(SELECTED_PLATFORMS_BUNDLE_KEY));
+
+            System.out.println("boooyah: " + adapter.getSelectedPlatforms());
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new PlatformSelectRecyclerAdapter(context,
-                new PlatformInfo(getResources().getDrawable(R.drawable.ic_google_classroom_32dp), getString(R.string.google_classroom))));
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -119,5 +130,10 @@ public class PlatformSelectFragment extends Fragment {
         }
 
         ImportFragment.savePlatforms(context);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(SELECTED_PLATFORMS_BUNDLE_KEY, adapter.getSelectedPlatforms());
     }
 }
