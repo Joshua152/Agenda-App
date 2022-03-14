@@ -224,13 +224,9 @@ public class HomeFragment extends Fragment {
             AtomicInteger done = new AtomicInteger(0);
 
             for(Platform p : ImportFragment.platforms) {
-                System.out.println("update platform: " + p.getPlatformName());
-
                 updateAssignments(p, () -> {
                     if(done.incrementAndGet() == ImportFragment.platforms.size())
                         swipeRefreshLayout.setRefreshing(false);
-
-                    System.out.println(done.get() + "|" + ImportFragment.platforms.size());
                 });
             }
 

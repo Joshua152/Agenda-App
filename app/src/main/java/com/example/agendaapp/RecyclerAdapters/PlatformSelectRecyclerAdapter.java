@@ -69,17 +69,17 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
          */
         public void initCallbacks() {
             numPlatforms.setFilters(new InputFilter[]{
-                    (source, start, end, dest, dstart, dend) -> {
-                        int n = Integer.parseInt(source.toString());
+                (source, start, end, dest, dstart, dend) -> {
+                    int n = Integer.parseInt(source.toString());
 
-                        if(n < 0)
-                            return "0";
+                    if(n < 0)
+                        return "0";
 
-                        if(n > 9)
-                            return "9";
+                    if(n > 9)
+                        return "9";
 
-                        return null;
-                    }
+                    return null;
+                }
             });
 
             addPlatform.setOnClickListener((view) -> {

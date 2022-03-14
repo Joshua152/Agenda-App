@@ -42,6 +42,8 @@ public class ImportFragment extends Fragment {
 
     // TODO: Use action view for add (search for platform with MaterialAutoCompleteTextView)
 
+    // TODO: ERROR WHEN CANCELING OAUTH
+
     public static final String SHARED_PREFERENCES_KEY = "Import Shared Preferences";
     public static final String SP_PLATFORM_JSON = "Shared Preferences Platform JSON";
 
@@ -138,6 +140,8 @@ public class ImportFragment extends Fragment {
 
                     tracker.clearSelection();
 
+                    savePlatforms(context);
+
                     return true;
                 }
 
@@ -208,8 +212,6 @@ public class ImportFragment extends Fragment {
             JSONObject object = new JSONObject();
 
             try {
-                System.out.println("saving id: " + p.getID());
-
                 object.put(JSON_SAVE_UID, p.getID());
                 object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
                 object.put(JSON_SAVE_PROFILE_PIC_URL, p.getAccountIconURL());
@@ -297,10 +299,13 @@ public class ImportFragment extends Fragment {
         return null;
     }
 
-    @Override
-    public void onPause() {
-        savePlatforms(context);
-
-        super.onPause();
-    }
+//    @Override
+//    public void onPause() {
+//        System.out.println("save");
+//
+//        // TODO: NOT GETTING CALLED WHEN RERUN IN ANDROID STUDIO
+//        savePlatforms(context);
+//
+//        super.onPause();
+//    }
 }

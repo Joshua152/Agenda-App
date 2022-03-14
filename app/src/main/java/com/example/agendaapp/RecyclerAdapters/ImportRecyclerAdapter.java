@@ -140,6 +140,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     .load(platforms.get(getBindingAdapterPosition()).getAccountIconURL())
                     .transform(new CircleCropTransform())
                     .into(ivAccount);
+
+            ImportFragment.savePlatforms(context);
         }
 
         /**

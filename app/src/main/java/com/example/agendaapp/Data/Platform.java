@@ -115,7 +115,7 @@ public abstract class Platform implements DefaultLifecycleObserver {
      * Updates the auth state and signs out if an exception occurs
      * @param context The context
      */
-    public void updateAndCheckAuthState(Context context) {
+    public void updateAndCheckAuthState(Context context, AuthUpdatedListener listener) {
         oAuthHelper.useAuthToken(authState -> {
             if(authState == null) {
                 onClickSignOut();
@@ -123,6 +123,8 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
                 Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
             }
+
+            listener.onAuthUpdated(authState);
         });
     }
 
@@ -152,8 +154,6 @@ public abstract class Platform implements DefaultLifecycleObserver {
     }
 
     public void setAuthState(AuthState authState) {
-        System.out.println(oAuthHelper);
-
         oAuthHelper.setAuthState(authState);
     }
 
@@ -238,10 +238,25 @@ public abstract class Platform implements DefaultLifecycleObserver {
     }
 
     /**
+     * Interface for when the auth state has been updated with the useAuthToken method
+     */
+    public interface AuthUpdatedListener {
+        /**
+         * Gets called when the auth state has been updated
+         * @param authState The updated auth state
+         */
+        void onAuthUpdated(AuthState authState);
+    }
+
+    /**
      * An interface for the onCoursesReceived() method
      */
     public interface CoursesReceivedListener {
-        public void onCoursesReceived(Map<String, Course> courses);
+        /**
+         * Gets called when the courses have been gotten from the http request
+         * @param courses The received courses
+         */
+        void onCoursesReceived(Map<String, Course> courses);
     }
 
     /**
@@ -253,6 +268,6 @@ public abstract class Platform implements DefaultLifecycleObserver {
          * List is filled
          * @param assignments The List of new assignments
          */
-        public void onAssignmentReceived(List<Assignment> assignments);
+        void onAssignmentReceived(List<Assignment> assignments);
     }
 }

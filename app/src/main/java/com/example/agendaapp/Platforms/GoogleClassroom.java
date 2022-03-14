@@ -58,6 +58,9 @@ import kotlin.random.Random;
 
 public class GoogleClassroom extends Platform {
 
+    // TODO: SIGNIGN IN DOESN'T WORK WHEN NOT SIGNED IN THEN PRESSING 'X' THEN GOING BACK TO IMPORT AND TRYING TO SIGN IN
+    // TODO: THINKING ITS BECAUSE THE OAUTHHELPER SOMEHOW DOESN'T GET SAVED PROPERLY
+
     public static final String GOOGLE_CLASSROOM = "Google Classroom";
 
     public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
@@ -87,8 +90,6 @@ public class GoogleClassroom extends Platform {
         preferences = context.getSharedPreferences(SHARED_PREFS_KEY, Context.MODE_PRIVATE);
 
         queue = Volley.newRequestQueue(activity.getApplicationContext());
-
-        System.out.println("GC CONSTRUCTOR");
 
         oAuthHelper = new OAuthHelper(context, ID,
                 "https://accounts.google.com/.well-known/openid-configuration",
@@ -150,10 +151,6 @@ public class GoogleClassroom extends Platform {
                         byte[] b = error.networkResponse.data;
                         Log.e("IMPORT ERROR", new String(b), error);
 
-                        // TODO: SIGNING OUT BECAUSE 401 BUT ACTUALLY JUST HAS TO TRY AGAIN
-
-                        System.out.println("error right here: " + retryPolicy.getCurrentRetryCount() + " " + DefaultRetryPolicy.DEFAULT_MAX_RETRIES);
-
                         if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                             return;
 
@@ -197,6 +194,8 @@ public class GoogleClassroom extends Platform {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
 
+                //TODO: CALL PERFORMACTIONWITHFRESHTOKENS AND THEN INSIDE OF THAT GET THE ACCESS TOKEN?
+
                 params.put("Content-Type", "application/json");
                 params.put("authorization", "Bearer " + oAuthHelper.getAuthState().getAccessToken());
 
@@ -204,12 +203,15 @@ public class GoogleClassroom extends Platform {
             }
         };
 
-        if(oAuthHelper.getAuthState().getNeedsTokenRefresh())
-            updateAndCheckAuthState(context);
-
         request.setRetryPolicy(retryPolicy);
 
-        queue.add(request);
+        if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
+            updateAndCheckAuthState(context, authState -> {
+                queue.add(request);
+            });
+        } else {
+            queue.add(request);
+        }
     }
 
     @Override
@@ -321,8 +323,6 @@ public class GoogleClassroom extends Platform {
 
                             switch(errorCode) {
                                 case 401 :
-                                    System.out.println("Sign out and make snackbar: handle assignments for course");
-
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
@@ -354,12 +354,15 @@ public class GoogleClassroom extends Platform {
             }
         };
 
-        if(oAuthHelper.getAuthState().getNeedsTokenRefresh())
-            updateAndCheckAuthState(context);
-
         request.setRetryPolicy(retryPolicy);
 
-        queue.add(request);
+        if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
+            updateAndCheckAuthState(context, authState -> {
+                queue.add(request);
+            });
+        } else {
+            queue.add(request);
+        }
     }
 
     @Override
@@ -435,12 +438,15 @@ public class GoogleClassroom extends Platform {
                 }
             };
 
-            if(authState.getNeedsTokenRefresh()) // TODO: MOVE ELSEWHERE -> RETRIEVE AUTH TOKEN MIGHT NOT FINISH IN TIME BEFORE GETACCESSTOKEN()
-                updateAndCheckAuthState(context);
-
             photoRequest.setRetryPolicy(retryPolicy);
 
-            queue.add(photoRequest);
+            if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
+                updateAndCheckAuthState(context, authState1 -> {
+                    queue.add(photoRequest);
+                });
+            } else {
+                queue.add(photoRequest);
+            }
         });
     }
 

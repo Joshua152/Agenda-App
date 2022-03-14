@@ -41,6 +41,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class OAuthHelper {
 
@@ -150,7 +152,7 @@ public class OAuthHelper {
     }
 
     public void initLauncher() {
-        authLauncher = registry.register(UID, owner,
+        authLauncher = registry.register(UUID.randomUUID().toString(), owner,
                 new ActivityResultContracts.StartActivityForResult(),
                 uri -> {
                     if(uri.getResultCode() == Activity.RESULT_OK) {
@@ -175,11 +177,6 @@ public class OAuthHelper {
 
                                     writeAuthState(authState);
 
-                                    System.out.println(oAuthCompleteListener);
-                                    System.out.println("1: " + this);
-                                    System.out.println("UID: " + UID);
-                                    System.out.println("refresh token: " + authState.getRefreshToken());
-
                                     oAuthCompleteListener.onOAuthComplete(authState);
                                 });
                     }
@@ -193,7 +190,12 @@ public class OAuthHelper {
      */
     public void launchOAuth(OAuthCompleteListener oAuthCompleteListener) {
         this.oAuthCompleteListener = oAuthCompleteListener;
-        authLauncher.launch(authIntent);
+
+        try {
+            authLauncher.launch(authIntent);
+        } catch(Exception e) {
+            Log.e("LAUNCH AUTH", e.toString());
+        }
     }
 
     /**
@@ -201,8 +203,6 @@ public class OAuthHelper {
      * @param listener The token listener for when when auth state returns the tokens
      */
     public void useAuthToken(OAuthCompleteListener listener) {
-        System.out.println(authState.getRefreshToken());
-
         if(authService == null)
             return;
 
@@ -210,9 +210,7 @@ public class OAuthHelper {
                 (accessToken, idToken, ex) -> {
 //                    authState.update(accessToken);
 
-                    System.out.println(authState.getNeedsTokenRefresh());
-                    System.out.println("refresh: " + authState.getRefreshToken());
-                    TokenRequest request = authState.createTokenRefreshRequest();
+//                    TokenRequest request = authState.createTokenRefreshRequest();
 
                     if (ex != null) {
                         Log.e("[TEST APP] oauth", "failed to use accessToken: " + ex);
@@ -253,13 +251,9 @@ public class OAuthHelper {
             if(authStateJSON == null)
                 return null;
 
-            System.out.println("auth state json: " + new JSONObject(authStateJSON).toString(4));
-
             AuthState authState = AuthState.jsonDeserialize(authStateJSON);
 
             this.authState = authState;
-
-            System.out.println("refresh: " + authState.getRefreshToken());
 
             return authState;
         } catch(JSONException e) {

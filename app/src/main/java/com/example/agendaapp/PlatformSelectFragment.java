@@ -70,8 +70,6 @@ public class PlatformSelectFragment extends Fragment {
 
         if(onSavedInstance != null) {
             adapter.setSelectedPlatforms((HashMap<String, Integer>) onSavedInstance.getSerializable(SELECTED_PLATFORMS_BUNDLE_KEY));
-
-            System.out.println("boooyah: " + adapter.getSelectedPlatforms());
         }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));

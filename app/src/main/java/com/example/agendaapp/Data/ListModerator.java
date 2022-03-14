@@ -155,8 +155,6 @@ public class ListModerator<T> {
             list++;
         }
 
-        System.out.println(index + " " + list + " " + 1);
-
         return index + list + 1;
     }
 
