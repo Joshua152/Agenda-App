@@ -11,7 +11,6 @@ package com.example.agendaapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,20 +32,16 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.DateInfo;
 import com.example.agendaapp.Data.Platform;
-import com.example.agendaapp.Platforms.GoogleClassroom;
 import com.example.agendaapp.RecyclerAdapters.AssignmentRecyclerAdapter;
-import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
-import com.example.agendaapp.Utils.OAuthHelper;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
@@ -222,11 +217,17 @@ public class HomeFragment extends Fragment {
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            if(ImportFragment.platforms.size() == 0) {
+                swipeRefreshLayout.setRefreshing(false);
+
+                return;
+            }
+
             AtomicInteger done = new AtomicInteger(0);
 
-            for(Platform p : ImportFragment.platforms) {
+            for(Platform p : ImportFragment.getSignedInPlatforms()) {
                 updateAssignments(p, () -> {
-                    if(done.incrementAndGet() == ImportFragment.platforms.size())
+                    if(done.incrementAndGet() == ImportFragment.getSignedInPlatforms().size())
                         swipeRefreshLayout.setRefreshing(false);
                 });
             }
@@ -259,7 +260,7 @@ public class HomeFragment extends Fragment {
      * Checks for new or updated assignments from the platform
      * @param p The platform
      */
-    public void updateAssignments(Platform p, CoursesUpdated coursesUpdated) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
+    public void updateAssignments(Platform p, CoursesUpdatedListener coursesUpdatedListener) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
         p.getNewAssignments(assignments -> {
             for(Assignment a : assignments) {
                 for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
@@ -296,7 +297,7 @@ public class HomeFragment extends Fragment {
 
             Utility.serializeAssignments(context, priority, upcoming);
 
-            coursesUpdated.onCoursesUpdated();
+            coursesUpdatedListener.onCoursesUpdated();
         });
     }
 
@@ -387,7 +388,7 @@ public class HomeFragment extends Fragment {
     /**
      * Interface for when the courses for a platform have been updated
      */
-    public interface CoursesUpdated {
+    public interface CoursesUpdatedListener {
         /**
          * Callback for when courses have been updated
          */

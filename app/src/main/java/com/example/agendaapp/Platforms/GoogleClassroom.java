@@ -153,6 +153,8 @@ public class GoogleClassroom extends Platform {
                         if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                             return;
 
+                        listener.onCoursesReceived(new HashMap<>());
+
                         try {
                             JSONObject o = new JSONObject(new String(b));
                             int errorCode = o.getJSONObject("error").getInt("code");
@@ -220,8 +222,11 @@ public class GoogleClassroom extends Platform {
         }
 
         getCourses(courses ->  {
-            if(courses == null)
+            if(courses == null) {
+                listener.onAssignmentReceived(new ArrayList<>());
+
                 return;
+            }
 
             List<Assignment> newAssignments = Collections.synchronizedList(new ArrayList<Assignment>());
 
