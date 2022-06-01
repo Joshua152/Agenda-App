@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,6 +26,7 @@ import com.example.agendaapp.RecyclerAdapters.CoursesRecyclerAdapter;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,6 +44,8 @@ public class CoursesFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private CoursesRecyclerAdapter recyclerAdapter;
+
+    private TextView tvNone;
 
     public static Map<String, Course> courseMap;
 
@@ -74,6 +78,8 @@ public class CoursesFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.courses_recycler_view);
 
+        tvNone = (TextView) view.findViewById(R.id.courses_tv_none);
+
         if(courseMap == null)
             courseMap = new TreeMap<String, Course>(); // set equal to course list in prefs
 
@@ -85,8 +91,11 @@ public class CoursesFragment extends Fragment {
      */
     private void initRecyclerAdapter() {
         updateCourseMap(context, (courseMap, error) -> {
-            if(courseMap != null)
+            System.out.println("hi");
+
+            if(courseMap != null) {
                 CoursesFragment.courseMap = courseMap;
+            }
 
             if(error != null) {
                 switch(error) {
@@ -96,6 +105,11 @@ public class CoursesFragment extends Fragment {
                                 .setAction(R.string.ok, view -> {})
                                 .show();
                 }
+            }
+
+            if(CoursesFragment.courseMap.size() == 0) {
+                recyclerView.setVisibility(View.GONE);
+                tvNone.setVisibility(View.VISIBLE);
             }
 
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -132,6 +146,12 @@ public class CoursesFragment extends Fragment {
         }
 
         List<Platform> platforms = ImportFragment.getSignedInPlatforms();
+
+        if(platforms.size() == 0) {
+            listener.onCoursesProcessed(new HashMap<>(), null);
+
+            return;
+        }
 
         AtomicInteger i = new AtomicInteger(0);
 

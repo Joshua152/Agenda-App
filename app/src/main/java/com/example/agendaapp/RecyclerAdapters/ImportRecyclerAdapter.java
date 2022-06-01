@@ -235,6 +235,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 View view = recyclerView.getLayoutManager().findViewByPosition(Math.toIntExact(key));
 
+                // TODO: GETTING VIBRATION TWICE
                 view.setActivated(selected);
             }
         });

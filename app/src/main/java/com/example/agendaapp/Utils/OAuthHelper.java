@@ -34,27 +34,26 @@ import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
-import net.openid.appauth.TokenRequest;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.HashSet;
 import java.util.UUID;
 
 public class OAuthHelper {
 
-    private final String SHARED_PREFERENCES_KEY = "OAuthHelper Shared Preferences Key";
-    private final String AUTH_STATE_JSON_KEY = "Auth State JSON Key";
+    // TODO: SIGN OUT IF DELETE PLATFORM!!!!
+
+    private final static String SHARED_PREFERENCES_KEY = "OAuthHelper Shared Preferences Key";
+    private final static String AUTH_STATE_JSON_KEY = "Auth State JSON Key";
 
     private final String UID;
 
     private Context context;
     private LifecycleOwner owner;
 
-    private SharedPreferences sharedPreferences;
+    private static SharedPreferences sharedPreferences;
 
     private ApiCred apiCred;
 
@@ -78,22 +77,8 @@ public class OAuthHelper {
         this.context = context;
         owner = null;
 
-        try {
-            MasterKey masterKey = new MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
-                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                    .build();
-
-            sharedPreferences = EncryptedSharedPreferences.create(
-                    context,
-                    SHARED_PREFERENCES_KEY,
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-        } catch(GeneralSecurityException | IOException e) {
-            Log.e("[AGENDA APP] OAuth", "Unable to create master key: " + e);
-            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
-        }
+        if(sharedPreferences == null)
+            initEncryptedSharedPrefs(context);
 
         apiCred = new ApiCred();
 
@@ -122,31 +107,36 @@ public class OAuthHelper {
                 Uri.parse(discoveryDocURL),
                 // AuthorizationServiceConfiguration, AuthorizationException
                 (serviceConfig, e) -> {
-                    if(e != null) {
-                        Log.e("[AGENDA APP] oauth", "failed to fetch config");
-                        Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+                    // TODO: DISABLE SIGN IN BUTTON UNTIL THIS IS RAN?
+                    // TODO: SET VOLATILE?
 
-                        return;
-                    }
+                    new Thread(() -> {
+                        if(e != null) {
+                            Log.e("[AGENDA APP] oauth", "failed to fetch config");
+                            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
 
-                    if(authState == null)
-                        authState = new AuthState(serviceConfig);
+                            return;
+                        }
 
-                    AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
-                            serviceConfig,
-                            apiCred.clientId(),
-                            ResponseTypeValues.CODE,
-                            Uri.parse("com.example.agendaapp:/")
-                    );
+                        if(authState == null)
+                            authState = new AuthState(serviceConfig);
 
-                    AuthorizationRequest req = authRequestBuilder
-                            .setScope(scopes)
-                            .build();
+                        AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(
+                                serviceConfig,
+                                apiCred.clientId(),
+                                ResponseTypeValues.CODE,
+                                Uri.parse("com.example.agendaapp:/")
+                        );
 
-                    authService = new AuthorizationService(context);
-                    authIntent = authService.getAuthorizationRequestIntent(req);
+                        AuthorizationRequest req = authRequestBuilder
+                                .setScope(scopes)
+                                .build();
 
-                    configListener.onConfig();
+                        authService = new AuthorizationService(context);
+                        authIntent = authService.getAuthorizationRequestIntent(req);
+
+                        configListener.onConfig();
+                    }).start();
                 }
         );
     }
@@ -182,6 +172,30 @@ public class OAuthHelper {
                     }
                 });
 
+    }
+
+    /**
+     * Initialize a universal encrypted shared preferences to speed up the process of creating
+     * new imported platform instances
+     * @param context The context
+     */
+    public static void initEncryptedSharedPrefs(Context context) {
+        try {
+            MasterKey masterKey = new MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+            sharedPreferences = EncryptedSharedPreferences.create(
+                    context,
+                    SHARED_PREFERENCES_KEY,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch(GeneralSecurityException | IOException e) {
+            Log.e("[AGENDA APP] OAuth", "Unable to create master key: " + e);
+            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**

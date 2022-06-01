@@ -58,9 +58,6 @@ import kotlin.random.Random;
 
 public class GoogleClassroom extends Platform {
 
-    // TODO: SIGNIGN IN DOESN'T WORK WHEN NOT SIGNED IN THEN PRESSING 'X' THEN GOING BACK TO IMPORT AND TRYING TO SIGN IN
-    // TODO: THINKING ITS BECAUSE THE OAUTHHELPER SOMEHOW DOESN'T GET SAVED PROPERLY
-
     public static final String GOOGLE_CLASSROOM = "Google Classroom";
 
     public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
@@ -168,8 +165,6 @@ public class GoogleClassroom extends Platform {
 
                                     break;
                                 case 403 :
-                                    System.out.println("403 ERROR");
-
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
@@ -344,8 +339,6 @@ public class GoogleClassroom extends Platform {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-
-                System.out.println("right here");
 
                 params.put("Content-Type", "application/json");
                 params.put("authorization", "Bearer " + oAuthHelper.getAuthState().getAccessToken());

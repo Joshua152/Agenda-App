@@ -73,6 +73,8 @@
     <string name="done">Done</string>
 
     <!--Courses Fragment-->
+    <string name="no_courses">No Courses\nTry signing into a platform!</string>
+
     <string name="save_error">Save error</string>
     <string name="save_get_error">Unable to retrieve subject</string>
 

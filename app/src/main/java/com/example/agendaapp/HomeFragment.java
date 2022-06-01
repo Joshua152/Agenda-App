@@ -40,6 +40,7 @@ import com.example.agendaapp.Utils.DateUtils;
 import com.example.agendaapp.Utils.ItemMoveCallback;
 import com.example.agendaapp.Data.ListModerator;
 import com.example.agendaapp.Data.SaveInfo;
+import com.example.agendaapp.Utils.OAuthHelper;
 import com.example.agendaapp.Utils.Serialize;
 import com.example.agendaapp.Utils.Utility;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
@@ -264,7 +265,6 @@ public class HomeFragment extends Fragment {
                 for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
                     if(a.getId().equals(assignmentModerator.get(i).getId())) {
                         int removePos = assignmentModerator.getPosFromNoHeader(i);
-                        System.out.println(i + " asdf: " + removePos);
 
                         assignmentModerator.remove(i);
                         recyclerViewAdapter.notifyItemRemoved(removePos);
