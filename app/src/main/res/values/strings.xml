@@ -64,6 +64,8 @@
 
     <string name="delete">Delete</string>
 
+    <string name="no_platforms">No Platforms\nClick the + icon to add some!</string>
+
     <string name="import_error">Import error</string>
     <string name="import_info_error">Error getting info</string>
     <string name="log_out_error">Error logging out</string>

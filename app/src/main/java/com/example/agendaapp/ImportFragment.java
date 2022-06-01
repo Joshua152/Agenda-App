@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -55,6 +56,7 @@ public class ImportFragment extends Fragment {
     private Context context;
 
     private RecyclerView recyclerView;
+    private TextView tvNone;
 
     private ActionMode actionMode;
     private ActionMode.Callback actionModeCallback;
@@ -89,6 +91,7 @@ public class ImportFragment extends Fragment {
         context = getContext();
 
         recyclerView = (RecyclerView) view.findViewById(R.id.import_recycler_view);
+        tvNone = (TextView) view.findViewById(R.id.import_tv_none);
 
         actionMode = null;
         actionModeCallback = null;
@@ -101,6 +104,11 @@ public class ImportFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(new ImportRecyclerAdapter(this, (ArrayList<Platform>) platforms));
+
+        if(platforms.size() == 0) {
+            recyclerView.setVisibility(View.GONE);
+            tvNone.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -141,6 +149,11 @@ public class ImportFragment extends Fragment {
                     tracker.clearSelection();
 
                     savePlatforms(context);
+
+                    if(platforms.size() == 0) {
+                        recyclerView.setVisibility(View.GONE);
+                        tvNone.setVisibility(View.VISIBLE);
+                    }
 
                     return true;
                 }

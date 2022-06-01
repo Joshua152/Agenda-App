@@ -58,6 +58,8 @@ import kotlin.random.Random;
 
 public class GoogleClassroom extends Platform {
 
+    // TODO: fix repeated import error toast
+
     public static final String GOOGLE_CLASSROOM = "Google Classroom";
 
     public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
