@@ -90,7 +90,7 @@ public class GoogleClassroom extends Platform {
 
         queue = Volley.newRequestQueue(activity.getApplicationContext());
 
-        oAuthHelper = new OAuthHelper(context, ID,
+        oAuthHelper = new OAuthHelper(activity, ID,
                 "https://accounts.google.com/.well-known/openid-configuration",
                 "https://www.googleapis.com/auth/userinfo.profile " +
                         "https://www.googleapis.com/auth/classroom.courses.readonly " +

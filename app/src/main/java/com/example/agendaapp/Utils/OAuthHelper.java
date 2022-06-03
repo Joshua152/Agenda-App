@@ -10,10 +10,17 @@
 package com.example.agendaapp.Utils;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +33,7 @@ import androidx.security.crypto.MasterKey;
 
 import com.example.agendaapp.Data.ApiCred;
 import com.example.agendaapp.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -39,17 +47,23 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class OAuthHelper {
 
     // TODO: SIGN OUT IF DELETE PLATFORM!!!!
 
+    // TODO: HANDLE IF NO WIFI WHEN OPEN SO OAUTH IS NOT INIT BUT THEN NEED TO INIT AFTER
+    // TODO: HANDLE REPEAT TOAST
+
     private final static String SHARED_PREFERENCES_KEY = "OAuthHelper Shared Preferences Key";
     private final static String AUTH_STATE_JSON_KEY = "Auth State JSON Key";
 
     private final String UID;
 
+    private Activity activity;
     private Context context;
     private LifecycleOwner owner;
 
@@ -57,7 +71,7 @@ public class OAuthHelper {
 
     private ApiCred apiCred;
 
-    private ConfigListener configListener;
+    private ArrayList<ConfigListener> configListeners;
 
     private AuthState authState;
     private AuthorizationService authService;
@@ -71,10 +85,11 @@ public class OAuthHelper {
     private Intent authIntent;
     private OAuthCompleteListener oAuthCompleteListener;
 
-    public OAuthHelper(Context context, String UID, String discoveryDocURL, String scopes, ConfigListener configListener) {
+    public OAuthHelper(Activity activity, String UID, String discoveryDocURL, String scopes, ConfigListener configListener) {
         this.UID = UID;
 
-        this.context = context;
+        this.activity = activity;
+        context = activity.getBaseContext();
         owner = null;
 
         if(sharedPreferences == null)
@@ -82,7 +97,7 @@ public class OAuthHelper {
 
         apiCred = new ApiCred();
 
-        this.configListener = configListener;
+        configListeners = new ArrayList<ConfigListener>(List.of(configListener));
 
         authState = getAuthState();
         authService = null;
@@ -97,6 +112,7 @@ public class OAuthHelper {
         oAuthCompleteListener = null;
 
         init();
+        initWifiListener();
     }
 
     /**
@@ -112,8 +128,11 @@ public class OAuthHelper {
 
                     new Thread(() -> {
                         if(e != null) {
-                            Log.e("[AGENDA APP] oauth", "failed to fetch config");
-                            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+                            Log.e("[AGENDA APP] oauth", "failed to fetch config: " + e);
+
+                            activity.runOnUiThread(() -> {
+                                Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+                            });
 
                             return;
                         }
@@ -135,10 +154,36 @@ public class OAuthHelper {
                         authService = new AuthorizationService(context);
                         authIntent = authService.getAuthorizationRequestIntent(req);
 
-                        configListener.onConfig();
+                        // TODO: DON'T ACTUALLY NEED BC THIS IS JUST FOR AUTH INTENT STUFF?
+                        callConfigListeners();
                     }).start();
                 }
         );
+    }
+
+    /**
+     * Initializes the listener for if the wifi connection state changes
+     */
+    private void initWifiListener() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .build();
+
+        ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                super.onAvailable(network);
+
+                if(authIntent == null)
+                    init();
+            }
+        };
+
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
     }
 
     public void initLauncher() {
@@ -204,6 +249,8 @@ public class OAuthHelper {
      */
     public void launchOAuth(OAuthCompleteListener oAuthCompleteListener) {
         this.oAuthCompleteListener = oAuthCompleteListener;
+
+        System.out.println("auth intent: " + authIntent);
 
         try {
             authLauncher.launch(authIntent);
@@ -301,6 +348,19 @@ public class OAuthHelper {
         authState = new AuthState(authState.getAuthorizationServiceConfiguration());
     }
 
+    /**
+     * Adds a ConfigListener for when OAuth has initialized the field variables
+     * @param listener The listener to add
+     */
+    public void addConfigListener(ConfigListener listener) {
+        configListeners.add(listener);
+    }
+
+    private void callConfigListeners() {
+        for(ConfigListener l : configListeners)
+            l.onConfig();
+    }
+
     public void setRegistry(ActivityResultRegistry registry) {
         this.registry = registry;
 
@@ -317,6 +377,14 @@ public class OAuthHelper {
 
     public void setAuthState(AuthState authState) {
         this.authState = authState;
+    }
+
+    /**
+     * Gets if the ConfigListener has already been called
+     * @return Returns if the authIntent field is null
+     */
+    public boolean getConfigured() {
+        return authIntent != null;
     }
 
     /**

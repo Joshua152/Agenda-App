@@ -5,7 +5,12 @@
 
 package com.example.agendaapp.RecyclerAdapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -24,6 +29,7 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.agendaapp.Data.Platform;
+import com.example.agendaapp.HomeFragment;
 import com.example.agendaapp.ImportFragment;
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.ImageTransformations.CircleCropTransform;
@@ -56,7 +62,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         private LinearLayout llSignedIn;
         private ImageView ivAccount;
-        private View signin;
+        private View signIn;
         private ImageView signOut;
 
         private PlatformViewHolder(View itemView) {
@@ -69,7 +75,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             llSignedIn = (LinearLayout) itemView.findViewById(R.id.import_ll_signed_in);
             ivAccount = (ImageView) itemView.findViewById(R.id.import_iv_account_icon);
-            signin = (View) itemView.findViewById(R.id.import_btn_sign_in);
+            signIn = (View) itemView.findViewById(R.id.import_btn_sign_in);
             signOut = (ImageView) itemView.findViewById(R.id.import_iv_sign_out);
 
             initListeners();
@@ -80,12 +86,13 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          */
         public void initListeners() {
             llRoot.setOnLongClickListener(view -> {
+                // TODO: CAUSE OF THE DOUBLE VIBRATION?
                 llRoot.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
 
                 return false;
             });
 
-            signin.setOnClickListener(view -> {
+            signIn.setOnClickListener(view -> {
                 Platform platform = platforms.get(getBindingAdapterPosition());
 
                 if(Utility.isNetworkAvailable(context))
@@ -98,8 +105,38 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 platforms.get(getBindingAdapterPosition()).onClickSignOut();
 
                 llSignedIn.setVisibility(View.INVISIBLE);
-                signin.setVisibility(View.VISIBLE);
+                signIn.setVisibility(View.VISIBLE);
             });
+
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkRequest networkRequest = new NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .build();
+
+            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    super.onAvailable(network);
+
+                    if(platforms.get(getBindingAdapterPosition()).getOAuthHelper().getConfigured()) {
+                        fragment.getActivity().runOnUiThread(() -> {
+                            signIn.setEnabled(true);
+                        });
+                    }
+                }
+
+                @Override
+                public void onLost(Network network) {
+                    super.onLost(network);
+
+                    signIn.setEnabled(false);
+                }
+            };
+
+            connectivityManager.requestNetwork(networkRequest, networkCallback);
         }
 
         /**
@@ -124,7 +161,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             parent.addView(newView, index);
 
-            signin = newView;
+            signIn = newView;
 
             initListeners();
         }
@@ -133,7 +170,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          * Makes the profile picture and sign out icon visible, hides the sign in button
          */
         private void setSignedInUI() {
-            signin.setVisibility(View.INVISIBLE);
+            signIn.setVisibility(View.INVISIBLE);
             llSignedIn.setVisibility(View.VISIBLE);
 
             Picasso.get()
@@ -148,7 +185,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          * Makes the profile picture and sign out icon invisible while making the sign in button visible
          */
         private void setSignedOutUI() {
-            signin.setVisibility(View.VISIBLE);
+            signIn.setVisibility(View.VISIBLE);
             llSignedIn.setVisibility(View.INVISIBLE);
         }
 
@@ -260,11 +297,18 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if(platform.getSignedIn())
             platformHolder.setSignedInUI();
 
+        if(!platform.getOAuthHelper().getConfigured())
+            platformHolder.signIn.setEnabled(false);
+
         platformHolder.ivPlatformIcon.setImageDrawable(platform.getPlatformIcon());
         platformHolder.tvName.setText(platform.getPlatformName());
 
         platform.addSignedInListener(platformHolder::setSignedInUI);
         platform.addSignOutRequestListener(platformHolder::setSignedOutUI);
+
+        platforms.get(position).getOAuthHelper().addConfigListener(() -> {
+            platformHolder.signIn.setEnabled(true);
+        });
     }
 
     @Override
