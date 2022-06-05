@@ -94,11 +94,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             signIn.setOnClickListener(view -> {
                 Platform platform = platforms.get(getBindingAdapterPosition());
-
-                if(Utility.isNetworkAvailable(context))
-                    platform.onClickSignIn();
-                else
-                    Toast.makeText(context, context.getString(R.string.error_no_connection), Toast.LENGTH_SHORT);
+                platform.onClickSignIn();
             });
 
             signOut.setOnClickListener(view -> {
@@ -121,6 +117,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 public void onAvailable(Network network) {
                     super.onAvailable(network);
 
+                    // getBindingAdapterPosition() could cause issues if the network state changes before onBind
                     if(platforms.get(getBindingAdapterPosition()).getOAuthHelper().getConfigured()) {
                         fragment.getActivity().runOnUiThread(() -> {
                             signIn.setEnabled(true);

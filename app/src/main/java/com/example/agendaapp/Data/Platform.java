@@ -4,6 +4,7 @@
 
 package com.example.agendaapp.Data;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -14,6 +15,8 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 
 import com.example.agendaapp.R;
 import com.example.agendaapp.Utils.OAuthHelper;
+import com.example.agendaapp.Utils.Utility;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.api.client.util.DateTime;
 
 import net.openid.appauth.AuthState;
@@ -113,15 +116,15 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     /**
      * Updates the auth state and signs out if an exception occurs
-     * @param context The context
+     * @param activity The activity
      */
-    public void updateAndCheckAuthState(Context context, AuthUpdatedListener listener) {
+    public void updateAndCheckAuthState(Activity activity, AuthUpdatedListener listener) {
         oAuthHelper.useAuthToken(authState -> {
             if(authState == null) {
                 onClickSignOut();
                 callSignOutRequestListeners();
 
-                Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
+                Utility.showBasicSnackbar(activity, R.string.import_error);
             }
 
             listener.onAuthUpdated(authState);

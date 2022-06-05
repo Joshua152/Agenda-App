@@ -85,6 +85,8 @@ public class OAuthHelper {
     private Intent authIntent;
     private OAuthCompleteListener oAuthCompleteListener;
 
+    private static Toast configToast;
+
     public OAuthHelper(Activity activity, String UID, String discoveryDocURL, String scopes, ConfigListener configListener) {
         this.UID = UID;
 
@@ -93,7 +95,7 @@ public class OAuthHelper {
         owner = null;
 
         if(sharedPreferences == null)
-            initEncryptedSharedPrefs(context);
+            initEncryptedSharedPrefs(activity);
 
         apiCred = new ApiCred();
 
@@ -123,7 +125,6 @@ public class OAuthHelper {
                 Uri.parse(discoveryDocURL),
                 // AuthorizationServiceConfiguration, AuthorizationException
                 (serviceConfig, e) -> {
-                    // TODO: DISABLE SIGN IN BUTTON UNTIL THIS IS RAN?
                     // TODO: SET VOLATILE?
 
                     new Thread(() -> {
@@ -131,7 +132,15 @@ public class OAuthHelper {
                             Log.e("[AGENDA APP] oauth", "failed to fetch config: " + e);
 
                             activity.runOnUiThread(() -> {
-                                Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+                                switch(e.code) {
+                                    case 3 :
+                                        Utility.showBasicSnackbar(activity, R.string.error_no_connection);
+
+                                        break;
+                                    default :
+                                        Utility.showBasicSnackbar(activity, R.string.import_error);
+
+                                }
                             });
 
                             return;
@@ -203,7 +212,8 @@ public class OAuthHelper {
                                 (resp1, ex1) -> {
                                     if(ex1 != null) {
                                         Log.e("[TEST APP] oauth", "failed to complete token request: " + ex1);
-                                        Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+
+                                        Utility.showBasicSnackbar(activity, R.string.import_error);
 
                                         return;
                                     }
@@ -222,16 +232,16 @@ public class OAuthHelper {
     /**
      * Initialize a universal encrypted shared preferences to speed up the process of creating
      * new imported platform instances
-     * @param context The context
+     * @param activity The activity
      */
-    public static void initEncryptedSharedPrefs(Context context) {
+    public static void initEncryptedSharedPrefs(Activity activity) {
         try {
-            MasterKey masterKey = new MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+            MasterKey masterKey = new MasterKey.Builder(activity, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                     .build();
 
             sharedPreferences = EncryptedSharedPreferences.create(
-                    context,
+                    activity.getBaseContext(),
                     SHARED_PREFERENCES_KEY,
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
@@ -239,7 +249,8 @@ public class OAuthHelper {
             );
         } catch(GeneralSecurityException | IOException e) {
             Log.e("[AGENDA APP] OAuth", "Unable to create master key: " + e);
-            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+
+            Utility.showBasicSnackbar(activity, R.string.import_error);
         }
     }
 
@@ -249,8 +260,6 @@ public class OAuthHelper {
      */
     public void launchOAuth(OAuthCompleteListener oAuthCompleteListener) {
         this.oAuthCompleteListener = oAuthCompleteListener;
-
-        System.out.println("auth intent: " + authIntent);
 
         try {
             authLauncher.launch(authIntent);
@@ -319,7 +328,8 @@ public class OAuthHelper {
             return authState;
         } catch(JSONException e) {
             Log.e("[AGENDA APP] OAuth", "Unable to deserialize auth state JSON: " + e);
-            Toast.makeText(context, context.getString(R.string.import_error), Toast.LENGTH_SHORT).show();
+
+            Utility.showBasicSnackbar(activity, R.string.import_error);
         }
 
         return null;

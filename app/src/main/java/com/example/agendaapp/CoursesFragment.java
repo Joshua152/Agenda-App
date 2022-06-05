@@ -100,10 +100,7 @@ public class CoursesFragment extends Fragment {
             if(error != null) {
                 switch(error) {
                     case ERROR_NO_CONNECTION :
-                        Snackbar.make(context, activity.findViewById(android.R.id.content),
-                                getString(R.string.error_no_connection), Snackbar.LENGTH_LONG)
-                                .setAction(R.string.ok, view -> {})
-                                .show();
+                        Utility.showBasicSnackbar(activity, R.string.error_no_connection);
                 }
             }
 

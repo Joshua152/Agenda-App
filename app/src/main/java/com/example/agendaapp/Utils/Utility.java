@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import com.example.agendaapp.Data.Assignment;
 import com.example.agendaapp.Data.Course;
 import com.example.agendaapp.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +82,18 @@ public class Utility {
     public static View getViewFromXML(Context context, int layoutId) {
         LayoutInflater inflater = LayoutInflater.from(context);
         return inflater.inflate(layoutId, null, false);
+    }
+
+    /**
+     * Displays a basic Snackbar with LENGTH_SHORT, parent view set as android.R.id.content, and
+     * with an OK button to dismiss
+     * @param activity The activity
+     * @param messageResId The String resource id
+     */
+    public static void showBasicSnackbar(Activity activity, int messageResId) {
+        Snackbar.make(activity.findViewById(android.R.id.content), messageResId, Snackbar.LENGTH_SHORT)
+                .setAction(R.string.ok, view -> {})
+                .show();
     }
 
     /**

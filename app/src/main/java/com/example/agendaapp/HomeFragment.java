@@ -10,6 +10,10 @@ package com.example.agendaapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,6 +46,7 @@ import com.example.agendaapp.Utils.Utility;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 
@@ -217,6 +222,9 @@ public class HomeFragment extends Fragment {
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            if(!Utility.isNetworkAvailable(context))
+                Utility.showBasicSnackbar(getActivity(), R.string.error_no_connection);
+
             if(ImportFragment.platforms.size() == 0) {
                 swipeRefreshLayout.setRefreshing(false);
 
@@ -234,6 +242,25 @@ public class HomeFragment extends Fragment {
 
             updateAssignmentPositions();
         });
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .build();
+
+        ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onLost(Network network) {
+                super.onLost(network);
+
+                Utility.showBasicSnackbar(getActivity(), R.string.error_no_connection);
+            }
+        };
+
+        connectivityManager.requestNetwork(networkRequest, networkCallback);
     }
 
     @Override

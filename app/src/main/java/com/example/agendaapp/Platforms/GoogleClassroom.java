@@ -164,16 +164,14 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(android.R.id.content),
-                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+                                    Utility.showBasicSnackbar(activity, R.string.logged_out);
 
                                     break;
                                 case 403 :
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(android.R.id.content),
-                                            context.getString(R.string.gc_not_allowed_error), Snackbar.LENGTH_LONG).show();
+                                    Utility.showBasicSnackbar(activity, R.string.gc_not_allowed_error);
 
                                     break;
                             }
@@ -181,7 +179,7 @@ public class GoogleClassroom extends Platform {
                             Log.e("IMPORT ERROR", "Could not parse error JSON: " + e);
                         }
                     } catch(NullPointerException e) {
-                        Snackbar.make(activity.findViewById(android.R.id.content), R.string.import_error, Snackbar.LENGTH_LONG).show();
+                        Utility.showBasicSnackbar(activity, R.string.import_error);
 
                         listener.onCoursesReceived(new HashMap<String, Course>()); //TODO
 
@@ -205,7 +203,7 @@ public class GoogleClassroom extends Platform {
         request.setRetryPolicy(retryPolicy);
 
         if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
-            updateAndCheckAuthState(context, authState -> {
+            updateAndCheckAuthState(activity, authState -> {
                 queue.add(request);
             });
         } else {
@@ -328,8 +326,7 @@ public class GoogleClassroom extends Platform {
                                     onClickSignOut();
                                     callSignOutRequestListeners();
 
-                                    Snackbar.make(activity.findViewById(android.R.id.content),
-                                            context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+                                    Utility.showBasicSnackbar(activity, R.string.logged_out);
 
                                     break;
                             }
@@ -357,7 +354,7 @@ public class GoogleClassroom extends Platform {
         request.setRetryPolicy(retryPolicy);
 
         if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
-            updateAndCheckAuthState(context, authState -> {
+            updateAndCheckAuthState(activity, authState -> {
                 queue.add(request);
             });
         } else {
@@ -392,7 +389,8 @@ public class GoogleClassroom extends Platform {
                             callSignInListeners();
                         } catch(JSONException e) {
                             Log.e("IMPORT ERROR", e.toString());
-                            Toast.makeText(context, R.string.import_error, Toast.LENGTH_SHORT).show();
+
+                            Utility.showBasicSnackbar(activity, R.string.import_error);
                         }
                     },
                     error -> {
@@ -414,8 +412,7 @@ public class GoogleClassroom extends Platform {
                                         onClickSignOut();
                                         callSignOutRequestListeners();
 
-                                        Snackbar.make(activity.findViewById(android.R.id.content),
-                                                context.getString(R.string.logged_out), Snackbar.LENGTH_LONG).show();
+                                        Utility.showBasicSnackbar(activity, R.string.logged_out);
 
                                         break;
                                 }
@@ -441,7 +438,7 @@ public class GoogleClassroom extends Platform {
             photoRequest.setRetryPolicy(retryPolicy);
 
             if(oAuthHelper.getAuthState().getNeedsTokenRefresh()) {
-                updateAndCheckAuthState(context, authState1 -> {
+                updateAndCheckAuthState(activity, authState1 -> {
                     queue.add(photoRequest);
                 });
             } else {
