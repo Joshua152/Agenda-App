@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Agenda App</string>
+    <string name="app_name">Plantlet</string>
 
     <!--Fragment Titles-->
     <string name="home_title">Agenda</string>
