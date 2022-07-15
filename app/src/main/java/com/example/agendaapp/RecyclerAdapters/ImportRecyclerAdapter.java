@@ -304,7 +304,9 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         platform.addSignOutRequestListener(platformHolder::setSignedOutUI);
 
         platforms.get(position).getOAuthHelper().addConfigListener(() -> {
-            platformHolder.signIn.setEnabled(true);
+            fragment.getActivity().runOnUiThread(() -> {
+                platformHolder.signIn.setEnabled(true);
+            });
         });
     }
 
