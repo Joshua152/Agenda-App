@@ -2,7 +2,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.agendaapp">
+    package="com.joshuaau.plantlet">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -19,7 +19,7 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="adjustResize|adjustPan">
         <activity
-            android:name=".MainActivity"
+            android:name="com.joshuaau.plantlet.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
