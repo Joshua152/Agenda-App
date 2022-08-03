@@ -4,11 +4,16 @@
 
 package com.joshuaau.plantlet.RecyclerAdapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,12 +22,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.joshuaau.plantlet.Data.PlatformInfo;
 import com.joshuaau.plantlet.R;
+import com.joshuaau.plantlet.Utils.Resize;
 
 import java.util.HashMap;
+
+import timber.log.Timber;
 
 public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
+
+    private Resize contentViewResize;
 
     private PlatformInfo[] platforms;
 
@@ -59,36 +69,58 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
          * Inits callbacks (ex. onClick)
          */
         public void initCallbacks() {
-            numPlatforms.setFilters(new InputFilter[]{
+            numPlatforms.setSelectAllOnFocus(true);
+
+            numPlatforms.setFilters(new InputFilter[] {
                 (source, start, end, dest, dstart, dend) -> {
-                    int n = Integer.parseInt(source.toString());
+                    try {
+                        int n = Integer.parseInt(source.toString());
 
-                    if(n < 0)
-                        return "0";
+                        if(n < 0)
+                            return "0";
 
-                    if(n > 9)
-                        return "9";
+                        if(n > 9)
+                            return "9";
 
-                    return null;
-                }
+                        return null;
+                    } catch(NumberFormatException e) {
+                        return null;
+                    }
+                },
+                new InputFilter.LengthFilter(1)
             });
+
+            numPlatforms.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String text = s.toString();
+
+                    if(!text.equals(""))
+                        selectedPlatforms.put(platformName.getText().toString(), Integer.parseInt(text));
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
+            contentViewResize.addListener(((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
+                if(toHeight == contentViewResize.getOriginalContentHeight())
+                    numPlatforms.clearFocus();
+            }));
 
             addPlatform.setOnClickListener((view) -> {
                 int num = Integer.parseInt(numPlatforms.getText().toString());
 
                 numPlatforms.setText((num + 1) + "");
-
-                if(num + 1 <= 9)
-                    changeSelectedPlatformsMap(platformName.getText().toString(), 1);
             });
 
             removePlatform.setOnClickListener((view) -> {
                 int num = Integer.parseInt(numPlatforms.getText().toString());
 
                 numPlatforms.setText((num - 1) + "");
-
-                if(num - 1 >= 0)
-                    changeSelectedPlatformsMap(platformName.getText().toString(), -1);
             });
         }
     }
@@ -96,10 +128,13 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
     /**
      * Constructor, pass in context for layout inflation, and the PlatformInfos in a parameter list
      * @param context The context
+     * @param activity The activity
      * @param platforms All the platforms able to be chosen
      */
-    public PlatformSelectRecyclerAdapter(Context context, PlatformInfo... platforms) {
+    public PlatformSelectRecyclerAdapter(Context context, Activity activity, PlatformInfo... platforms) {
         this.context = context;
+
+        contentViewResize = Resize.newInstance(activity);
 
         this.platforms = platforms;
 
@@ -121,20 +156,6 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
 
         if(selectedPlatforms.containsKey(platforms[position].getPlatformName()))
             viewHolder.numPlatforms.setText(selectedPlatforms.get(platforms[position].getPlatformName()).toString());
-    }
-
-    /**
-     * Changes the number of platforms to add with the given key (platform name)
-     * @param key The platform name
-     * @param change How many of that platform to add or remove
-     */
-    public void changeSelectedPlatformsMap(String key, int change) {
-        Integer n = selectedPlatforms.get(key);
-
-        if(n == null)
-            n = 0;
-
-        selectedPlatforms.put(key, n + change);
     }
 
     public void setSelectedPlatforms(HashMap<String, Integer> selectedPlatforms) {

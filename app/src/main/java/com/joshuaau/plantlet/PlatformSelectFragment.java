@@ -27,6 +27,8 @@ import com.joshuaau.plantlet.Utils.Utility;
 
 import java.util.HashMap;
 
+import timber.log.Timber;
+
 public class PlatformSelectFragment extends Fragment {
 
     private final String SELECTED_PLATFORMS_BUNDLE_KEY = "Selected Platforms Bundle Key";
@@ -62,7 +64,7 @@ public class PlatformSelectFragment extends Fragment {
         context = getContext();
 
         recyclerView = (RecyclerView) view.findViewById(R.id.select_recycler_view);
-        adapter = new PlatformSelectRecyclerAdapter(context,
+        adapter = new PlatformSelectRecyclerAdapter(context, requireActivity(),
                 new PlatformInfo(getResources().getDrawable(R.drawable.ic_google_classroom_32dp),
                 getString(R.string.google_classroom)));
 
@@ -112,6 +114,7 @@ public class PlatformSelectFragment extends Fragment {
      *                    (ex. Google Classroom, 4)
      */
     public void addPlatforms(HashMap<String, Integer> platformMap) {
+        Timber.i("Platform map: %s", platformMap);
         for(String key : platformMap.keySet()) {
             int index = 0;
 

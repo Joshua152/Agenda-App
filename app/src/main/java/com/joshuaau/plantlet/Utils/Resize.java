@@ -8,7 +8,9 @@
 
 package com.joshuaau.plantlet.Utils;
 
+import android.app.Activity;
 import android.view.View;
+import android.view.Window;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +25,8 @@ public class Resize {
     // All the listeners for when the content view has been resized
     private List<ResizeListener> listeners;
 
+    // The height of the content view when Resize is first initialized
+    private int originalContentHeight;
     // The previous height of the content view
     private int previousHeight;
     // The current height of the content view
@@ -34,10 +38,20 @@ public class Resize {
 
         listeners = new ArrayList<ResizeListener>();
 
+        originalContentHeight = contentView.getHeight();
         previousHeight = contentView.getHeight();
         currentHeight = contentView.getHeight();
 
         listen();
+    }
+
+    /**
+     * Creates a new instance where the listenerView is the decor view and the content view is Window.ID_ANDROID_CONTENT
+     * @param activity The activity
+     * @return Returns a new Resize object
+     */
+    public static Resize newInstance(Activity activity) {
+        return new Resize(activity.getWindow().getDecorView(), activity.getWindow().getDecorView().findViewById(Window.ID_ANDROID_CONTENT));
     }
 
     public void addListener(ResizeListener resizeListener) {
@@ -70,6 +84,14 @@ public class Resize {
      */
     public int getContentHeight() {
         return contentView.getHeight();
+    }
+
+    /**
+     * Gets the height of the content view when the object was first instantiated
+     * @return Returns the pixel height of the original content view
+     */
+    public int getOriginalContentHeight() {
+        return originalContentHeight;
     }
 
     /**

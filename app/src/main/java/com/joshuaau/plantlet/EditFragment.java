@@ -70,7 +70,6 @@ public class EditFragment extends Fragment {
     private int originalPosition;
 
     private int descriptionMinHeight;
-    private int originalContentHeight;
 
     private boolean createNew;
 
@@ -116,15 +115,13 @@ public class EditFragment extends Fragment {
         ibDate = (ImageButton) view.findViewById(R.id.edit_ib_date);
         sSubjects = (Spinner) view.findViewById(R.id.edit_s_subject);
 
-        contentViewResize = new Resize((View) getActivity().getWindow().getDecorView(),
-                (View) getActivity().getWindow().getDecorView().findViewById(Window.ID_ANDROID_CONTENT));
+        contentViewResize = Resize.newInstance(getActivity());
 
         SaveInfo info = getArguments().getParcelable(Utility.SAVE_INFO);
         assignment = info.getAssignment();
         originalPosition = info.getPosition();
 
         descriptionMinHeight = 0;
-        originalContentHeight = contentViewResize.getContentHeight();
 
         createNew = info.getCreateNew();
 
@@ -156,7 +153,7 @@ public class EditFragment extends Fragment {
      */
     private void initListeners() {
         contentViewResize.addListener((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
-            if(toHeight == originalContentHeight) {
+            if(toHeight == contentViewResize.getOriginalContentHeight()) {
                 // line height = height * multiplier + extra
                 etDescription.setHeight((int) ((etDescription.getLineCount() * (etDescription.getLineHeight() + etDescription.getLineSpacingExtra())
                         * etDescription.getLineSpacingMultiplier()) + 0.5) + etDescription.getCompoundPaddingTop()
