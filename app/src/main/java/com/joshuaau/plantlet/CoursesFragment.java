@@ -171,7 +171,7 @@ public class CoursesFragment extends Fragment {
                 Course course = CoursesFragment.courseMap.get(courseId);
 
                 e.getValue().setCourseSubject(course.getCourseSubject());
-                e.getValue().setCourseIcon(course.getCourseIcon());
+                e.getValue().setCourseIcon(course.getCourseIconId());
             } else {
                 CoursesFragment.courseMap.put(e.getKey(), e.getValue());
             }

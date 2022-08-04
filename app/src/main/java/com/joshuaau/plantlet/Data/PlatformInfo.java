@@ -11,16 +11,16 @@ import android.graphics.drawable.Drawable;
 
 public class PlatformInfo {
 
-    private Drawable platformIcon;
+    private int platformIconId;
     private String platformName;
 
-    public PlatformInfo(Drawable platformIcon, String platformName) {
-        this.platformIcon = platformIcon;
+    public PlatformInfo(int platformIconId, String platformName) {
+        this.platformIconId = platformIconId;
         this.platformName = platformName;
     }
 
-    public Drawable getPlatformIcon() {
-        return platformIcon;
+    public int getPlatformIconId() {
+        return platformIconId;
     }
 
     public String getPlatformName() {

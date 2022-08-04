@@ -252,7 +252,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     fragment.hideContextualAppBar();
 
                     visible = false;
-                } else if(!visible && tracker.getSelection().size() > 0){
+                } else if(!visible && tracker.getSelection().size() > 0) {
                     fragment.showContextualAppBar();
 
                     visible = true;
@@ -293,7 +293,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if(!platform.getOAuthHelper().getConfigured())
             platformHolder.signIn.setEnabled(false);
 
-        platformHolder.ivPlatformIcon.setImageDrawable(platform.getPlatformIcon());
+        platformHolder.ivPlatformIcon.setImageResource(platform.getPlatformIconId());
         platformHolder.tvName.setText(platform.getPlatformName());
 
         platform.addSignedInListener(platformHolder::setSignedInUI);

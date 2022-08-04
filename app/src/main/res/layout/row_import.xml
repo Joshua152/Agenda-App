@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
-    android:background="@color/selectable">
+    android:padding="8dp">
+<!--    android:background="@color/selectable">-->
 <!--    android:background="?android:attr/selectableItemBackground">-->
 
     <ImageView

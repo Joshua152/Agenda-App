@@ -65,12 +65,11 @@ public class PlatformSelectFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.select_recycler_view);
         adapter = new PlatformSelectRecyclerAdapter(context, requireActivity(),
-                new PlatformInfo(getResources().getDrawable(R.drawable.ic_google_classroom_32dp),
+                new PlatformInfo(R.drawable.ic_google_classroom_32dp,
                 getString(R.string.google_classroom)));
 
-        if(onSavedInstance != null) {
+        if(onSavedInstance != null)
             adapter.setSelectedPlatforms((HashMap<String, Integer>) onSavedInstance.getSerializable(SELECTED_PLATFORMS_BUNDLE_KEY));
-        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(adapter);
@@ -114,7 +113,6 @@ public class PlatformSelectFragment extends Fragment {
      *                    (ex. Google Classroom, 4)
      */
     public void addPlatforms(HashMap<String, Integer> platformMap) {
-        Timber.i("Platform map: %s", platformMap);
         for(String key : platformMap.keySet()) {
             int index = 0;
 

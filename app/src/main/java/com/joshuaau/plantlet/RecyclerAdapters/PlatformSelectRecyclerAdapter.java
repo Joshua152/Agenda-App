@@ -107,8 +107,15 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
             });
 
             contentViewResize.addListener(((Resize.ResizeListener) (fromHeight, toHeight, contentView) -> {
-                if(toHeight == contentViewResize.getOriginalContentHeight())
+                if(toHeight == contentViewResize.getOriginalContentHeight()) {
                     numPlatforms.clearFocus();
+
+                    String s = numPlatforms.getText().toString();
+
+                    if(s.equals("")) {
+                        numPlatforms.setText("0");
+                    }
+                }
             }));
 
             addPlatform.setOnClickListener((view) -> {
@@ -151,7 +158,7 @@ public class PlatformSelectRecyclerAdapter extends RecyclerView.Adapter<Recycler
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         PlatformSelectViewHolder viewHolder = (PlatformSelectViewHolder) holder;
 
-        viewHolder.platformIcon.setImageDrawable(platforms[position].getPlatformIcon());
+        viewHolder.platformIcon.setImageResource(platforms[position].getPlatformIconId());
         viewHolder.platformName.setText(platforms[position].getPlatformName());
 
         if(selectedPlatforms.containsKey(platforms[position].getPlatformName()))

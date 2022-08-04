@@ -5,6 +5,7 @@
 package com.joshuaau.plantlet.RecyclerAdapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,8 @@ import com.joshuaau.plantlet.R;
 import com.joshuaau.plantlet.Utils.Utility;
 
 import java.util.Map;
+
+import timber.log.Timber;
 
 public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -89,11 +92,14 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     Course course = (Course) courses.values().toArray()[getBindingAdapterPosition()];
 
                     course.setCourseSubject(subject);
-                    course.setCourseIcon(AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, subject)));
+                    course.setCourseIcon(Utility.getSubjectDrawableId(context, subject));
+
+                    flCourseIcon.setBackground(AppCompatResources.getDrawable(context, R.drawable.circle_drawable));
+                    DrawableCompat.setTint(DrawableCompat.wrap(flCourseIcon.getBackground()).mutate(), Utility.getSubjectColor(context, subject));
+
+                    Timber.i("Utility.getSubjectColor(%s) -> %d into %s", subject, Utility.getSubjectColor(context, subject), flCourseIcon.getBackground());
 
                     notifyItemChanged(getBindingAdapterPosition());
-
-                    DrawableCompat.setTint(DrawableCompat.wrap(flCourseIcon.getBackground()), Utility.getSubjectColor(context, subject));
 
                     // update assignments
 
@@ -133,7 +139,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         courseHolder.tvCourseName.setText(course.getCourseName());
         courseHolder.sCourseSubject.setSelection(Utility.getSubjectPositionFromTitle(context, course.getCourseSubject()));
-        courseHolder.ivCourseIcon.setImageDrawable(course.getCourseIcon());
+        courseHolder.ivCourseIcon.setImageResource(course.getCourseIconId());
     }
 
     @Override

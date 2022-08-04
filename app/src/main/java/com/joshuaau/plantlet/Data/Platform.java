@@ -28,7 +28,7 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     public String ID;
 
-    private Drawable platformIcon;
+    private int platformIconId;
     private String platformName;
 
     private String accountIconURL;
@@ -43,13 +43,13 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     /**
      * Constructor to set the platform icon and name with the default sign in icon (not signed in yet)
-     * @param platformIcon The platform logo
+     * @param platformIconId The platform logo drawable id
      * @param platformName The name of the platform
      */
-    public Platform(Drawable platformIcon, String platformName) {
+    public Platform(int platformIconId, String platformName) {
         ID = UUID.randomUUID().toString();
 
-        this.platformIcon = platformIcon;
+        this.platformIconId = platformIconId;
         this.platformName = platformName;
 
         accountIconURL = "";
@@ -65,12 +65,12 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     /**
      * Constructor to set aspects of a platform with a custom sign in button (not signed in yet)
-     * @param platformIcon The platform logo
+     * @param platformIconId The platform logo drawable id
      * @param platformName The name of the platform
      * @param signInButton The custom sign in button
      */
-    public Platform(Drawable platformIcon, String platformName, View signInButton) {
-        this(platformIcon, platformName);
+    public Platform(int platformIconId, String platformName, View signInButton) {
+        this(platformIconId, platformName);
 
         this.signInButton = signInButton;
     }
@@ -161,8 +161,8 @@ public abstract class Platform implements DefaultLifecycleObserver {
         return ID;
     }
 
-    public Drawable getPlatformIcon() {
-        return platformIcon;
+    public int getPlatformIconId() {
+        return platformIconId;
     }
 
     public String getPlatformName() {

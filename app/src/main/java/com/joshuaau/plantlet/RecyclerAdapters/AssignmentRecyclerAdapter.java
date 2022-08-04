@@ -229,7 +229,7 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             assignmentHolder.tvTitle.setText(assignment.getTitle());
             assignmentHolder.tvDueDate.setText(assignment.getDateInfo().getDate());
             assignmentHolder.tvDescription.setText(assignment.getDescription());
-            assignmentHolder.ivType.setImageResource(Utility.getSubjectDrawable(context, assignment.getSubject()));
+            assignmentHolder.ivType.setImageResource(Utility.getSubjectDrawableId(context, assignment.getSubject()));
 
             if(position <= priority.size() && DateUtils.isLate(context, priority.get(moderator.getArrayPosFromOverall(position)).getDateInfo())) {
                 assignmentHolder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.late));

@@ -155,7 +155,7 @@ public class Utility {
      * @param subject The subject name
      * @return Returns the drawable id of the subject icon
      */
-    public static int getSubjectDrawable(Context context, String subject) {
+    public static int getSubjectDrawableId(Context context, String subject) {
         String[] array = context.getResources().getStringArray(R.array.subject_array);
 
         if(subject.equals(array[POSITION_ART]))

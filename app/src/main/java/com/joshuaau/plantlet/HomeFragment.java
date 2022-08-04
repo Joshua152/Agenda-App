@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import timber.log.Timber;
+
 // TODO: CRASH WHEN CREATING NEW ASSIGNMENT THEN CHANGING PLATFORM SUBJECT
 
 public class HomeFragment extends Fragment {
@@ -87,7 +89,7 @@ public class HomeFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
 
-        getSaved();
+        getSavedAndUpdate();
 
         init(view, onSavedInstance);
 
@@ -118,14 +120,17 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * Gets the saved instances (platformList, courseList)
+     * Gets the saved instances (platformList, courseList) and updates from the platforms
      */
-    private void getSaved() {
+    private void getSavedAndUpdate() {
         if(ImportFragment.platforms == null)
             ImportFragment.platforms = ImportFragment.getSavedPlatforms(getContext(), getActivity());
 
         if(CoursesFragment.courseMap == null)
             CoursesFragment.courseMap = CoursesFragment.getSavedCourseList(getContext());
+
+        for(Platform p : ImportFragment.getSignedInPlatforms())
+            updateAssignments(p, () -> {});
     }
 
     /**
@@ -224,7 +229,9 @@ public class HomeFragment extends Fragment {
             if(!Utility.isNetworkAvailable(context))
                 Utility.showBasicSnackbar(getActivity(), R.string.error_no_connection);
 
-            if(ImportFragment.platforms.size() == 0) {
+            List<Platform> signedInPlatforms = ImportFragment.getSignedInPlatforms();
+
+            if(signedInPlatforms.size() == 0) {
                 swipeRefreshLayout.setRefreshing(false);
 
                 return;
@@ -232,9 +239,9 @@ public class HomeFragment extends Fragment {
 
             AtomicInteger done = new AtomicInteger(0);
 
-            for(Platform p : ImportFragment.getSignedInPlatforms()) {
+            for(Platform p : signedInPlatforms) {
                 updateAssignments(p, () -> {
-                    if(done.incrementAndGet() == ImportFragment.getSignedInPlatforms().size())
+                    if(done.incrementAndGet() == signedInPlatforms.size())
                         swipeRefreshLayout.setRefreshing(false);
                 });
             }

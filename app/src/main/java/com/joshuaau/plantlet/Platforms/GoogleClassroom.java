@@ -75,7 +75,11 @@ public class GoogleClassroom extends Platform {
      * @param activity The activity or fragment's parent activity
      */
     public GoogleClassroom(String id, Activity activity) {
-        super(ResourcesCompat.getDrawable(activity.getBaseContext().getResources(), R.drawable.ic_google_classroom_32dp, null),
+//        super(ResourcesCompat.getDrawable(activity.getBaseContext().getResources(), R.drawable.ic_google_classroom_32dp, null),
+//                activity.getBaseContext().getString(R.string.google_classroom),
+//                Utility.getViewFromXML(activity, R.layout.button_google_classroom));
+
+        super(R.drawable.ic_google_classroom_32dp,
                 activity.getBaseContext().getString(R.string.google_classroom),
                 Utility.getViewFromXML(activity, R.layout.button_google_classroom));
 
@@ -133,7 +137,7 @@ public class GoogleClassroom extends Platform {
                                     GOOGLE_CLASSROOM,
                                     o.getString("name"),
                                     other,
-                                    AppCompatResources.getDrawable(context, Utility.getSubjectDrawable(context, other))));
+                                    Utility.getSubjectDrawableId(context, other)));
                         }
 
                         CoursesFragment.processCourses(map);
@@ -260,7 +264,7 @@ public class GoogleClassroom extends Platform {
 
         List<Assignment> assignments = new ArrayList<Assignment>();
 
-        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(5000,
+        DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(15000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
 
