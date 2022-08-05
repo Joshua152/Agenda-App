@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.SelectionPredicates;
 import androidx.recyclerview.selection.SelectionTracker;
@@ -34,6 +35,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -81,13 +84,6 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          * Inits the listeners for the views (onClick)
          */
         public void initListeners() {
-            llRoot.setOnLongClickListener(view -> {
-                // TODO: CAUSE OF THE DOUBLE VIBRATION?
-                llRoot.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-
-                return false;
-            });
-
             signIn.setOnClickListener(view -> {
                 Platform platform = platforms.get(getBindingAdapterPosition());
                 platform.onClickSignIn();
@@ -113,8 +109,10 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 public void onAvailable(Network network) {
                     super.onAvailable(network);
 
+                    int pos = getBindingAdapterPosition();
+
                     // getBindingAdapterPosition() could cause issues if the network state changes before onBind
-                    if(platforms.get(getBindingAdapterPosition()).getOAuthHelper().getConfigured()) {
+                    if(pos != -1 && platforms.get(pos).getOAuthHelper().getConfigured()) { // why is getBindingAdapterPosition returning -1
                         fragment.getActivity().runOnUiThread(() -> {
                             signIn.setEnabled(true);
                         });
@@ -265,8 +263,12 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 View view = recyclerView.getLayoutManager().findViewByPosition(Math.toIntExact(key));
 
-                // TODO: GETTING VIBRATION TWICE
                 view.setActivated(selected);
+
+                if(selected)
+                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSecondary_26a));
+                else
+                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSurface));
             }
         });
     }
