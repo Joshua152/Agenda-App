@@ -5,11 +5,12 @@
     android:id="@+id/assignment_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="8dp"
     android:orientation="vertical"
+    android:layout_gravity="center_horizontal"
     android:focusable="true"
     android:clickable="true"
-    android:checkable="true"
-    android:layout_margin="8dp">
+    android:checkable="true">
 
     <LinearLayout
         android:id="@+id/assignment_linear_layout"

@@ -30,6 +30,7 @@ import androidx.security.crypto.MasterKey;
 
 import com.joshuaau.plantlet.BuildConfig;
 import com.joshuaau.plantlet.Data.ApiCred;
+import com.joshuaau.plantlet.HomeFragment;
 import com.joshuaau.plantlet.R;
 
 import net.openid.appauth.AuthState;
@@ -83,8 +84,6 @@ public class OAuthHelper {
 
     private Intent authIntent;
     private OAuthCompleteListener oAuthCompleteListener;
-
-    private static Toast configToast;
 
     public OAuthHelper(Activity activity, String UID, String discoveryDocURL, String scopes, ConfigListener configListener) {
         this.UID = UID;
@@ -173,25 +172,20 @@ public class OAuthHelper {
      * Initializes the listener for if the wifi connection state changes
      */
     private void initWifiListener() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkRequest networkRequest = new NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .build();
-
-        ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+        Connectivity.ConnectivityListener listener = new Connectivity.ConnectivityListener() {
             @Override
             public void onAvailable(Network network) {
-                super.onAvailable(network);
-
                 if(authIntent == null)
                     init();
+
+                HomeFragment.connectivity.removeListener(this);
             }
+
+            @Override
+            public void onLost(Network network) {}
         };
 
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        HomeFragment.connectivity.addListener(listener);
     }
 
     public void initLauncher() {

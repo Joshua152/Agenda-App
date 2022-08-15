@@ -20,7 +20,7 @@
 
     <string name="classes_icon_title">Classes</string>
     <string name="import_icon_title">Import</string>
-    <string name="settings_icon_title">Settings</string>
+    <string name="open_source_icon_title">Open Source Licenses</string>
 
     <string name="already_in_range_toast">Due date of assignment is in priority range</string>
 
@@ -94,8 +94,8 @@
 
     <string name="cd_courses_icon">Courses icon</string>
     <string name="cd_import_icon">Import icon</string>
-    <string name="cd_settings_icon">Settings icon</string>
     <string name="cd_account_icon">Account icon</string>
+    <string name="cd_open_source">Open source</string>
 
     <string name="cd_sign_out">Sign out</string>
 

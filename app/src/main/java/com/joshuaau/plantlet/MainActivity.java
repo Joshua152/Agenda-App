@@ -14,6 +14,7 @@ import androidx.core.splashscreen.SplashScreen;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 import timber.log.Timber;
 

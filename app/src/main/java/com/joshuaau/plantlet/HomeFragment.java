@@ -37,6 +37,7 @@ import com.joshuaau.plantlet.Data.Assignment;
 import com.joshuaau.plantlet.Data.DateInfo;
 import com.joshuaau.plantlet.Data.Platform;
 import com.joshuaau.plantlet.RecyclerAdapters.AssignmentRecyclerAdapter;
+import com.joshuaau.plantlet.Utils.Connectivity;
 import com.joshuaau.plantlet.Utils.DateUtils;
 import com.joshuaau.plantlet.Utils.ItemMoveCallback;
 import com.joshuaau.plantlet.Data.ListModerator;
@@ -75,6 +76,9 @@ public class HomeFragment extends Fragment {
     // ListModerator for the priority and upcoming arrays
     public static ListModerator<Assignment> assignmentModerator;
 
+    public static Connectivity connectivity;
+    private Connectivity.ConnectivityListener connectivityListener;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle onSavedInstance) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
@@ -89,11 +93,11 @@ public class HomeFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener(Utility.HOME_RESULT_KEY, this,
                 new ResultListener());
 
-        getSavedAndUpdate();
-
         init(view, onSavedInstance);
 
         initListeners();
+
+        getSavedAndUpdate();
 
         return view;
     }
@@ -156,6 +160,11 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(recyclerViewAdapter);
+
+        if(connectivity == null)
+            connectivity = new Connectivity(context);
+
+        connectivityListener = null;
 
         updateAssignmentPositions();
     }
@@ -249,24 +258,17 @@ public class HomeFragment extends Fragment {
             updateAssignmentPositions();
         });
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        connectivityListener = new Connectivity.ConnectivityListener() {
+            @Override
+            public void onAvailable(Network network) {}
 
-        NetworkRequest networkRequest = new NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .build();
-
-        ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onLost(Network network) {
-                super.onLost(network);
-
                 Utility.showBasicSnackbar(getActivity(), R.string.error_no_connection);
             }
         };
 
-        connectivityManager.requestNetwork(networkRequest, networkCallback);
+        connectivity.addListener(connectivityListener);
     }
 
     @Override
@@ -404,6 +406,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         ImportFragment.savePlatforms(context); // TODO: WHY?
+
+        connectivity.removeListener(connectivityListener);
 
         super.onPause();
     }

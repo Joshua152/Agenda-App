@@ -28,8 +28,10 @@ import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.joshuaau.plantlet.Data.Platform;
+import com.joshuaau.plantlet.HomeFragment;
 import com.joshuaau.plantlet.ImportFragment;
 import com.joshuaau.plantlet.R;
+import com.joshuaau.plantlet.Utils.Connectivity;
 import com.joshuaau.plantlet.Utils.ImageTransformations.CircleCropTransform;
 import com.squareup.picasso.Picasso;
 
@@ -64,6 +66,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         private View signIn;
         private ImageView signOut;
 
+        private Connectivity.ConnectivityListener connectivityListener;
+
         private PlatformViewHolder(View itemView) {
             super(itemView);
 
@@ -76,6 +80,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             ivAccount = (ImageView) itemView.findViewById(R.id.import_iv_account_icon);
             signIn = (View) itemView.findViewById(R.id.import_btn_sign_in);
             signOut = (ImageView) itemView.findViewById(R.id.import_iv_sign_out);
+
+            connectivityListener = null;
 
             initListeners();
         }
@@ -96,19 +102,9 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 signIn.setVisibility(View.VISIBLE);
             });
 
-            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkRequest networkRequest = new NetworkRequest.Builder()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    .build();
-
-            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+            connectivityListener = new Connectivity.ConnectivityListener() {
                 @Override
                 public void onAvailable(Network network) {
-                    super.onAvailable(network);
-
                     int pos = getBindingAdapterPosition();
 
                     // getBindingAdapterPosition() could cause issues if the network state changes before onBind
@@ -121,13 +117,11 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 @Override
                 public void onLost(Network network) {
-                    super.onLost(network);
-
                     signIn.setEnabled(false);
                 }
             };
 
-            connectivityManager.requestNetwork(networkRequest, networkCallback);
+            HomeFragment.connectivity.addListener(connectivityListener);
         }
 
         /**
@@ -320,5 +314,15 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     public SelectionTracker<Long> getSelectionTracker() {
         return tracker;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        int childCount = recyclerView.getChildCount();
+        for(int i = 0; i < childCount; i++) {
+            PlatformViewHolder holder = (PlatformViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+
+            HomeFragment.connectivity.removeListener(holder.connectivityListener);
+        }
     }
 }

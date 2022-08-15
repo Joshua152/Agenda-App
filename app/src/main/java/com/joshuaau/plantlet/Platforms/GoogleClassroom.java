@@ -386,6 +386,8 @@ public class GoogleClassroom extends Platform {
 
                             String photoURL = response.getJSONArray("photos").getJSONObject(0).getString("url");
 
+                            Timber.i("Photo URL: %s", photoURL);
+
                             setAccountIconURL(photoURL);
 
                             callSignInListeners();
