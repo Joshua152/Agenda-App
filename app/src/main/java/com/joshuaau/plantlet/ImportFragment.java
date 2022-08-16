@@ -134,7 +134,7 @@ public class ImportFragment extends Fragment {
 
                     TreeSet<Integer> remove = new TreeSet<Integer>();
 
-                    for (Long l : tracker.getSelection())
+                    for(Long l : tracker.getSelection())
                         remove.add(Math.toIntExact(l));
 
                     for(Iterator i = remove.descendingIterator(); i.hasNext(); ) {

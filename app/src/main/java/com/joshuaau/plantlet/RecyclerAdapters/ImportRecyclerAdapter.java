@@ -47,6 +47,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private Context context;
     private ImportFragment fragment;
 
+    private RecyclerView recyclerView;
+
     private SelectionTracker<Long> tracker;
 
     private List<Platform> platforms;
@@ -55,6 +57,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
      * ViewHolder class for a platform
      */
     private class PlatformViewHolder extends RecyclerView.ViewHolder {
+
+        private View itemView;
 
         private LinearLayout llRoot;
 
@@ -70,6 +74,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         private PlatformViewHolder(View itemView) {
             super(itemView);
+
+            this.itemView = itemView;
 
             llRoot = (LinearLayout) itemView.findViewById(R.id.import_ll_root);
 
@@ -200,6 +206,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         this.context = fragment.getContext();
         this.fragment = fragment;
 
+        recyclerView = null;
+
         this.platforms = platforms;
 
         tracker = null;
@@ -209,6 +217,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+
         tracker = new SelectionTracker.Builder<Long>(
                 "selectionId",
                 recyclerView,
@@ -256,13 +266,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 super.onItemStateChanged(key, selected);
 
                 View view = recyclerView.getLayoutManager().findViewByPosition(Math.toIntExact(key));
-
-                view.setActivated(selected);
-
-                if(selected)
-                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSecondary_26a));
-                else
-                    view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSurface));
+                handleSelected(view, selected);
             }
         });
     }
@@ -285,12 +289,16 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         if(platform.getSignedIn())
             platformHolder.setSignedInUI();
+        else
+            platformHolder.setSignedOutUI();
 
         if(!platform.getOAuthHelper().getConfigured())
             platformHolder.signIn.setEnabled(false);
 
         platformHolder.ivPlatformIcon.setImageResource(platform.getPlatformIconId());
         platformHolder.tvName.setText(platform.getPlatformName());
+
+        handleSelected(platformHolder.itemView, tracker.isSelected((long) position));
 
         platform.addSignedInListener(platformHolder::setSignedInUI);
         platform.addSignOutRequestListener(platformHolder::setSignedOutUI);
@@ -304,6 +312,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public long getItemId(int position) {
+//        return platforms.get(position).getID();
+
         return Math.toIntExact(position);
     }
 
@@ -324,5 +334,22 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             HomeFragment.connectivity.removeListener(holder.connectivityListener);
         }
+    }
+
+    /**
+     * Handles the view UI depending on if the view is selected
+     * @param view The view holder view
+     * @param selected If the view is selected
+     */
+    private void handleSelected(View view, boolean selected) {
+        if(view == null)
+            return;
+
+        view.setActivated(selected);
+
+        if(selected)
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSecondary_26a));
+        else
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSurface));
     }
 }
