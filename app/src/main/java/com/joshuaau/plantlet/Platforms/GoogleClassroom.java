@@ -81,7 +81,7 @@ public class GoogleClassroom extends Platform {
 
         super(R.drawable.ic_google_classroom_32dp,
                 activity.getBaseContext().getString(R.string.google_classroom),
-                Utility.getViewFromXML(activity, R.layout.button_google_classroom));
+                 Utility.getViewFromXML(activity, R.layout.button_google_classroom));
 
         ID = id.equals(AUTO_ID) ? getID() : id;
 

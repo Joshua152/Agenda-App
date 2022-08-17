@@ -6,7 +6,6 @@ package com.joshuaau.plantlet.Data;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.lifecycle.DefaultLifecycleObserver;

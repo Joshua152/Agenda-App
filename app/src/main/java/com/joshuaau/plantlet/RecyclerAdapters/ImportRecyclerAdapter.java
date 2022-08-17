@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ import com.joshuaau.plantlet.ImportFragment;
 import com.joshuaau.plantlet.R;
 import com.joshuaau.plantlet.Utils.Connectivity;
 import com.joshuaau.plantlet.Utils.ImageTransformations.CircleCropTransform;
+import com.joshuaau.plantlet.Utils.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -60,14 +62,14 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         private View itemView;
 
-        private LinearLayout llRoot;
-
         private ImageView ivPlatformIcon;
         private TextView tvName;
 
+        private FrameLayout frameLayout;
         private LinearLayout llSignedIn;
         private ImageView ivAccount;
         private View signIn;
+        private View originalSignIn;
         private ImageView signOut;
 
         private Connectivity.ConnectivityListener connectivityListener;
@@ -77,14 +79,14 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             this.itemView = itemView;
 
-            llRoot = (LinearLayout) itemView.findViewById(R.id.import_ll_root);
-
             ivPlatformIcon = (ImageView) itemView.findViewById(R.id.import_iv_platform_icon);
             tvName = (TextView) itemView.findViewById(R.id.import_tv_platform_name);
 
+            frameLayout = (FrameLayout) itemView.findViewById(R.id.import_frame);
             llSignedIn = (LinearLayout) itemView.findViewById(R.id.import_ll_signed_in);
             ivAccount = (ImageView) itemView.findViewById(R.id.import_iv_account_icon);
             signIn = (View) itemView.findViewById(R.id.import_btn_sign_in);
+            originalSignIn = signIn;
             signOut = (ImageView) itemView.findViewById(R.id.import_iv_sign_out);
 
             connectivityListener = null;
@@ -97,15 +99,18 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
          */
         public void initListeners() {
             signIn.setOnClickListener(view -> {
+                signIn.setEnabled(false);
+
                 Platform platform = platforms.get(getBindingAdapterPosition());
                 platform.onClickSignIn();
             });
 
             signOut.setOnClickListener(view -> {
+                signIn.setEnabled(true);
+
                 platforms.get(getBindingAdapterPosition()).onClickSignOut();
 
-                llSignedIn.setVisibility(View.INVISIBLE);
-                signIn.setVisibility(View.VISIBLE);
+                setSignedOutUI();
             });
 
             connectivityListener = new Connectivity.ConnectivityListener() {
@@ -138,19 +143,18 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         private void replaceSignInButton(View newView) {
             View btn = (View) itemView.findViewById(R.id.import_btn_sign_in);
 
-            if(btn == null)
+            if(btn != null) {
+                ViewGroup parent = (ViewGroup) btn.getParent();
+                parent.removeView(btn);
+            }
+
+            if(frameLayout.getChildCount() > 1)
                 return;
 
-            ViewGroup parent = (ViewGroup) btn.getParent();
-
-            int index = parent.indexOfChild(btn);
-
-            parent.removeView(btn);
-
-            if (newView.getParent() != null)
+            if(newView.getParent() != null)
                 ((ViewGroup) newView.getParent()).removeView(newView);
 
-            parent.addView(newView, index);
+            frameLayout.addView(newView, frameLayout.getChildCount());
 
             signIn = newView;
 
@@ -158,9 +162,20 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         /**
+         * Replaces custom button with original if necessary
+         */
+        private void useOriginalSignInButton() {
+            if(signIn.equals(originalSignIn))
+                replaceSignInButton(originalSignIn);
+        }
+
+        /**
          * Makes the profile picture and sign out icon visible, hides the sign in button
          */
         private void setSignedInUI() {
+            if(getBindingAdapterPosition() == -1)
+                return;
+
             signIn.setVisibility(View.INVISIBLE);
             llSignedIn.setVisibility(View.VISIBLE);
 
@@ -228,10 +243,10 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     public ItemDetails<Long> getItemDetails(MotionEvent e) {
                         View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
 
-                        if (view != null) {
+                        if(view != null) {
                             RecyclerView.ViewHolder holder = recyclerView.getChildViewHolder(view);
 
-                            if (holder instanceof ImportRecyclerAdapter.PlatformViewHolder)
+                            if(holder instanceof ImportRecyclerAdapter.PlatformViewHolder)
                                 return ((ImportRecyclerAdapter.PlatformViewHolder) holder).getItemDetails();
                         }
 
@@ -265,8 +280,14 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             public void onItemStateChanged(Long key, boolean selected) {
                 super.onItemStateChanged(key, selected);
 
-                View view = recyclerView.getLayoutManager().findViewByPosition(Math.toIntExact(key));
-                handleSelected(view, selected);
+//                View view = recyclerView.getLayoutManager().findViewByPosition(Math.toIntExact(key));
+
+                RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(Math.toIntExact(key));
+
+                if(holder == null)
+                    return;
+
+                handleSelected(holder.itemView, selected);
             }
         });
     }
@@ -286,6 +307,8 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         if(platform.getSignInButton() != null)
             platformHolder.replaceSignInButton(platform.getSignInButton());
+        else
+            platformHolder.useOriginalSignInButton();
 
         if(platform.getSignedIn())
             platformHolder.setSignedInUI();
@@ -298,7 +321,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         platformHolder.ivPlatformIcon.setImageResource(platform.getPlatformIconId());
         platformHolder.tvName.setText(platform.getPlatformName());
 
-        handleSelected(platformHolder.itemView, tracker.isSelected((long) position));
+        handleSelected(holder.itemView, tracker.isSelected((long) position));
 
         platform.addSignedInListener(platformHolder::setSignedInUI);
         platform.addSignOutRequestListener(platformHolder::setSignedOutUI);
@@ -308,6 +331,11 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 platformHolder.signIn.setEnabled(true);
             });
         });
+    }
+
+    @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder viewHolder) {
+        handleSelected(viewHolder.itemView, tracker.isSelected((long) viewHolder.getBindingAdapterPosition()));
     }
 
     @Override

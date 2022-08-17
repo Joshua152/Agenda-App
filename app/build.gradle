@@ -21,8 +21,8 @@ android {
         applicationId "com.joshuaau.plantlet"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 3
-        versionName "1.0.2-beta"
+        versionCode 4
+        versionName "1.0.3-beta"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled true
@@ -62,9 +62,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'androidx.appcompat:appcompat-resources:1.4.2'
-    implementation 'androidx.fragment:fragment:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'androidx.appcompat:appcompat-resources:1.5.0'
+    implementation 'androidx.fragment:fragment:1.5.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
