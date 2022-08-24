@@ -353,7 +353,6 @@ public class EditFragment extends Fragment {
      * @return Returns a new instance of EditFragment
      */
     public static EditFragment newInstance(Context context) {
-
         Bundle bundle = new Bundle();
 
         Assignment assignment = new Assignment();

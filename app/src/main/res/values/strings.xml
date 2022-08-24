@@ -8,6 +8,7 @@
     <string name="edit_title">Edit Assignment</string>
     <string name="courses_title">Courses</string>
     <string name="import_title">Import</string>
+    <string name="options_title">Platform Options</string>
     <string name="licenses_title">Open Source Licenses</string>
 
     <!--Contextual App Bar Titles-->
@@ -57,8 +58,13 @@
     <string name="add_import_platform">Add Import Platform</string>
 
     <string name="sign_in">Sign In</string>
+    <string name="already_signed_in">Already signed in</string>
 
+    <string name="google_calendar">Google Calendar</string>
     <string name="google_classroom">Google Classroom</string>
+
+    <string name="tap_for_more_options">Tap for more options</string>
+    <string name="choose_calendars">Choose calendars to import</string>
 
     <string name="logged_out">You have been logged out of an account. Logging out.</string>
 
@@ -70,6 +76,9 @@
     <string name="import_info_error">Error getting info</string>
     <string name="log_out_error">Error logging out</string>
     <string name="gc_not_allowed_error">Not permitted into Google Classroom, signing out</string>
+
+    <!-- Options Fragment -->
+    <string name="op_none">No options for this platform</string>
 
     <!--Platform Select Fragment-->
     <string name="done">Done</string>

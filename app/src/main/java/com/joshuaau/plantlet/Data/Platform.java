@@ -5,7 +5,10 @@
 package com.joshuaau.plantlet.Data;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 
 import androidx.lifecycle.DefaultLifecycleObserver;
@@ -16,16 +19,28 @@ import com.joshuaau.plantlet.Utils.Utility;
 
 import net.openid.appauth.AuthState;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class Platform implements DefaultLifecycleObserver {
+import timber.log.Timber;
+
+public abstract class Platform implements DefaultLifecycleObserver, Serializable {
 
     public static final String AUTO_ID = "Auto ID";
 
+    public static final String ACCOUNT_SHARED_PREFS = "Account Shared Preferences";
+    public static final String ACCOUNT_JSON = "Account JSON";
+
+    // TODO: USELESS?
     public String ID;
+    public String accountID;
 
     private int platformIconId;
     private String platformName;
@@ -40,12 +55,17 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     private boolean signedIn;
 
+    private ArrayList<String> exclusions;
+
+    private boolean hasOptions;
+
     /**
      * Constructor to set the platform icon and name with the default sign in icon (not signed in yet)
      * @param platformIconId The platform logo drawable id
      * @param platformName The name of the platform
+     * @param hasOptions Whether the platform has additional options in the import fragment
      */
-    public Platform(int platformIconId, String platformName) {
+    public Platform(int platformIconId, String platformName, boolean hasOptions) {
         ID = UUID.randomUUID().toString();
 
         this.platformIconId = platformIconId;
@@ -60,6 +80,10 @@ public abstract class Platform implements DefaultLifecycleObserver {
         oAuthHelper = null;
 
         signedIn = false;
+
+        exclusions = new ArrayList<String>();
+
+        this.hasOptions = hasOptions;
     }
 
     /**
@@ -67,11 +91,14 @@ public abstract class Platform implements DefaultLifecycleObserver {
      * @param platformIconId The platform logo drawable id
      * @param platformName The name of the platform
      * @param signInButton The custom sign in button
+     * @param hasOptions Whether the platform has additional options in the import fragment
      */
-    public Platform(int platformIconId, String platformName, View signInButton) {
-        this(platformIconId, platformName);
+    public Platform(int platformIconId, String platformName, View signInButton, boolean hasOptions) {
+        this(platformIconId, platformName, hasOptions);
 
         this.signInButton = signInButton;
+
+        this.hasOptions = hasOptions;
     }
 
     /**
@@ -124,16 +151,6 @@ public abstract class Platform implements DefaultLifecycleObserver {
     }
 
     /**
-     * Sets all fields holding user data to null and sets isSignedIn to false
-     */
-    public void signOut() {
-        accountIconURL = "";
-        signedIn = false;
-
-        oAuthHelper.signOut();
-    }
-
-    /**
      * Sets the update millis (System.currentTimeMillis()) for the specific platform and course; the key is the courseId
      * **Make sure to use a different shared prefs key in order to make sure that there are no courseId conflicts
      * @param courseId The specific course id
@@ -144,6 +161,78 @@ public abstract class Platform implements DefaultLifecycleObserver {
         editor.commit();
     }
 
+    /**
+     * Adds an account to the shared preferences. Returns if successful.
+     * @param context The context
+     * @param id The account id (use a combination of a user id and platform name)
+     * @return Returns true if successful and false if the user is already signed in
+     */
+    public boolean addAccount(Context context, String id) {
+        try {
+            SharedPreferences accountPreferences = context.getSharedPreferences(ACCOUNT_SHARED_PREFS, Context.MODE_PRIVATE);
+
+            JSONArray accounts = new JSONArray(accountPreferences.getString(ACCOUNT_JSON, "[]"));
+
+            for(int i = 0; i < accounts.length(); i++) {
+                String acc = accounts.getString(i);
+
+                if(acc.equals(id))
+                    return false;
+            }
+
+            accounts.put(id);
+
+            accountPreferences.edit().putString(ACCOUNT_JSON, accounts.toString()).apply();
+
+            setAccountID(id);
+
+            return true;
+        } catch(JSONException e) {
+            Timber.e(e, "Unable to retrieve account shared preferences");
+
+            return false;
+        }
+    }
+
+    /**
+     * Removes the account from shared preferences
+     * @param context The context
+     * @param id The account id
+     */
+    public void removeAccount(Context context, String id) {
+        try {
+            SharedPreferences accountPreferences = context.getSharedPreferences(ACCOUNT_SHARED_PREFS, Context.MODE_PRIVATE);
+
+            JSONArray accounts = new JSONArray(accountPreferences.getString(ACCOUNT_JSON, "[]"));
+
+            for(int i = accounts.length() - 1; i >= 0; i--) {
+                String acc = accounts.getString(i);
+
+                if(acc.equals(id)) {
+                    accounts.remove(i);
+
+                    return;
+                }
+            }
+        } catch(JSONException e) {
+            Timber.e(e, "Unable to retrieve account shared preferences");
+        }
+    }
+
+    /**
+     * Sets all fields holding user data to null and sets isSignedIn to false
+     */
+    public void signOut() {
+        accountIconURL = "";
+        signedIn = false;
+
+        oAuthHelper.signOut();
+    }
+
+    public void setAccountID(String accountID) {
+        this.accountID = accountID;
+    }
+
     public void setAccountIconURL(String accountIconURL) {
         this.accountIconURL = accountIconURL;
     }
@@ -152,12 +241,20 @@ public abstract class Platform implements DefaultLifecycleObserver {
         oAuthHelper.setAuthState(authState);
     }
 
+    public void setExclusions(ArrayList<String> exclusions) {
+        this.exclusions = exclusions;
+    }
+
     public void setSignedIn(boolean signedIn) {
         this.signedIn = signedIn;
     }
 
     public String getID() {
         return ID;
+    }
+
+    public String getAccountID() {
+        return accountID;
     }
 
     public int getPlatformIconId() {
@@ -182,6 +279,18 @@ public abstract class Platform implements DefaultLifecycleObserver {
 
     public boolean getSignedIn() {
         return signedIn;
+    }
+
+    /**
+     * Contains the course ids that are excluded from being imported
+     * @return Gets a list of the exclusions
+     */
+    public ArrayList<String> getExclusions() {
+        return exclusions;
+    }
+
+    public boolean hasOptions() {
+        return hasOptions;
     }
 
     /**
@@ -250,8 +359,9 @@ public abstract class Platform implements DefaultLifecycleObserver {
         /**
          * Gets called when the courses have been gotten from the http request
          * @param courses The received courses
+         * @param coursesWithExclusion The courses with excluded ones removed
          */
-        void onCoursesReceived(Map<String, Course> courses);
+        void onCoursesReceived(Map<String, Course> courses, Map<String, Course> coursesWithExclusion);
     }
 
     /**

@@ -14,10 +14,7 @@ package com.joshuaau.plantlet.Platforms;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
@@ -59,7 +56,6 @@ public class GoogleClassroom extends Platform {
     // TODO: fix repeated import error toast
 
     public static final String GOOGLE_CLASSROOM = "Google Classroom";
-
     public static final String SHARED_PREFS_KEY = "Google Classroom Shared Preferences Key";
 
     private Activity activity;
@@ -81,7 +77,8 @@ public class GoogleClassroom extends Platform {
 
         super(R.drawable.ic_google_classroom_32dp,
                 activity.getBaseContext().getString(R.string.google_classroom),
-                 Utility.getViewFromXML(activity, R.layout.button_google_classroom));
+                Utility.getViewFromXML(activity, R.layout.button_google),
+                false);
 
         ID = id.equals(AUTO_ID) ? getID() : id;
 
@@ -142,7 +139,7 @@ public class GoogleClassroom extends Platform {
 
                         CoursesFragment.processCourses(map);
 
-                        listener.onCoursesReceived(map);
+                        listener.onCoursesReceived(map, map);
                     } catch(JSONException e) {
                         Timber.e(e, "Unable to parse JSON");
                     }
@@ -155,7 +152,7 @@ public class GoogleClassroom extends Platform {
                         if(retryPolicy.getCurrentRetryCount() - 1 != DefaultRetryPolicy.DEFAULT_MAX_RETRIES)
                             return;
 
-                        listener.onCoursesReceived(new HashMap<>());
+                        listener.onCoursesReceived(new HashMap<>(), new HashMap<>());
 
                         try {
                             JSONObject o = new JSONObject(new String(b));
@@ -183,7 +180,7 @@ public class GoogleClassroom extends Platform {
                     } catch(NullPointerException e) {
                         Utility.showBasicSnackbar(activity, R.string.import_error);
 
-                        listener.onCoursesReceived(new HashMap<String, Course>()); //TODO
+                        listener.onCoursesReceived(new HashMap<>(), new HashMap<>()); //TODO
 
                         e.printStackTrace();
                     }
@@ -221,7 +218,7 @@ public class GoogleClassroom extends Platform {
             return;
         }
 
-        getCourses(courses ->  {
+        getCourses((courses, withExclusions) ->  {
             if(courses == null) {
                 listener.onAssignmentReceived(new ArrayList<>());
 
@@ -236,9 +233,8 @@ public class GoogleClassroom extends Platform {
                 String courseId = e.getKey();
 
                 handleAssignmentsForCourse(courseId, assignments -> {
-                    for(Assignment a : assignments) {
+                    for(Assignment a : assignments)
                         a.setSubject(CoursesFragment.courseMap.get(courseId).getCourseSubject());
-                    }
 
                     newAssignments.addAll(assignments);
 
@@ -281,12 +277,12 @@ public class GoogleClassroom extends Platform {
                         for(int i = 0; i < courseWork.length(); i++) {
                             JSONObject o = courseWork.getJSONObject(i);
 
-                            JSONObject date = o.optJSONObject("dueDate");
+                            JSONObject dueDate = o.optJSONObject("dueDate");
                             DateInfo dateInfo = DateUtils.getNoneInstance(context);
 
-                            if(date != null) {
-                                dateInfo = DateUtils.getLocalDateFormat(context, date.getInt("day"),
-                                        date.getInt("month"), date.getInt("year"));
+                            if(dueDate != null) {
+                                dateInfo = DateUtils.getLocalDateFormat(context, dueDate.getInt("day"),
+                                        dueDate.getInt("month"), dueDate.getInt("year"));
                             }
 
                             if((lastUpdateMillis == 0 && DateUtils.compareDates(dateInfo, DateUtils.getDay(context, 0)) == DateInfo.FURTHER)
@@ -382,15 +378,21 @@ public class GoogleClassroom extends Platform {
                     // response is a JSONObject
                     response -> {
                         try {
-                            setSignedIn(true);
-
                             String photoURL = response.getJSONArray("photos").getJSONObject(0).getString("url");
 
                             Timber.i("Photo URL: %s", photoURL);
 
                             setAccountIconURL(photoURL);
 
-                            callSignInListeners();
+                            boolean ok = addAccount(context, GOOGLE_CLASSROOM + response.getString("resourceName"));
+                            if(ok) {
+                                setSignedIn(true);
+                                callSignInListeners();
+                            } else {
+                                onClickSignOut();
+
+                                Utility.showBasicSnackbar(activity, R.string.already_signed_in);
+                            }
                         } catch(JSONException e) {
                             Timber.e(e, "Error handling photo response");
 
@@ -453,6 +455,8 @@ public class GoogleClassroom extends Platform {
 
     @Override
     public void onClickSignOut() {
+        removeAccount(context, accountID);
+
         signOut();
     }
 }

@@ -5,7 +5,6 @@
 package com.joshuaau.plantlet.RecyclerAdapters;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +26,8 @@ import com.joshuaau.plantlet.HomeFragment;
 import com.joshuaau.plantlet.R;
 import com.joshuaau.plantlet.Utils.Utility;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -35,7 +36,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private Context context;
 
-    private Map<String, Course> courses;
+    private ArrayList<Course> courseList;
 
     /**
      * Class to represent a single course in the recycler view
@@ -89,10 +90,10 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
                     String subject = sCourseSubject.getSelectedItem().toString();
 
-                    Course course = (Course) courses.values().toArray()[getBindingAdapterPosition()];
+                    Course course = courseList.get(getBindingAdapterPosition());
 
                     course.setCourseSubject(subject);
-                    course.setCourseIcon(Utility.getSubjectDrawableId(context, subject));
+                    course.setCourseIconId(Utility.getSubjectDrawableId(context, subject));
 
                     flCourseIcon.setBackground(AppCompatResources.getDrawable(context, R.drawable.circle_drawable));
                     DrawableCompat.setTint(DrawableCompat.wrap(flCourseIcon.getBackground()).mutate(), Utility.getSubjectColor(context, subject));
@@ -120,7 +121,20 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public CoursesRecyclerAdapter(Context context, Map<String, Course> courses) {
         this.context = context;
 
-        this.courses = courses;
+        courseList = new ArrayList<Course>();
+
+        for(Map.Entry<String, Course> e : courses.entrySet())
+            courseList.add(e.getValue());
+
+        Collections.sort(courseList, (o1, o2) -> {
+            if(o1.getCourseName().compareTo(o2.getCourseName()) > 0)
+                return 1;
+
+            if(o1.getCourseName().compareTo(o2.getCourseName()) < 0)
+                return -1;
+
+            return 0;
+        });
     }
 
     @Override
@@ -133,7 +147,7 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         CourseHolder courseHolder = (CourseHolder) holder;
-        Course course = (Course) courses.values().toArray()[position];
+        Course course = courseList.get(position);
 
         courseHolder.tvCoursePlatform.setText(course.getCoursePlatform());
 
@@ -144,6 +158,6 @@ public class CoursesRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
-        return courses.size();
+        return courseList.size();
     }
 }

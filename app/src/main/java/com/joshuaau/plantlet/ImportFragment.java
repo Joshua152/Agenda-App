@@ -3,6 +3,7 @@ package com.joshuaau.plantlet;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
@@ -10,21 +11,27 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.joshuaau.plantlet.Data.Course;
 import com.joshuaau.plantlet.Data.Platform;
+import com.joshuaau.plantlet.Platforms.GoogleCalendar;
 import com.joshuaau.plantlet.Platforms.GoogleClassroom;
 import com.joshuaau.plantlet.RecyclerAdapters.ImportRecyclerAdapter;
+import com.joshuaau.plantlet.RecyclerAdapters.OptionsRecyclerAdapter;
 import com.joshuaau.plantlet.Utils.Utility;
 
 import org.json.JSONArray;
@@ -32,8 +39,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import timber.log.Timber;
@@ -48,9 +57,11 @@ public class ImportFragment extends Fragment {
     public static final String SP_PLATFORM_JSON = "Shared Preferences Platform JSON";
 
     public static final String JSON_SAVE_UID = "JSON Save UID";
+    public static final String JSON_SAVE_ACCOUNT_ID = "JSON Save Account ID";
     public static final String JSON_SAVE_PLATFORM_NAME = "JSON Save Platform Name";
     public static final String JSON_SAVE_PROFILE_PIC_URL = "JSON Save Profile Pic URL";
     public static final String JSON_SAVE_SIGNED_IN = "JSON Save Signed In";
+    public static final String JSON_SAVE_EXCLUSIONS = "JSON Save Exclusions";
 
     private Context context;
 
@@ -96,7 +107,7 @@ public class ImportFragment extends Fragment {
         actionModeCallback = null;
 
         if(platforms == null)
-            platforms = getSavedPlatforms(context, getActivity());
+            platforms = getSavedPlatforms(context, getActivity(), getActivity().getSupportFragmentManager());
 
         for(Platform p : platforms)
             getLifecycle().addObserver(p);
@@ -224,10 +235,17 @@ public class ImportFragment extends Fragment {
             JSONObject object = new JSONObject();
 
             try {
+                JSONArray exclusions = new JSONArray();
+                ArrayList<String> exclusionList = p.getExclusions();
+                for(String s : exclusionList)
+                    exclusions.put(s);
+
                 object.put(JSON_SAVE_UID, p.getID());
+                object.put(JSON_SAVE_ACCOUNT_ID, p.getAccountID());
                 object.put(JSON_SAVE_PLATFORM_NAME, p.getPlatformName());
                 object.put(JSON_SAVE_PROFILE_PIC_URL, p.getAccountIconURL());
                 object.put(JSON_SAVE_SIGNED_IN, p.getSignedIn());
+                object.put(JSON_SAVE_EXCLUSIONS, exclusions);
             } catch(JSONException e) {
                 Timber.e(e, "Unable to write to JSON");
             }
@@ -245,10 +263,11 @@ public class ImportFragment extends Fragment {
     /**
      * Gets the platform list from shared preferences
      * @param context The context
-     * @param activity The activity to be passed in to potentially use to init a Platform
+     * @param activity The parent activity
+     * @param manager The activity's fragment manager
      * @return Returns the list of saved platforms from the json in shared prefs
      */
-    public static List<Platform> getSavedPlatforms(Context context, Activity activity) {
+    public static List<Platform> getSavedPlatforms(Context context, Activity activity, FragmentManager manager) {
         ArrayList<Platform> platforms = new ArrayList<Platform>();
 
         SharedPreferences preferences = context.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE);
@@ -261,14 +280,25 @@ public class ImportFragment extends Fragment {
                 JSONObject o = (JSONObject) array.get(i);
 
                 String uid = o.getString(JSON_SAVE_UID);
+                String accountID = o.getString(JSON_SAVE_ACCOUNT_ID);
                 String name = o.getString(JSON_SAVE_PLATFORM_NAME);
                 String profilePicURL = o.getString(JSON_SAVE_PROFILE_PIC_URL);
                 boolean signedIn = o.getBoolean(JSON_SAVE_SIGNED_IN);
+                JSONArray exclusions = o.optJSONArray(JSON_SAVE_EXCLUSIONS);
+
+                ArrayList<String> exclusionList = new ArrayList<String>();
+
+                if(exclusions != null) {
+                    for(int j = 0; j < exclusions.length(); j++)
+                        exclusionList.add(exclusions.getString(j));
+                }
 
                 Platform p = getPlatformFromName(context, name, uid, activity);
+                p.setAccountID(accountID);
                 p.setAuthState(p.readAuthState());
                 p.setAccountIconURL(profilePicURL);
                 p.setSignedIn(signedIn);
+                p.setExclusions(exclusionList);
 
                 platforms.add(p);
             }
@@ -299,12 +329,14 @@ public class ImportFragment extends Fragment {
      * @param context The fragment context
      * @param name The platform name
      * @param id The id to use; if you want to use the auto generated one, pass in AUTO_ID
-     * @param activity The fragment's parent activity
+     * @param activity The parent activity
      * @return The correct Platform object
      */
     public static Platform getPlatformFromName(Context context, String name, String id, Activity activity) {
         if(name.equals(context.getString(R.string.google_classroom)))
             return new GoogleClassroom(id, activity);
+        else if(name.equals(context.getString(R.string.google_calendar)))
+            return new GoogleCalendar(id, activity);
 
         return null;
     }

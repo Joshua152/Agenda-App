@@ -53,7 +53,7 @@ public class Course implements Serializable {
         this.courseSubject = courseSubject;
     }
 
-    public void setCourseIcon(int courseIconId) {
+    public void setCourseIconId(int courseIconId) {
         this.courseIconId = courseIconId;
     }
 

@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.joshuaau.plantlet.Data.Platform;
 import com.joshuaau.plantlet.Data.PlatformInfo;
+import com.joshuaau.plantlet.Platforms.GoogleCalendar;
 import com.joshuaau.plantlet.RecyclerAdapters.PlatformSelectRecyclerAdapter;
 import com.joshuaau.plantlet.Utils.Utility;
 
@@ -65,8 +66,8 @@ public class PlatformSelectFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.select_recycler_view);
         adapter = new PlatformSelectRecyclerAdapter(context, requireActivity(),
-                new PlatformInfo(R.drawable.ic_google_classroom_32dp,
-                getString(R.string.google_classroom)));
+                new PlatformInfo(R.drawable.ic_google_calendar_32dp, getString(R.string.google_calendar)),
+                new PlatformInfo(R.drawable.ic_google_classroom_32dp, getString(R.string.google_classroom)));
 
         if(onSavedInstance != null)
             adapter.setSelectedPlatforms((HashMap<String, Integer>) onSavedInstance.getSerializable(SELECTED_PLATFORMS_BUNDLE_KEY));

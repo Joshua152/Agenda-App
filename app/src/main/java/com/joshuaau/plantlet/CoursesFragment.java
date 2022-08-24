@@ -80,7 +80,7 @@ public class CoursesFragment extends Fragment {
         tvNone = (TextView) view.findViewById(R.id.courses_tv_none);
 
         if(courseMap == null)
-            courseMap = new TreeMap<String, Course>(); // set equal to course list in prefs
+            courseMap = new HashMap<String, Course>(); // set equal to course list in prefs
 
         initRecyclerAdapter();
     }
@@ -149,12 +149,16 @@ public class CoursesFragment extends Fragment {
 
         AtomicInteger i = new AtomicInteger(0);
 
+        Map<String, Course> fullCourseMap = new HashMap<String, Course>();
+
         for(Platform p : platforms) {
-            p.getCourses(courseMap -> {
-                processCourses(courseMap);
+            p.getCourses((courseMap, withExclusions) -> {
+                fullCourseMap.putAll(withExclusions);
+
+                processCourses(withExclusions);
 
                 if(i.incrementAndGet() >= platforms.size())
-                    listener.onCoursesProcessed(courseMap, null);
+                    listener.onCoursesProcessed(fullCourseMap, null);
             });
         }
     }
@@ -171,7 +175,7 @@ public class CoursesFragment extends Fragment {
                 Course course = CoursesFragment.courseMap.get(courseId);
 
                 e.getValue().setCourseSubject(course.getCourseSubject());
-                e.getValue().setCourseIcon(course.getCourseIconId());
+                e.getValue().setCourseIconId(course.getCourseIconId());
             } else {
                 CoursesFragment.courseMap.put(e.getKey(), e.getValue());
             }
@@ -186,8 +190,15 @@ public class CoursesFragment extends Fragment {
     public static Map<String, Course> getSavedCourseList(Context context) {
         Map<String, Course> map = Utility.deserializeCourses(context);
 
-        if(map != null)
+        if(map != null) {
+            for(Map.Entry<String, Course> e : map.entrySet()) {
+                Course c = e.getValue();
+
+                c.setCourseIconId(Utility.getSubjectDrawableId(context, c.getCourseSubject()));
+            }
+
             return map;
+        }
 
         return new TreeMap<String, Course>();
     }

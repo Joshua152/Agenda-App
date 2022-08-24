@@ -33,6 +33,7 @@ public class Utility {
     public final static String VIEW_FRAGMENT = "View Fragment";
     public final static String CLASSES_FRAGMENT = "Classes Fragment";
     public final static String IMPORT_FRAGMENT = "Import Fragment";
+    public final static String CAL_OPTIONS_FRAGMENT = "Calendar Options Fragment";
     public final static String PLATFORM_SELECT_FRAGMENT = "Platform Select Fragment";
 
     public final static String SERIALIZATION_ASSIGNMENT_FILE = "assignments.txt";
