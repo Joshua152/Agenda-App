@@ -134,6 +134,7 @@ public class OptionsFragment extends Fragment {
      * Updates the exclusion list with the one from the adapter
      */
     public void updateExclusions() {
+        // platform is null
         platform.setExclusions(((OptionsRecyclerAdapter) recyclerView.getAdapter()).getExclusions());
     }
 

@@ -308,11 +308,13 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         holder.setOnClickListener(view -> {
             int pos = recyclerView.getChildLayoutPosition(view);
 
-            FragmentTransaction optionsTransaction = fragment.getParentFragmentManager().beginTransaction();
-            optionsTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
-            optionsTransaction.replace(R.id.fragment_container, OptionsFragment.newInstance(platforms.get(pos)));
-            optionsTransaction.addToBackStack(Utility.HOME_FRAGMENT);
-            optionsTransaction.commit();
+            if(platforms.get(pos).getSignedIn()) {
+                FragmentTransaction optionsTransaction = fragment.getParentFragmentManager().beginTransaction();
+                optionsTransaction.setCustomAnimations(R.animator.slide_in_left, R.animator.slide_out_left);
+                optionsTransaction.replace(R.id.fragment_container, OptionsFragment.newInstance(platforms.get(pos)));
+                optionsTransaction.addToBackStack(Utility.HOME_FRAGMENT);
+                optionsTransaction.commit();
+            }
         });
 
         return new PlatformViewHolder(holder);

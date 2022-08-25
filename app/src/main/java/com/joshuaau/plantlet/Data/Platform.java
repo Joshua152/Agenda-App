@@ -38,7 +38,7 @@ public abstract class Platform implements DefaultLifecycleObserver, Serializable
     public static final String ACCOUNT_SHARED_PREFS = "Account Shared Preferences";
     public static final String ACCOUNT_JSON = "Account JSON";
 
-    // TODO: USELESS?
+    // TODO: USELESS (replace with accountID?)?
     public String ID;
     public String accountID;
 

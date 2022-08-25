@@ -132,14 +132,6 @@ public class HomeFragment extends Fragment {
 
         if(CoursesFragment.courseMap == null)
             CoursesFragment.courseMap = CoursesFragment.getSavedCourseList(getContext());
-
-        for(Platform p : ImportFragment.getSignedInPlatforms()) {
-            System.out.println("UPDATEEEEE: " + p);
-
-            updateAssignments(p, () -> {
-                System.out.println("finished updating: " + p);
-            });
-        }
     }
 
     /**
@@ -301,12 +293,8 @@ public class HomeFragment extends Fragment {
      * @param p The platform
      */
     public void updateAssignments(Platform p, CoursesUpdatedListener coursesUpdatedListener) { // TODO: DELETE ASSIGNMENT IF PLATFORM ASSIGNMENT IS DELETED?
-        System.out.println("UPDATING ASSIGNMENTS FOR: " + p);
-
         p.getNewAssignments(assignments -> {
             for(Assignment a : assignments) {
-                System.out.println("IN UPDATE ASSIGNMENTS: " + a);
-
                 for(int i = 0; i < assignmentModerator.getItemCount(); i++) {
                     if(a.getId().equals(assignmentModerator.get(i).getId())) {
                         int removePos = assignmentModerator.getPosFromNoHeader(i);
@@ -341,9 +329,6 @@ public class HomeFragment extends Fragment {
 
             Utility.serializeAssignments(context, priority, upcoming);
 
-            System.out.println("Assignments:");
-            System.out.println("Priority: " + priority);
-            System.out.println("Upcoming: " + upcoming);
             coursesUpdatedListener.onCoursesUpdated();
         });
     }

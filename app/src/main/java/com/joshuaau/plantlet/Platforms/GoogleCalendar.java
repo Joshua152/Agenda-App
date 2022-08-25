@@ -262,13 +262,8 @@ public class GoogleCalendar extends Platform {
 
                     numDone.getAndIncrement();
 
-                    System.out.println("size check: " + numDone.get() + " " + withExclusions.size());
-
-                    if(numDone.get() == withExclusions.size()) {
-                        System.out.println("ON ASSIGNMENTS RECEIVED: " + newAssignments);
-
+                    if(numDone.get() == withExclusions.size())
                         listener.onAssignmentReceived(newAssignments);
-                    }
                 });
             });
         });
@@ -285,10 +280,6 @@ public class GoogleCalendar extends Platform {
             return;
         }
 
-        System.out.println("Course ID: " + courseId);
-
-//        List<Assignment> assignments = new ArrayList<Assignment>\();
-
         DefaultRetryPolicy retryPolicy = new DefaultRetryPolicy(15000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
@@ -297,14 +288,11 @@ public class GoogleCalendar extends Platform {
         String lastUpdateRFC3339 = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ssZZZZZ").format(lastUpdateMillis);
         // change min
 
-        System.out.println("Last Update: " + lastUpdateRFC3339);
-
         DateUtils.getDay(context, 7);
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 7);
         String timeMax = new SimpleDateFormat("yyyy-MM-dd'T'h:m:ssZZZZZ").format(calendar.getTime());
-        System.out.println("Time max: " + timeMax);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
                 "https://www.googleapis.com/calendar/v3/calendars/" + courseId.substring(courseId.indexOf("|") + 1) + "/events" +
@@ -320,7 +308,6 @@ public class GoogleCalendar extends Platform {
                             JSONObject o = items.getJSONObject(i);
 
                             // why no dateTime? one of the ones thats like full?
-                            System.out.println(o.toString(4));
 
                             String dueDate = o.getJSONObject("end").optString("date"); // rfc3339 at "dateTime" property
                             if(dueDate.equals(""))
@@ -347,15 +334,12 @@ public class GoogleCalendar extends Platform {
                                 a.setDescription(o.optString("description"));
                                 a.setDateInfo(dateInfo);
 
-                                System.out.println("calendar assignment: " + a);
-
                                 assignments.add(a); // TODO: UNCOMMENT
                             }
                         }
 
                         setUpdateMillis(courseId, preferences.edit());
 
-                        System.out.println("on assignment received");
                         listener.onAssignmentReceived(assignments);
                     } catch(JSONException e) {
                         Timber.e(e, "Unable to get Google Calendar courses");
