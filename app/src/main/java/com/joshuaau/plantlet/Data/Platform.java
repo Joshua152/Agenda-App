@@ -211,6 +211,10 @@ public abstract class Platform implements DefaultLifecycleObserver, Serializable
                 if(acc.equals(id)) {
                     accounts.remove(i);
 
+                    accountPreferences.edit().putString(ACCOUNT_JSON, accounts.toString()).apply();
+
+                    System.out.println("Updated accounts: " + accounts);
+
                     return;
                 }
             }
