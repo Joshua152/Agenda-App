@@ -151,6 +151,10 @@ public class ImportFragment extends Fragment {
                     for(Iterator i = remove.descendingIterator(); i.hasNext(); ) {
                         int pos = (int) i.next();
 
+                        Platform p = platforms.get(pos);
+                        if(p.getSignedIn())
+                            p.onClickSignOut();
+
                         platforms.remove(pos);
                     }
 

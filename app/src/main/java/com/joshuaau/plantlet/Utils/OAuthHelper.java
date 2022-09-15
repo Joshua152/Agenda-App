@@ -44,6 +44,7 @@ import net.openid.appauth.ResponseTypeValues;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ import java.util.UUID;
 
 import timber.log.Timber;
 
-public class OAuthHelper {
+public class OAuthHelper implements Serializable {
 
     // TODO: SIGN OUT IF DELETE PLATFORM!!!!
 

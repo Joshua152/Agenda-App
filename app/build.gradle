@@ -21,8 +21,8 @@ android {
         applicationId "com.joshuaau.plantlet"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 5
-        versionName "1.1.0-beta"
+        versionCode 6
+        versionName "1.1.1-beta"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         multiDexEnabled true
@@ -36,7 +36,7 @@ android {
     buildTypes {
         release {
             debuggable false
-            minifyEnabled false // reset to TRUE when making release
+            minifyEnabled true // reset to TRUE when making release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {

@@ -58,6 +58,8 @@
     <string name="add_import_platform">Add Import Platform</string>
 
     <string name="sign_in">Sign In</string>
+    <string name="sign_in_with">Sign in with:</string>
+    <string name="google">Google</string>
     <string name="already_signed_in">Already signed in</string>
 
     <string name="google_calendar">Google Calendar</string>

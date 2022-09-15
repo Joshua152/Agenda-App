@@ -67,12 +67,39 @@
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/import_btn_sign_in"
+            <LinearLayout
+                android:id="@+id/import_ll_signed_out"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_gravity="center"
-                android:text="@string/sign_in"/>
+                android:visibility="invisible">
+
+                <TextView
+                    android:id="@+id/import_tv_with"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:text="@string/sign_in_with"
+                    android:layout_gravity="start"/>
+
+<!--                <Button-->
+<!--                    android:id="@+id/import_btn_sign_in"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:text="@string/sign_in"/>-->
+
+                <Button
+                    android:id="@+id/import_btn_sign_in"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/google"
+                    app:icon="@drawable/ic_google_logo_16dp"
+                    app:iconTint="@null"/>
+
+            </LinearLayout>
 
         </FrameLayout>
 
