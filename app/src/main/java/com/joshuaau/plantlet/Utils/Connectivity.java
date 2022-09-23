@@ -7,18 +7,24 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Connectivity {
     private ConnectivityManager manager;
     private ConnectivityManager.NetworkCallback networkCallback;
 
-    private ArrayList<ConnectivityListener> listeners;
+    private List<ConnectivityListener> listeners;
 
     public Connectivity(Context context) {
         manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         networkCallback = null;
 
-        listeners = new ArrayList<ConnectivityListener>();
+//        listeners = new ArrayList<ConnectivityListener>();
+//        listeners = Collections.synchronizedList(new ArrayList<ConnectivityListener>());
+        listeners = new CopyOnWriteArrayList<ConnectivityListener>();
 
         initCallbacks();
     }

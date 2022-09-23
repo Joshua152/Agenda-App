@@ -137,7 +137,9 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 @Override
                 public void onLost(Network network) {
-                    signIn.setEnabled(false);
+                    fragment.getActivity().runOnUiThread(() -> {
+                        signIn.setEnabled(false);
+                    });
                 }
             };
 
@@ -353,7 +355,7 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         else
             platformHolder.setSignedOutUI();
 
-        if(!platform.getOAuthHelper().getConfigured())
+        if(!platform.getOAuthHelper().getConfigured() || !Utility.isNetworkAvailable(context))
             platformHolder.signIn.setEnabled(false);
 
         if(platform.hasOptions() && platform.getSignedIn())

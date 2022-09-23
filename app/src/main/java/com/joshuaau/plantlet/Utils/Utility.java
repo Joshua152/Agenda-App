@@ -197,7 +197,7 @@ public class Utility {
         else if(subject.equals(array[POSITION_MATH]))
             return ContextCompat.getColor(context, R.color.turquoise);
         else if(subject.equals(array[POSITION_MUSIC]))
-            return ContextCompat.getColor(context, R.color.blue);
+            return ContextCompat.getColor(context, R.color.google_blue);
         else if(subject.equals(array[POSITION_SCIENCE]))
             return ContextCompat.getColor(context, R.color.magenta);
         else

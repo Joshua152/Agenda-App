@@ -284,7 +284,7 @@ public class ImportFragment extends Fragment {
                 JSONObject o = (JSONObject) array.get(i);
 
                 String uid = o.getString(JSON_SAVE_UID);
-                String accountID = o.getString(JSON_SAVE_ACCOUNT_ID);
+                String accountID = o.optString(JSON_SAVE_ACCOUNT_ID, "");
                 String name = o.getString(JSON_SAVE_PLATFORM_NAME);
                 String profilePicURL = o.getString(JSON_SAVE_PROFILE_PIC_URL);
                 boolean signedIn = o.getBoolean(JSON_SAVE_SIGNED_IN);

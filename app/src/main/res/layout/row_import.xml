@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/import_ll_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -81,6 +82,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:text="@string/sign_in_with"
+                    android:maxLines="2"
                     android:layout_gravity="start"/>
 
 <!--                <Button-->
@@ -95,9 +97,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:paddingStart="2dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
                     android:text="@string/google"
-                    app:icon="@drawable/ic_google_logo_16dp"
-                    app:iconTint="@null"/>
+                    android:textAllCaps="false"
+                    android:drawablePadding="24dp"
+                    app:backgroundTint="@color/google_blue"
+                    app:icon="@drawable/ic_google_logo_18dp"
+                    app:iconTint="@null"
+                    app:iconPadding="16dp"/>
 
             </LinearLayout>
 

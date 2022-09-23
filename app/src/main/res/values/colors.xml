@@ -14,6 +14,7 @@
     <color name="colorOnSurface">#000000</color>
     <color name="statusBarColor">#121212</color>
 
+    <color name="white">#FFFFFF</color>
     <color name="red">#D84D6A</color>
     <color name="orange">#D8934D</color>
     <color name="yellow">#D8C14D</color>

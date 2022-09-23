@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:text="@string/google"
-    app:icon="@drawable/ic_google_logo_16dp"
-    app:iconTint="@null">
-
+    android:textSize="14sp"
+    android:color="@color/google_blue"
+    android:drawablePadding="24dp"
+    android:drawableStart="@drawable/ic_google_logo_18dp">
 </Button>
