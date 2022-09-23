@@ -24,4 +24,10 @@
         android:contentDescription="@string/cd_open_source"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/home_privacy"
+        android:title="@string/privacy"
+        android:contentDescription="@string/cd_privacy"
+        app:showAsAction="never" />
+
 </menu>

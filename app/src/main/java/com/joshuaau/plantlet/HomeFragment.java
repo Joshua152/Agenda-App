@@ -14,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -216,6 +217,9 @@ public class HomeFragment extends Fragment {
                     OssLicensesMenuActivity.setActivityTitle(getString(R.string.licenses_title));
 
                     return true;
+                case R.id.home_privacy :
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://plantlet-app.web.app/privacy"));
+                    startActivity(browserIntent);
             }
 
             return false;
