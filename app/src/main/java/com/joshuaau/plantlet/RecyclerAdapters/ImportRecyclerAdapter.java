@@ -165,20 +165,16 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             if(newView.getParent() != null)
                 ((ViewGroup) newView.getParent()).removeView(newView);
 
+            newView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
             llSignedOut.addView(newView, llSignedOut.getChildCount());
-//            llSignedOut.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
-//                    FrameLayout.LayoutParams.WRAP_CONTENT));
-
-//            llSignedOut.setMinimumWidth(Math.max(signInWith.getWidth(), newView.getWidth()));
-//            signIn.requestLayout();
-//            llSignedOut.requestLayout();
 
             signIn = newView;
 
-//            if(newView.equals(originalSignIn))
-//                signInWith.setVisibility(View.GONE);
-//            else
-//                signInWith.setVisibility(View.VISIBLE);
+            if(newView.equals(originalSignIn))
+                signInWith.setVisibility(View.GONE);
+            else
+                signInWith.setVisibility(View.VISIBLE);
 
             initListeners();
         }
@@ -345,10 +341,10 @@ public class ImportRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         Platform platform = platforms.get(position);
 
-//        if(platform.getSignInButton() != null)
-//            platformHolder.replaceSignInButton(platform.getSignInButton());
-//        else
-//            platformHolder.useOriginalSignInButton();
+        if(platform.getSignInButton() != null)
+            platformHolder.replaceSignInButton(platform.getSignInButton());
+        else
+            platformHolder.useOriginalSignInButton();
 
         if(platform.getSignedIn())
             platformHolder.setSignedInUI();

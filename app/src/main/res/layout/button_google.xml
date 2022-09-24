@@ -5,9 +5,30 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:paddingStart="2dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
     android:text="@string/google"
-    android:textSize="14sp"
-    android:color="@color/google_blue"
+    android:textAllCaps="false"
     android:drawablePadding="24dp"
-    android:drawableStart="@drawable/ic_google_logo_18dp">
+    app:backgroundTint="@color/google_blue"
+    app:icon="@drawable/ic_google_logo_18dp"
+    app:iconTint="@null"
+    app:iconPadding="16dp">
 </Button>
+
+<!--<Button-->
+<!--android:id="@+id/import_btn_sign_in"-->
+<!--android:layout_width="wrap_content"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:layout_gravity="center"-->
+<!--android:paddingStart="2dp"-->
+<!--android:paddingTop="2dp"-->
+<!--android:paddingBottom="2dp"-->
+<!--android:text="@string/google"-->
+<!--android:textAllCaps="false"-->
+<!--android:drawablePadding="24dp"-->
+<!--app:backgroundTint="@color/google_blue"-->
+<!--app:icon="@drawable/ic_google_logo_18dp"-->
+<!--app:iconTint="@null"-->
+<!--app:iconPadding="16dp"/>-->
