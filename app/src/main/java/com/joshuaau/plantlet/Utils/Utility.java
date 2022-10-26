@@ -23,8 +23,13 @@ import com.joshuaau.plantlet.Data.Course;
 import com.joshuaau.plantlet.R;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
+
+import timber.log.Timber;
 
 public class Utility {
 
@@ -60,13 +65,15 @@ public class Utility {
     public final static int POSITION_OTHER = 7;
 
     /**
-     * Checks if the device is connected to the internet
+     * Checks if an internet connection is available (not necessarily connected)
      * @param context The context
-     * @return Returns true if connected to the internet and false otherwise
+     * @return Returns true if available, false otherwise
      */
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
+
+        Timber.i("Is network available: %s", (info != null && info.isConnected()));
 
         return info != null && info.isConnected(); // change to info.isConnectedOrConnecting()?
     }

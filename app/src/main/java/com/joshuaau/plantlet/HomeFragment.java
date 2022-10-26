@@ -267,6 +267,8 @@ public class HomeFragment extends Fragment {
             public void onLost(Network network) {
                 Utility.showBasicSnackbar(getActivity(), R.string.error_no_connection);
             }
+
+            // TODO: REMOVE?
         };
 
         connectivity.addListener(connectivityListener);
@@ -431,5 +433,9 @@ public class HomeFragment extends Fragment {
          * Callback for when courses have been updated
          */
         void onCoursesUpdated();
+    }
+
+    public SwipeRefreshLayout getSwipeRefreshLayout() {
+        return swipeRefreshLayout;
     }
 }

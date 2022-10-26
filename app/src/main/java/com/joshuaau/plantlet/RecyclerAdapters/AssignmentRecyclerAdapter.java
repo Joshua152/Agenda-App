@@ -39,6 +39,8 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     implements ItemMoveCallback.ItemTouchHelperContract {
 
@@ -279,6 +281,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public void onRowSelected(AssignmentViewHolder holder) {
+        MainActivity.homeFragment.getSwipeRefreshLayout().setEnabled(false);
+
         holder.cardView.setSelected(true);
     }
 
@@ -290,6 +294,8 @@ public class AssignmentRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
             notifyItemChanged(0);
             notifyItemChanged(priority.size() + 1);
         });
+
+        MainActivity.homeFragment.getSwipeRefreshLayout().setEnabled(true);
     }
 
     @Override
